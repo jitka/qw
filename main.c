@@ -5,16 +5,66 @@
 #include <getopt.h> //parametry
 #include <X11/Xlib.h> //okynka
 #include <gdk/gdk.h>
-#include <cairo/cairo.h> //kreslici knihovna
-#include <cairo/cairo-xlib.h> //kreslici knihovna
+#include <glib.h> 
 #include "poppler.h"  //ovladani c++ knihovny
 
+int current_page = 0;
 extern int pdf_num_pages;
-int start_page = 1;
-extern double pdf_page_width;
-extern double pdf_page_height;
-gint window_width=840;
-gint window_height=1200;
+extern pdf_page pdf_page_1;
+GMainLoop *mainloop;
+GdkGC *gdkGC;
+
+void change_page(GdkWindow *window, int new){
+//	int old = current_page;
+	pdf_page_init(new);
+	current_page=new;
+	render_page(window);
+//	pdf_page_free(old);
+}
+
+void render_page(GdkWindow *window){
+	gint w,h;
+	gdk_drawable_get_size(window,&w,&h);
+	printf("zmena %d %d\n",w,h);
+
+	pdf_render_page(current_page);
+}
+
+static void event_func(GdkEvent *ev, gpointer data) {
+	switch(ev->type) {
+		case GDK_KEY_PRESS:
+			printf("key press [%s]-%d\n", ev->key.string,ev->key.keyval);
+			switch(ev->key.keyval){
+				case 65362: case 65365:
+					if (current_page > 0)
+						change_page(ev->any.window,current_page-1);
+					break;
+				case 65364: case 65366:
+					if (current_page < pdf_num_pages-1)
+						change_page(ev->any.window,current_page+1);
+					break;
+			}
+			break;
+		case GDK_DELETE:
+			g_main_loop_quit(mainloop);
+			break;
+		case GDK_CONFIGURE: //zmena pozici ci velikosti-zavola exspose
+			render_page(ev->any.window);		
+			break;
+		case GDK_EXPOSE:
+			printf("expose\n");
+			gdk_pixbuf_render_to_drawable(
+					pdf_page_1.pixbuf, //GdkPixbuf *pixbuf,
+					ev->any.window,//GdkDrawable *drawable,
+					gdkGC, //GdkGC *gc,
+					0,0, //vykreslit cely pixbuf
+					0,0, // kreslit do leveho horniho rohu okna
+					500,500, //rozmery
+					GDK_RGB_DITHER_NONE, //fujvec nechci
+					0,0);
+			break;
+	}
+} 
 
 void open_file(char *path){
 	if (path == NULL){
@@ -37,10 +87,9 @@ void open_file(char *path){
 		fprintf(stderr,"Chyba načtení: %s\n",err);
 		exit(1);
 	}
-
-	start_page--; //lidi cisluji od 1
-	if ((start_page < 1) || (start_page > pdf_num_pages))
-		start_page = 0;
+	
+	if ((current_page < 0) || (current_page > pdf_num_pages))
+		current_page = 0;
 }
 
 int main(int argc, char * argv[]) {
@@ -67,11 +116,11 @@ int main(int argc, char * argv[]) {
 			case 'i':
 				open_file(optarg);
 				printf("Stran: %d\n",pdf_num_pages);
-				pdf_page_init(start_page);
-				printf("Strana: %d sirka: %f cm vyska: %f cm\n",start_page,pdf_page_width*0.035278,pdf_page_height*0.035278);
+				pdf_page_init(current_page);
+				printf("Strana: %d sirka: %f cm vyska: %f cm\n",current_page,pdf_page_1.width*0.035278,pdf_page_1.height*0.035278);
 				return 0;
 			case 'p':
-				start_page = atoi(optarg);	
+				current_page = atoi(optarg) - 1; //lide cisluji od 1
 				break;
 			case '?': 
 				fprintf(stderr,"Špatné volby. Po nápovědu pište -h nebo -help.\n");
@@ -83,27 +132,23 @@ int main(int argc, char * argv[]) {
 
 	open_file(argv[optind]); //optind je prvni argument, kteri neni volba
 
-	pdf_page_init(start_page);
-	window_width = ceil(pdf_page_width);
-	window_height = ceil(pdf_page_height);
-
+	pdf_page_init(current_page);
 
 	//vytvoreni okna
 	gdk_init(NULL,NULL);
 
-	GdkDisplay *display = gdk_display_open(NULL);
 	GdkVisual *visual = gdk_visual_get_system();
 	GdkColormap *colormap = gdk_colormap_new(visual,TRUE);
 
 	GdkWindowAttr attr = {
 		"huiii", //gchar *title;
 		0x3FFFFE, //gint event_mask; all events mask
-		0,0, //gint x, y;
-		window_width, window_height,
+		100,0, //gint x, y;
+		ceil(pdf_page_1.width),ceil(pdf_page_1.height),
 	 	GDK_INPUT_OUTPUT, //GdkWindowClass wclass;
 		visual, //GdkVisual *visual;
 		colormap, //GdkColormap *colormap;
-		GDK_WINDOW_ROOT, //GdkWindowType window_type;
+		GDK_WINDOW_TOPLEVEL, //GdkWindowType window_type;
 		GDK_X_CURSOR, //GdkCursor *cursor;
 		NULL, //gchar *wmclass_name;
 		NULL, //gchar *wmclass_class;
@@ -111,41 +156,20 @@ int main(int argc, char * argv[]) {
 		GDK_WINDOW_TYPE_HINT_NORMAL, //GdkWindowTypeHint type_hint;
 	};
 
-	GdkWindow *root_window =  gdk_window_new(
+	GdkWindow *root_window = gdk_window_new(
 			NULL, //GdkWindow *parent,
 			&attr, //GdkWindowAttr *attributes,
-			0x3FFFFE //gint attributes_mask ????
+			0 //gint attributes_mask ????
 	);
+	gdkGC  = gdk_gc_new(root_window);
+
 
 	gdk_window_show(root_window);
+	gdk_event_handler_set(event_func, NULL, NULL);
+	mainloop = g_main_loop_new(g_main_context_default(), FALSE);
+	g_main_loop_run(mainloop);
+	gdk_window_destroy(root_window); 
 
-
-	//hlavni smycka
-	int alive = 1;
-	while (alive) {
-/*		XNextEvent(display, &event);
-		switch (event.type) {
-			case Expose:
-				cairo_set_source_rgb(cr, 1, 1, 1);
-				cairo_paint(cr);
-				pdf_render_page(cr, start_page);
-				if (event.xexpose.count > 0)
-					break;
-//				XDrawLine(display, window, gc, 10, 20, 150, 80);
-//				XFlush(display);
-				break;
-
-			case ClientMessage:
-				if (event.xclient.data.l[0] == delete_window)
-					alive = 0;
-				break;
-			case KeyPress:
-				printf("klavesa\n");
-		}
-*/	alive = 0;
-	}
-
-	gdk_display_close(display);
 	return 0;
 }
 	

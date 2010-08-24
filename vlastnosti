@@ -2,6 +2,7 @@ qw
 měl by to být jednoduchý rychlý prohlížeč pdf, ps.
 
 jednoduché 'neokýnko' bez lištičky, tlačítek
+vykresleni par stranek dopredu - je-li potreba
 zjistit si velikost pisma a podle toho volit velikost okna
 velikosti obrázků nebo s černým rámečkem
 volitelne - pamatovat si nastevi tohoto pdf z minula..
@@ -17,6 +18,7 @@ automaticky sledovat změny + r
 skákat po víc stránkách
 otevrit poklepanim/ entrem v mc
 prolinani pod sebou
+
 
 ideálně (navíc):
 prezentace s casem z pdf ci nastavenym
@@ -34,5 +36,3 @@ horni listiska
   jmeno pdf
 hledání
 hypertextové odkazy
-plohlížení obrázků v běžných formátech
-	smazání obrázku
