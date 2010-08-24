@@ -23,11 +23,38 @@ void change_page(GdkWindow *window, int new){
 }
 
 void render_page(GdkWindow *window){
-	gint w,h;
-	gdk_drawable_get_size(window,&w,&h);
-	printf("zmena %d %d\n",w,h);
+	gint w_w,w_h;
+	gdk_drawable_get_size(window,&w_w,&w_h);
+	int p_w,p_h;
+	double scale;
 
-	pdf_render_page(current_page);
+	if (w_w*pdf_page_1.height < pdf_page_1.width*w_h){
+		//šířka je stejná
+		p_w = w_w;
+		p_h = ceil(w_w*pdf_page_1.height/pdf_page_1.width);
+		scale = w_w/pdf_page_1.width/w_w;
+		pdf_page_1.shift_width = 0;
+		pdf_page_1.shift_height = (w_h-p_h)/2;
+	} else {
+		//výška je stejná
+		p_w = ceil(w_h*(pdf_page_1.width/pdf_page_1.height));
+		p_h = w_h;
+		scale = w_h/pdf_page_1.height;
+		pdf_page_1.shift_width = (w_w-p_w)/2;
+		pdf_page_1.shift_height = 0;
+	}
+
+	if ( (pdf_page_1.width != p_w) || (pdf_page_1.height != p_h) ){
+		pdf_page_1.pixbuf_width = p_w;
+		pdf_page_1.pixbuf_height = p_h;
+
+		pdf_render_page_to_pixbuf(
+				current_page, //int num_page
+				pdf_page_1.pixbuf_width,pdf_page_1.pixbuf_height, //int width, int height
+				scale, //double scale
+				0); //int rotation);
+		gdk_window_invalidate_rect(window,NULL,FALSE); //prekresleni
+	}
 }
 
 static void event_func(GdkEvent *ev, gpointer data) {
@@ -52,14 +79,15 @@ static void event_func(GdkEvent *ev, gpointer data) {
 			render_page(ev->any.window);		
 			break;
 		case GDK_EXPOSE:
-			printf("expose\n");
+			//printf("expose\n"); doublebuffering!!!!!
+			gdk_window_clear(ev->any.window); //smaže starý obrázek
 			gdk_pixbuf_render_to_drawable(
 					pdf_page_1.pixbuf, //GdkPixbuf *pixbuf,
 					ev->any.window,//GdkDrawable *drawable,
 					gdkGC, //GdkGC *gc,
 					0,0, //vykreslit cely pixbuf
-					0,0, // kreslit do leveho horniho rohu okna
-					500,500, //rozmery
+					pdf_page_1.shift_width,pdf_page_1.shift_height, // kreslit do leveho horniho rohu okna
+					pdf_page_1.pixbuf_width,pdf_page_1.pixbuf_height, //rozmery
 					GDK_RGB_DITHER_NONE, //fujvec nechci
 					0,0);
 			break;
@@ -109,6 +137,7 @@ int main(int argc, char * argv[]) {
 		switch(next_option){
 			case 'h': 
 				printf("Nápověda qw: \n"
+					" šipečky posunuji, okynko se da zvětšit\n"
 					" -h 	-help 	nápověda\n"
 					" -p 	-page 	počáteční stránka\n"
 					" -i 	-info 	info dokumentu\n");
@@ -163,6 +192,8 @@ int main(int argc, char * argv[]) {
 	);
 	gdkGC  = gdk_gc_new(root_window);
 
+		//toto tady provizorne
+	render_page(root_window);
 
 	gdk_window_show(root_window);
 	gdk_event_handler_set(event_func, NULL, NULL);

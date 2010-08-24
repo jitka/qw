@@ -1,5 +1,4 @@
-mazani pixbuf
-prekreslovani
 pismenka
 nenechat si posilat eventy, ktere nepotrebuji
-
+doublebuffering
+nechat vykreslovat cairem, když to trva dlouho?

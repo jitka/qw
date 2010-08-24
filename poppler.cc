@@ -33,20 +33,24 @@ char * pdf_init( char* filePath) {
 void pdf_page_init(int n){
 	page = poppler_document_get_page (doc, n);
 	poppler_page_get_size(page, &pdf_page_1.width, &pdf_page_1.height);
+	pdf_page_1.pixbuf_width = 0;
+	pdf_page_1.pixbuf_height = 0;
 }
 
-void pdf_render_page(int n) {
+void pdf_render_page_to_pixbuf(int num_page, int width, int height, double scale, int rotation) {
+	pdf_page_1.pixbuf_width = width;
+	pdf_page_1.pixbuf_height = height;	
 	pdf_page_1.pixbuf = gdk_pixbuf_new(
 		GDK_COLORSPACE_RGB,
 		FALSE,	//gboolean has_alpha,
 		8, //bits_per_sample,
-		500,500); //int width,height
+		width,height); //int width,height
 	poppler_page_render_to_pixbuf(
 		page,
 		0,0,
-		500,500, //int src_width, int src_height,
-		1, //scale hustota
-		0, //ve stupních
+		width,height, //int src_width, int src_height,
+		scale, //scale hustota
+		rotation, //ve stupních
 		pdf_page_1.pixbuf);
 
 }
