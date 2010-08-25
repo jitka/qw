@@ -6,7 +6,7 @@
 #include <gdk/gdk.h> //okynka
 #include <glib.h> 
 #include "poppler.h"  //ovladani c++ knihovny
-#include "inputs.c" //vstup -> funkce
+#include "inputs.h" //vstup -> funkce
 
 int current_page = 0;
 extern int pdf_num_pages;
@@ -37,7 +37,6 @@ void render_page(){
 		pdf_page_1.shift_width = (w_w-p_w)/2;
 		pdf_page_1.shift_height = 0;
 	}
-printf("%f %d %d\n",scale,p_w,p_h);
 	if ( (pdf_page_1.width != p_w) || (pdf_page_1.height != p_h) ){
 		pdf_page_1.pixbuf_width = p_w;
 		pdf_page_1.pixbuf_height = p_h;
@@ -52,6 +51,8 @@ printf("%f %d %d\n",scale,p_w,p_h);
 }
 
 void change_page(int new){
+	if (new <0 || new >= pdf_num_pages)
+		return;
 //	int old = current_page;
 	pdf_page_init(new);
 	current_page=new;
@@ -59,23 +60,29 @@ void change_page(int new){
 //	pdf_page_free(old);
 }
 
-void key_up(){
-	if (current_page > 0)
-		change_page(current_page-1);
+void key_up(){ 		change_page(current_page-1);}
+void key_down(){ 	change_page(current_page+1);}
+void key_home(){ 	change_page(0);}
+void key_end(){ 	change_page(pdf_num_pages-1);}
+void key_jump(int num_page){ 	change_page(num_page);}
+void key_jump_up(int diff){ 	change_page(current_page - diff);}
+void key_jump_down(int diff){ 	change_page(current_page + diff);}
+
+void click_distance(int first_x, int first_y, int second_x, int second_y){
+	printf("hui %f %f %d %d - %d %d\n",pdf_page_1.width,pdf_page_1.height,first_x,first_y,second_x,second_y);
 }
-
-void key_down(){
-	if (current_page < pdf_num_pages-1)
-		change_page(current_page+1);
+void click_position(int x, int y){
+	printf("hui %f %f %d %d\n",pdf_page_1.width,pdf_page_1.height,x,y);
 }
-
-
 
 static void event_func(GdkEvent *ev, gpointer data) {
 	switch(ev->type) {
 		case GDK_KEY_PRESS:
-			printf("key press [%s]-%d\n", ev->key.string,ev->key.keyval);
 			handling_key(ev->key.keyval);
+			break;
+		case GDK_BUTTON_PRESS:
+			if (ev->button.button == 1)
+				handling_click((int)ev->button.x,(int)ev->button.x);
 			break;
 		case GDK_DELETE:
 			g_main_loop_quit(mainloop);

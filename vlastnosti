@@ -1,38 +1,29 @@
-qw
-měl by to být jednoduchý rychlý prohlížeč pdf, ps.
-
-jednoduché 'neokýnko' bez lištičky, tlačítek
+	jednoduché 'neokýnko' bez lištičky, tlačítek
 vykresleni par stranek dopredu - je-li potreba
 zjistit si velikost pisma a podle toho volit velikost okna
-velikosti obrázků nebo s černým rámečkem
+	velikosti obrázků nebo s černým rámečkem
 volitelne - pamatovat si nastevi tohoto pdf z minula..
-ovládání písmenky, myš jen při výběru, určování pozice
-	nastavení písmenek v souboru
-roztahování
+	ovládání písmenky, myš jen při výběru, určování pozice
+nastavení písmenek v souboru
 nastavitelné výchozí chování
-inteligentní předpočítávání stránek do předu
 dát stránce číslo -> přečíslování
-záložky
-skok na stránku
-automaticky sledovat změny + r
-skákat po víc stránkách
-otevrit poklepanim/ entrem v mc
-prolinani pod sebou
-
-
-ideálně (navíc):
-prezentace s casem z pdf ci nastavenym
-zvetsit se z roztahnutim okna
-mit ikonku
 logické číslování
-rotace
-	s uložením
-	cely dokument i jen stranka
+záložky
+	skok na stránku
+automaticky sledovat změny + r
+	skákat po víc stránkách
+otevrit poklepanim/ entrem v mc
+rezimy:
+-1strana/tabulka
+-presne/prolinani pod sebou
+*cela obrazovka
+-moc velke priblizeni 1 strany/normal vyskoceni esc
+mereni
+ukazovat co pisu
+prezentace s casem z pdf ci nastavenym
+mit ikonku
+rotace-cely dokument i jen stranka
 výběr textu
-horni listiska
-  pozice v dokumentu
-  pozice myši
-  záložky
-  jmeno pdf
-hledání
 hypertextové odkazy
+hledání
+horni listiska - nechci radsi psat pres pdf
