@@ -55,6 +55,8 @@ static struct command_char command_chars[] = {
 	{ GDK_a, key_rotate },
 	{ GDK_A, key_rotate_document },
 	{ GDK_q, key_quit },
+	{ GDK_F11, key_fullscreen },
+	{ GDK_f, key_fullscreen },
 	//klikaci pismenka
 	{ GDK_d, wait_distance },
 	{ GDK_D, wait_position },

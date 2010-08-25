@@ -15,6 +15,7 @@ extern pdf_page pdf_page_1;
 
 GMainLoop *mainloop;
 GdkWindow *root_window;
+int is_fullscreen;
 GdkGC *gdkGC;
 
 void render_page(){
@@ -94,10 +95,23 @@ void key_jump_down(int diff){ 	change_page(current_page + diff);}
 void key_quit(){
 	gdk_event_put( gdk_event_new(GDK_DELETE));
 }
+
+void key_fullscreen(){
+	printf("%d\n",is_fullscreen);
+	if (is_fullscreen){
+		gdk_window_unfullscreen(root_window);
+		is_fullscreen = 0;
+	} else {
+		gdk_window_fullscreen(root_window);
+		is_fullscreen = 1;
+	}
+}
+
 void key_rotate(){ 
 	pdf_page_1.rotation = (pdf_page_1.rotation + 90) % 360;
 	render_page();
 }
+
 void key_rotate_document(){
 	document_rotation = (document_rotation+90)%360; 
 	render_page();
