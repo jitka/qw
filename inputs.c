@@ -18,6 +18,7 @@ int state=1;
 int number;
 int click_x;
 int click_y;
+int key_cancel_waiting = FALSE;
 
 void wait_distance();
 void wait_position();

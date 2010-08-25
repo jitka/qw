@@ -2,4 +2,5 @@ qw
 *~
 .*.swp
 *.o
+*.pdf
 vim.sh

@@ -15,7 +15,7 @@ extern pdf_page pdf_page_1;
 
 GMainLoop *mainloop;
 GdkWindow *root_window;
-int is_fullscreen;
+int is_fullscreen = FALSE;
 GdkGC *gdkGC;
 
 void render_page(){
@@ -115,6 +115,10 @@ void key_rotate(){
 void key_rotate_document(){
 	document_rotation = (document_rotation+90)%360; 
 	render_page();
+}
+
+void key_reload(){
+
 }
 
 void click_distance(int first_x, int first_y, int second_x, int second_y){
