@@ -35,6 +35,7 @@ void pdf_page_init(int n){
 	poppler_page_get_size(page, &pdf_page_1.width, &pdf_page_1.height);
 	pdf_page_1.pixbuf_width = 0;
 	pdf_page_1.pixbuf_height = 0;
+	pdf_page_1.rotation = 0;
 }
 
 void pdf_render_page_to_pixbuf(int num_page, int width, int height, double scale, int rotation) {

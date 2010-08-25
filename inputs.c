@@ -52,6 +52,9 @@ static struct command_char command_chars[] = {
 	{ GDK_Up, key_up },		// nahoru o stranu/kousek
 	{ GDK_Home, key_home },
 	{ GDK_End, key_end },
+	{ GDK_a, key_rotate },
+	{ GDK_A, key_rotate_document },
+	{ GDK_q, key_quit },
 	//klikaci pismenka
 	{ GDK_d, wait_distance },
 	{ GDK_D, wait_position },

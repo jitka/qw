@@ -10,6 +10,7 @@
 
 int current_page = 0;
 extern int pdf_num_pages;
+int document_rotation = 0;
 extern pdf_page pdf_page_1;
 
 GMainLoop *mainloop;
@@ -21,31 +22,53 @@ void render_page(){
 	gdk_drawable_get_size(root_window,&w_w,&w_h);
 	int p_w,p_h;
 	double scale;
+	int rotation = (pdf_page_1.rotation+document_rotation) % 360;
 
-	if (w_w*pdf_page_1.height < pdf_page_1.width*w_h){
-		//šířka je stejná
-		p_w = w_w;
-		p_h = ceil(w_w*pdf_page_1.height/pdf_page_1.width);
-		scale = w_w/pdf_page_1.width;
-		pdf_page_1.shift_width = 0;
-		pdf_page_1.shift_height = (w_h-p_h)/2;
+	if ((rotation)%180 == 0){
+		if (w_w*pdf_page_1.height < pdf_page_1.width*w_h){
+			//šířka je stejná
+			p_w = w_w;
+			p_h = ceil(w_w*pdf_page_1.height/pdf_page_1.width);
+			scale = w_w/pdf_page_1.width;
+			pdf_page_1.shift_width = 0;
+			pdf_page_1.shift_height = (w_h-p_h)/2;
+		} else {
+			//výška je stejná
+			p_w = ceil(w_h*(pdf_page_1.width/pdf_page_1.height));
+			p_h = w_h;
+			scale = w_h/pdf_page_1.height;
+			pdf_page_1.shift_width = (w_w-p_w)/2;
+			pdf_page_1.shift_height = 0;
+		}
 	} else {
-		//výška je stejná
-		p_w = ceil(w_h*(pdf_page_1.width/pdf_page_1.height));
-		p_h = w_h;
-		scale = w_h/pdf_page_1.height;
-		pdf_page_1.shift_width = (w_w-p_w)/2;
-		pdf_page_1.shift_height = 0;
+		if (w_w*pdf_page_1.width < pdf_page_1.height*w_h){
+			//šířka je stejná
+			p_w = w_w;
+			p_h = ceil(w_w*pdf_page_1.width/pdf_page_1.height);
+			scale = w_w/pdf_page_1.height;
+			pdf_page_1.shift_width = 0;
+			pdf_page_1.shift_height = (w_h-p_h)/2;
+		} else {
+			//výška je stejná
+			p_w = ceil(w_h*(pdf_page_1.height/pdf_page_1.width));
+			p_h = w_h;
+			scale = w_h/pdf_page_1.width;
+			pdf_page_1.shift_width = (w_w-p_w)/2;
+			pdf_page_1.shift_height = 0;
+		}
 	}
-	if ( (pdf_page_1.width != p_w) || (pdf_page_1.height != p_h) ){
+	if ( (pdf_page_1.pixbuf_width != p_w) 
+			|| (pdf_page_1.pixbuf_height != p_h) 
+			|| (pdf_page_1.pixbuf_rotation != rotation)){
 		pdf_page_1.pixbuf_width = p_w;
 		pdf_page_1.pixbuf_height = p_h;
+		pdf_page_1.pixbuf_rotation = rotation;
 
 		pdf_render_page_to_pixbuf(
 				current_page, //int num_page
 				pdf_page_1.pixbuf_width,pdf_page_1.pixbuf_height, //int width, int height
 				scale, //double scale
-				0); //int rotation);
+				rotation); //int rotation);
 		gdk_window_invalidate_rect(root_window,NULL,FALSE); //prekresleni
 	}
 }
@@ -67,6 +90,18 @@ void key_end(){ 	change_page(pdf_num_pages-1);}
 void key_jump(int num_page){ 	change_page(num_page);}
 void key_jump_up(int diff){ 	change_page(current_page - diff);}
 void key_jump_down(int diff){ 	change_page(current_page + diff);}
+
+void key_quit(){
+	gdk_event_put( gdk_event_new(GDK_DELETE));
+}
+void key_rotate(){ 
+	pdf_page_1.rotation = (pdf_page_1.rotation + 90) % 360;
+	render_page();
+}
+void key_rotate_document(){
+	document_rotation = (document_rotation+90)%360; 
+	render_page();
+}
 
 void click_distance(int first_x, int first_y, int second_x, int second_y){
 	printf("hui %f %f %d %d - %d %d\n",pdf_page_1.width,pdf_page_1.height,first_x,first_y,second_x,second_y);

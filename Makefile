@@ -7,7 +7,7 @@ CPPFLAGS=-g -Wall -W  $(CFL)
 LDFLAGS=$(LFL)
 
 qw: inputs.o poppler.o main.o
-	gcc -o qw poppler.o main.o $(LDFLAGS)
+	gcc -o qw inputs.o poppler.o main.o $(LDFLAGS)
 
 inputs.o: inputs.c inputs.h
 
