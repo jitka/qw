@@ -12,6 +12,7 @@ int current_page = 0;
 extern int pdf_num_pages;
 int document_rotation = 0;
 extern pdf_page pdf_page_1;
+char * file_name;
 
 GMainLoop *mainloop;
 GdkWindow *root_window;
@@ -70,10 +71,39 @@ void render_page(){
 				pdf_page_1.pixbuf_width,pdf_page_1.pixbuf_height, //int width, int height
 				scale, //double scale
 				rotation); //int rotation);
-		gdk_window_invalidate_rect(root_window,NULL,FALSE); //prekresleni
 	}
+	gdk_window_invalidate_rect(root_window,NULL,FALSE); //prekresleni
 }
 
+ 
+void open_file(char *path){
+	if (path == NULL){
+		fprintf(stderr,"Nebylo zadáno jméno souboru.\n");
+		exit(1);
+	}
+	//absoulutni adresa
+	char *pwd = getenv("PWD");
+	char abs_path[strlen("file://")+strlen(path)+1+strlen(pwd)+1];
+	strcpy(abs_path,"file://");	
+	if (*path != '/'){
+		strcat(abs_path,pwd);	
+		strcat(abs_path,"/");	
+	}
+	strcat(abs_path,path);
+	//otevreni
+	char *err;
+	err = pdf_init(abs_path);
+	if (err != NULL){
+		fprintf(stderr,"Chyba načtení: %s\n",err);
+		exit(1);
+	}
+	
+	if ((current_page < 0) || (current_page > pdf_num_pages))
+		current_page = 0;
+}
+
+/////////////////////////////////////////////////////////////////
+	
 void change_page(int new){
 	if (new <0 || new >= pdf_num_pages)
 		return;
@@ -118,7 +148,12 @@ void key_rotate_document(){
 }
 
 void key_reload(){
-
+	open_file(file_name);
+	pdf_page_init(current_page);
+	document_rotation = 0;
+	pdf_page_1.rotation = 0;
+	pdf_page_1.pixbuf_height = 0;
+	render_page();
 }
 
 void click_distance(int first_x, int first_y, int second_x, int second_y){
@@ -127,6 +162,8 @@ void click_distance(int first_x, int first_y, int second_x, int second_y){
 void click_position(int x, int y){
 	printf("hui %f %f %d %d\n",pdf_page_1.width,pdf_page_1.height,x,y);
 }
+
+///////////////////////////////////////////////////////////////////////////////////
 
 static void event_func(GdkEvent *ev, gpointer data) {
 	switch(ev->type) {
@@ -157,32 +194,6 @@ static void event_func(GdkEvent *ev, gpointer data) {
 					0,0);
 			break;
 	}
-} 
-
-void open_file(char *path){
-	if (path == NULL){
-		fprintf(stderr,"Nebylo zadáno jméno souboru.\n");
-		exit(1);
-	}
-	//absoulutni adresa
-	char *pwd = getenv("PWD");
-	char abs_path[strlen("file://")+strlen(path)+1+strlen(pwd)+1];
-	strcpy(abs_path,"file://");	
-	if (*path != '/'){
-		strcat(abs_path,pwd);	
-		strcat(abs_path,"/");	
-	}
-	strcat(abs_path,path);
-	//otevreni
-	char *err;
-	err = pdf_init(abs_path);
-	if (err != NULL){
-		fprintf(stderr,"Chyba načtení: %s\n",err);
-		exit(1);
-	}
-	
-	if ((current_page < 0) || (current_page > pdf_num_pages))
-		current_page = 0;
 }
 
 int main(int argc, char * argv[]) {
@@ -224,7 +235,8 @@ int main(int argc, char * argv[]) {
 		}
 	} while (next_option != -1);
 
-	open_file(argv[optind]); //optind je prvni argument, kteri neni volba
+	file_name = argv[optind]; //vim ze tohle obecne nefunguje, ale tady to staci
+	open_file(file_name);
 
 	pdf_page_init(current_page);
 
@@ -258,7 +270,7 @@ int main(int argc, char * argv[]) {
 	gdkGC  = gdk_gc_new(root_window);
 
 		//toto tady provizorne
-	render_page(root_window);
+	render_page();
 
 	gdk_window_show(root_window);
 	gdk_event_handler_set(event_func, NULL, NULL);
