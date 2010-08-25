@@ -14,11 +14,17 @@
  *
  */
 
-int state=1;
+enum {
+	BASIC,
+	NUMBERS,
+	DISTANCE_1,
+	DISTANCE_2,
+	POSITION
+} state=BASIC;
 int number;
 int click_x;
 int click_y;
-int key_cancel_waiting = FALSE;
+int key_cancel_waiting = TRUE;
 
 void wait_distance();
 void wait_position();
@@ -64,12 +70,12 @@ static struct command_char command_chars[] = {
 };
 
 
-void wait_distance(){ 	state = 4;}
-void wait_position(){ 	state = 6;}
+void wait_distance(){ 	state = DISTANCE_1;}
+void wait_position(){ 	state = POSITION;}
 
 void handling_key(guint keyval){
 	switch(state){
-		case 1:
+		case BASIC:
 //			printf("key press %d\n",keyval);
 			for (unsigned int i=0; i < sizeof(command_chars) / sizeof(command_chars[0]); i++)
 				if (command_chars[i].pressed_char == keyval) {
@@ -81,7 +87,7 @@ void handling_key(guint keyval){
 				number = keyval - GDK_0;
 			}	
  			break;
-		case 2:
+		case NUMBERS:
 			if ((keyval >= GDK_0) && (keyval <= GDK_9)){
 				number = number*10 + keyval - GDK_0;
 				break;
@@ -94,21 +100,27 @@ void handling_key(guint keyval){
 			state = 1;
 		
 			break;
+		case DISTANCE_1: case DISTANCE_2: case POSITION:
+			if (key_cancel_waiting)
+				state = 1;
+			break;
 	}
 }
 
 void handling_click(int x, int y){
 	switch(state){
-		case 4:
+		case BASIC: case NUMBERS:
+			break;
+		case DISTANCE_1:
 			click_x=x;
 			click_y=y;
 			state=5;
 			break;
-		case 5:
+		case DISTANCE_2:
 			click_distance(click_x,click_y,x,y);
 			state=1;
 			break;
-		case 6:
+		case POSITION:
 			click_position(x,y);
 			state=1;
 			break;
