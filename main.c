@@ -3,28 +3,22 @@
 #include <string.h>
 #include <math.h>
 #include <getopt.h> //parametry
-#include <X11/Xlib.h> //okynka
-#include <gdk/gdk.h>
+#include <gdk/gdk.h> //okynka
 #include <glib.h> 
 #include "poppler.h"  //ovladani c++ knihovny
+#include "inputs.c" //vstup -> funkce
 
 int current_page = 0;
 extern int pdf_num_pages;
 extern pdf_page pdf_page_1;
+
 GMainLoop *mainloop;
+GdkWindow *root_window;
 GdkGC *gdkGC;
 
-void change_page(GdkWindow *window, int new){
-//	int old = current_page;
-	pdf_page_init(new);
-	current_page=new;
-	render_page(window);
-//	pdf_page_free(old);
-}
-
-void render_page(GdkWindow *window){
+void render_page(){
 	gint w_w,w_h;
-	gdk_drawable_get_size(window,&w_w,&w_h);
+	gdk_drawable_get_size(root_window,&w_w,&w_h);
 	int p_w,p_h;
 	double scale;
 
@@ -32,7 +26,7 @@ void render_page(GdkWindow *window){
 		//šířka je stejná
 		p_w = w_w;
 		p_h = ceil(w_w*pdf_page_1.height/pdf_page_1.width);
-		scale = w_w/pdf_page_1.width/w_w;
+		scale = w_w/pdf_page_1.width;
 		pdf_page_1.shift_width = 0;
 		pdf_page_1.shift_height = (w_h-p_h)/2;
 	} else {
@@ -43,7 +37,7 @@ void render_page(GdkWindow *window){
 		pdf_page_1.shift_width = (w_w-p_w)/2;
 		pdf_page_1.shift_height = 0;
 	}
-
+printf("%f %d %d\n",scale,p_w,p_h);
 	if ( (pdf_page_1.width != p_w) || (pdf_page_1.height != p_h) ){
 		pdf_page_1.pixbuf_width = p_w;
 		pdf_page_1.pixbuf_height = p_h;
@@ -53,37 +47,48 @@ void render_page(GdkWindow *window){
 				pdf_page_1.pixbuf_width,pdf_page_1.pixbuf_height, //int width, int height
 				scale, //double scale
 				0); //int rotation);
-		gdk_window_invalidate_rect(window,NULL,FALSE); //prekresleni
+		gdk_window_invalidate_rect(root_window,NULL,FALSE); //prekresleni
 	}
 }
+
+void change_page(int new){
+//	int old = current_page;
+	pdf_page_init(new);
+	current_page=new;
+	render_page();
+//	pdf_page_free(old);
+}
+
+void key_up(){
+	if (current_page > 0)
+		change_page(current_page-1);
+}
+
+void key_down(){
+	if (current_page < pdf_num_pages-1)
+		change_page(current_page+1);
+}
+
+
 
 static void event_func(GdkEvent *ev, gpointer data) {
 	switch(ev->type) {
 		case GDK_KEY_PRESS:
 			printf("key press [%s]-%d\n", ev->key.string,ev->key.keyval);
-			switch(ev->key.keyval){
-				case 65362: case 65365:
-					if (current_page > 0)
-						change_page(ev->any.window,current_page-1);
-					break;
-				case 65364: case 65366:
-					if (current_page < pdf_num_pages-1)
-						change_page(ev->any.window,current_page+1);
-					break;
-			}
+			handling_key(ev->key.keyval);
 			break;
 		case GDK_DELETE:
 			g_main_loop_quit(mainloop);
 			break;
 		case GDK_CONFIGURE: //zmena pozici ci velikosti-zavola exspose
-			render_page(ev->any.window);		
+			render_page();		
 			break;
 		case GDK_EXPOSE:
-			//printf("expose\n"); doublebuffering!!!!!
-			gdk_window_clear(ev->any.window); //smaže starý obrázek
+			//printf("expose\n"); //doublebuffering!!!!!
+			gdk_window_clear(root_window); //smaže starý obrázek
 			gdk_pixbuf_render_to_drawable(
 					pdf_page_1.pixbuf, //GdkPixbuf *pixbuf,
-					ev->any.window,//GdkDrawable *drawable,
+					root_window,//GdkDrawable *drawable,
 					gdkGC, //GdkGC *gc,
 					0,0, //vykreslit cely pixbuf
 					pdf_page_1.shift_width,pdf_page_1.shift_height, // kreslit do leveho horniho rohu okna
@@ -185,7 +190,7 @@ int main(int argc, char * argv[]) {
 		GDK_WINDOW_TYPE_HINT_NORMAL, //GdkWindowTypeHint type_hint;
 	};
 
-	GdkWindow *root_window = gdk_window_new(
+	root_window = gdk_window_new(
 			NULL, //GdkWindow *parent,
 			&attr, //GdkWindowAttr *attributes,
 			0 //gint attributes_mask ????
