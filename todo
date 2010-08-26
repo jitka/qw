@@ -1,5 +1,8 @@
+blikani - predelat render
+krabicka na pixbufery
+	g_object_unref() - mazani nepouzitelnych pixbuferu
+	vykreslovat dopredu
 nenechat si posilat eventy, ktere nepotrebuji
-doublebuffering
-vycevlaken, vykreslovat dopredu
-nechat vykreslovat cairem, když to trva dlouho?
+zapnout okno hlaskou cekam
 zjistit jak funguji okynka a pripadne uklidit moje
+jedno vlakno a zpracování zpráv a další na renderovaní, protože slušný program reaguje pořád a neseká se kvuli špatnému pdf

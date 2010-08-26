@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <sys/stat.h> //hlidani zmen v souboru
+#include <unistd.h> //cwd
 #include <getopt.h> //parametry
 #include <gdk/gdk.h> //okynka
 #include <glib.h> 
@@ -12,7 +14,8 @@ int current_page = 0;
 extern int pdf_num_pages;
 int document_rotation = 0;
 extern pdf_page pdf_page_1;
-char * file_name;
+char * file_path;
+time_t modification_time;
 
 GMainLoop *mainloop;
 GdkWindow *root_window;
@@ -25,7 +28,7 @@ void render_page(){
 	int p_w,p_h;
 	double scale;
 	int rotation = (pdf_page_1.rotation+document_rotation) % 360;
-
+// zapamatovat si stare rozmery
 	if ((rotation)%180 == 0){
 		if (w_w*pdf_page_1.height < pdf_page_1.width*w_h){
 			//šířka je stejná
@@ -71,6 +74,7 @@ void render_page(){
 				pdf_page_1.pixbuf_width,pdf_page_1.pixbuf_height, //int width, int height
 				scale, //double scale
 				rotation); //int rotation);
+		//smazat stare rozmery
 	}
 	gdk_window_invalidate_rect(root_window,NULL,FALSE); //prekresleni
 }
@@ -82,7 +86,11 @@ void open_file(char *path){
 		exit(1);
 	}
 	//absoulutni adresa
-	char *pwd = getenv("PWD");
+	char pwd[1024];
+	if (!getcwd(pwd, sizeof(pwd))) {
+		printf("au getcwd \n");
+		exit(1);
+	}
 	char abs_path[strlen("file://")+strlen(path)+1+strlen(pwd)+1];
 	strcpy(abs_path,"file://");	
 	if (*path != '/'){
@@ -96,7 +104,12 @@ void open_file(char *path){
 	if (err != NULL){
 		fprintf(stderr,"Chyba načtení: %s\n",err);
 		exit(1);
+	}				
+	struct stat s;
+	if (stat(file_path, &s) != -1){
+		modification_time = s.st_mtime;
 	}
+
 	
 	if ((current_page < 0) || (current_page > pdf_num_pages))
 		current_page = 0;
@@ -148,7 +161,7 @@ void key_rotate_document(){
 }
 
 void key_reload(){
-	open_file(file_name);
+	open_file(file_path);
 	pdf_page_init(current_page);
 	document_rotation = 0;
 	pdf_page_1.rotation = 0;
@@ -174,15 +187,21 @@ static void event_func(GdkEvent *ev, gpointer data) {
 			if (ev->button.button == 1)
 				handling_click((int)ev->button.x,(int)ev->button.x);
 			break;
-		case GDK_DELETE:
-			g_main_loop_quit(mainloop);
-			break;
+		case GDK_FOCUS_CHANGE:
+			{
+				struct stat s;
+				if (stat(file_path, &s) == -1)
+					break; //stat neprosel
+				if (modification_time != s.st_mtime)
+					key_reload();
+				break;
+			}
 		case GDK_CONFIGURE: //zmena pozici ci velikosti-zavola exspose
 			render_page();		
 			break;
 		case GDK_EXPOSE:
 			//printf("expose\n"); //doublebuffering!!!!!
-			gdk_window_clear(root_window); //smaže starý obrázek
+//			gdk_window_clear(root_window); //smaže starý obrázek
 			gdk_pixbuf_render_to_drawable(
 					pdf_page_1.pixbuf, //GdkPixbuf *pixbuf,
 					root_window,//GdkDrawable *drawable,
@@ -192,6 +211,9 @@ static void event_func(GdkEvent *ev, gpointer data) {
 					pdf_page_1.pixbuf_width,pdf_page_1.pixbuf_height, //rozmery
 					GDK_RGB_DITHER_NONE, //fujvec nechci
 					0,0);
+			break;
+		case GDK_DELETE:
+			g_main_loop_quit(mainloop);
 			break;
 	}
 }
@@ -235,8 +257,8 @@ int main(int argc, char * argv[]) {
 		}
 	} while (next_option != -1);
 
-	file_name = argv[optind]; //vim ze tohle obecne nefunguje, ale tady to staci
-	open_file(file_name);
+	file_path = argv[optind]; //vim ze tohle obecne nefunguje, ale tady to staci
+	open_file(file_path);
 
 	pdf_page_init(current_page);
 
