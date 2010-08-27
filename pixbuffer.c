@@ -1,10 +1,14 @@
 #include <stdlib.h> //calloc
 #include <string.h> //memcpy
+//#include <gdk-pixbuf/gdk-pixbuf.h>
 #include "pixbuffer.h"
 #include "poppler.h"
 
 void really_free(struct pixbuf_pixbuf s){
-	g_object_unref(s.pixbuf);
+//	g_free(s.pixbuf);
+//	gdk_pixbuf_finalize(s.pixbuf);
+//	g_object_unref(s.pixbuf);
+//	   gdk_pixbuf_unref                    (s.pixbuf);
 	s.width = 0;
 	s.height = 0;
 }
