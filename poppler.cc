@@ -12,6 +12,7 @@ pdf_page pdf_page_1;
 
 PopplerDocument * doc;
 pixbuf_database current_database;
+pixbuf_database new_database;
 
 PopplerPage * page;
 GError * err;
@@ -32,15 +33,10 @@ char * pdf_init( char* filePath) {
 void pdf_page_init(int n){
 	page = poppler_document_get_page (doc, n);
 	poppler_page_get_size(page, &pdf_page_1.width, &pdf_page_1.height);
-	pdf_page_1.pixbuf_width = 0;
-	pdf_page_1.pixbuf_height = 0;
-	pdf_page_1.rotation = 0;
 }
 
-void pdf_render_page_to_pixbuf(int num_page, int width, int height, double scale, int rotation) {
-	pdf_page_1.pixbuf_width = width;
-	pdf_page_1.pixbuf_height = height;	
-	pdf_page_1.pixbuf = gdk_pixbuf_new(
+void pdf_render_page_to_pixbuf(GdkPixbuf **pixbuf,int num_page, int width, int height, double scale, int rotation) {
+	*pixbuf = gdk_pixbuf_new(
 		GDK_COLORSPACE_RGB,
 		FALSE,	//gboolean has_alpha,
 		8, //bits_per_sample,
@@ -51,6 +47,6 @@ void pdf_render_page_to_pixbuf(int num_page, int width, int height, double scale
 		width,height, //int src_width, int src_height,
 		scale, //scale hustota
 		rotation, //ve stupních
-		pdf_page_1.pixbuf);
+		*pixbuf);
 
 }

@@ -35,16 +35,17 @@ void pixbuf_render(pixbuf_database * database, int page, int width, int height, 
 	rendruj
 	vloz 
 */	
-	if ( (pdf_page_1.pixbuf_width != width) 
-			|| (pdf_page_1.pixbuf_height != height) 
-			|| (pdf_page_1.pixbuf_rotation != rotation)){
-		pdf_page_1.pixbuf_width = width;
-		pdf_page_1.pixbuf_height = height;
-		pdf_page_1.pixbuf_rotation = rotation;
+	if ( (database->page[page].width != width) 
+			|| (database->page[page].height != height) 
+			|| (database->page[page].rotation != rotation)){
+		database->page[page].width = width;
+		database->page[page].height = height;
+		database->page[page].rotation = rotation;
 
 		pdf_render_page_to_pixbuf(
+				&database->page[page].pixbuf,
 				page, //int num_page
-				pdf_page_1.pixbuf_width,pdf_page_1.pixbuf_height, //int width, int height
+				database->page[page].width,database->page[page].height, //int width, int height
 				scale, //double scale
 				rotation); //int rotation);
 	}

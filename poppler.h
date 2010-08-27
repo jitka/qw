@@ -3,7 +3,7 @@ typedef struct pdf_page{
 	double height;
 	int rotation;
 	GdkPixbuf *pixbuf;
-	int pixbuf_width;
+//	int pixbuf_width;
 	int pixbuf_height;
 	int pixbuf_rotation;
 	int shift_width;
@@ -16,4 +16,4 @@ extern pixbuf_database current_database;
 
 char * pdf_init(char *fileName);
 void pdf_page_init(int n);
-void pdf_render_page_to_pixbuf(int num_page, int width, int height, double scale, int rotation);
+void pdf_render_page_to_pixbuf(GdkPixbuf **pixbuf, int num_page, int width, int height, double scale, int rotation);

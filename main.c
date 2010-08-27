@@ -11,9 +11,15 @@
 #include "poppler.h"  //ovladani c++ knihovny
 #include "inputs.h" //vstup -> funkce
 
+enum {
+	START,
+	PAGE,
+} mode = START;
+
 int current_page = 0;
 extern int pdf_num_pages;
 extern pixbuf_database current_database;
+extern pixbuf_database new_database;
 int document_rotation = 0;
 extern pdf_page pdf_page_1;
 char * file_path;
@@ -222,17 +228,26 @@ static void event_func(GdkEvent *ev, gpointer data) {
 			render_page();		
 			break;
 		case GDK_EXPOSE:
-			//printf("expose\n"); //doublebuffering!!!!!
-//			gdk_window_clear(root_window); //smaže starý obrázek
-			gdk_pixbuf_render_to_drawable(
-					pdf_page_1.pixbuf, //GdkPixbuf *pixbuf,
-					root_window,//GdkDrawable *drawable,
-					gdkGC, //GdkGC *gc,
-					0,0, //vykreslit cely pixbuf
-					pdf_page_1.shift_width,pdf_page_1.shift_height, // kreslit do leveho horniho rohu okna
-					pdf_page_1.pixbuf_width,pdf_page_1.pixbuf_height, //rozmery
-					GDK_RGB_DITHER_NONE, //fujvec nechci
-					0,0);
+			//rekne mi kolik jich je ve fronte-> zabijeni zbytecnych rendrovani
+			switch (mode) {
+				case START:
+					//jeste by se tu dal vlozit nejaky hezky obrazek
+					render_page();
+					mode = PAGE;
+					break;
+				case PAGE:
+					gdk_pixbuf_render_to_drawable(
+							current_database.page[current_page].pixbuf,
+							root_window,//GdkDrawable *drawable,
+							gdkGC, //GdkGC *gc,
+							0,0, //vykreslit cely pixbuf
+							pdf_page_1.shift_width,pdf_page_1.shift_height, //posunuti
+							current_database.page[current_page].width, //rozmery
+							current_database.page[current_page].height,
+							GDK_RGB_DITHER_NONE, //fujvec nechci
+							0,0);
+					break;
+			}
 			break;
 		case GDK_DELETE:
 			g_main_loop_quit(mainloop);
@@ -281,8 +296,9 @@ int main(int argc, char * argv[]) {
 
 	g_type_init();
 	file_path = argv[optind]; //vim ze tohle obecne nefunguje, ale tady to staci
-	open_file(file_path);
 
+	//!!!11
+	open_file(file_path);
 	pdf_page_init(current_page);
 
 	//vytvoreni okna
@@ -295,7 +311,7 @@ int main(int argc, char * argv[]) {
 		"huiii", //gchar *title;
 		0x3FFFFE, //gint event_mask; all events mask
 		100,0, //gint x, y;
-		ceil(pdf_page_1.width),ceil(pdf_page_1.height),
+		545,692,
 	 	GDK_INPUT_OUTPUT, //GdkWindowClass wclass;
 		visual, //GdkVisual *visual;
 		colormap, //GdkColormap *colormap;
@@ -314,12 +330,11 @@ int main(int argc, char * argv[]) {
 	);
 	gdkGC  = gdk_gc_new(root_window);
 
-		//toto tady provizorne
-	render_page();
-
 	gdk_window_show(root_window);
 	gdk_event_handler_set(event_func, NULL, NULL);
 	mainloop = g_main_loop_new(g_main_context_default(), FALSE);
+	
+	
 	g_main_loop_run(mainloop);
 	gdk_window_destroy(root_window); 
 
