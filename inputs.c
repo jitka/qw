@@ -84,7 +84,7 @@ void handling_key(guint keyval){
 					break;
 				}
 			if ((keyval >= GDK_0) && (keyval <= GDK_9)){
-				state = 2;
+				state = NUMBERS;
 				number = keyval - GDK_0;
 			}	
  			break;
@@ -98,12 +98,12 @@ void handling_key(guint keyval){
 					number_chars[i].function(number);
 					break;
 				}
-			state = 1;
+			state = BASIC;
 		
 			break;
 		case DISTANCE_1: case DISTANCE_2: case POSITION:
 			if (key_cancel_waiting)
-				state = 1;
+				state = BASIC;
 			break;
 	}
 }
@@ -115,15 +115,15 @@ void handling_click(int x, int y){
 		case DISTANCE_1:
 			click_x=x;
 			click_y=y;
-			state=5;
+			state=DISTANCE_2;
 			break;
 		case DISTANCE_2:
 			click_distance(click_x,click_y,x,y);
-			state=1;
+			state=BASIC;
 			break;
 		case POSITION:
 			click_position(x,y);
-			state=1;
+			state=BASIC;
 			break;
 	}
 }

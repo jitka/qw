@@ -9,6 +9,7 @@
 #include <glib.h> 
 #include "poppler.h"  //ovladani c++ knihovny
 #include "inputs.h" //vstup -> funkce
+#include "pixbuffer.h" //zasoba vykreslenych
 
 int current_page = 0;
 extern int pdf_num_pages;
@@ -36,13 +37,13 @@ void render_page(){
 			p_h = ceil(w_w*pdf_page_1.height/pdf_page_1.width);
 			scale = w_w/pdf_page_1.width;
 			pdf_page_1.shift_width = 0;
-			pdf_page_1.shift_height = (w_h-p_h)/2;
+			pdf_page_1.shift_height = (w_h-p_h+1)/2;
 		} else {
 			//výška je stejná
 			p_w = ceil(w_h*(pdf_page_1.width/pdf_page_1.height));
 			p_h = w_h;
 			scale = w_h/pdf_page_1.height;
-			pdf_page_1.shift_width = (w_w-p_w)/2;
+			pdf_page_1.shift_width = (w_w-p_w+1)/2;
 			pdf_page_1.shift_height = 0;
 		}
 	} else {
@@ -52,13 +53,13 @@ void render_page(){
 			p_h = ceil(w_w*pdf_page_1.width/pdf_page_1.height);
 			scale = w_w/pdf_page_1.height;
 			pdf_page_1.shift_width = 0;
-			pdf_page_1.shift_height = (w_h-p_h)/2;
+			pdf_page_1.shift_height = (w_h-p_h+1)/2;
 		} else {
 			//výška je stejná
 			p_w = ceil(w_h*(pdf_page_1.height/pdf_page_1.width));
 			p_h = w_h;
 			scale = w_h/pdf_page_1.width;
-			pdf_page_1.shift_width = (w_w-p_w)/2;
+			pdf_page_1.shift_width = (w_w-p_w+1)/2;
 			pdf_page_1.shift_height = 0;
 		}
 	}
@@ -76,7 +77,25 @@ void render_page(){
 				rotation); //int rotation);
 		//smazat stare rozmery
 	}
-	gdk_window_invalidate_rect(root_window,NULL,FALSE); //prekresleni
+	int w,h;
+	if (pdf_page_1.shift_width == 0){
+		if (pdf_page_1.shift_height == 0){
+			w = 0; h = 0;
+		} else {
+			w = w_w; h = pdf_page_1.shift_height;
+		}
+	} else {
+		w = pdf_page_1.shift_width; h = w_h;
+	}
+	gdk_window_clear_area_e(
+			root_window,
+			0,0,
+			w,h);
+	gdk_window_clear_area_e(
+			root_window,
+			w_w-w,w_h-h,
+			w,h);
+gdk_window_invalidate_rect(root_window,NULL,FALSE); //prekresleni
 }
 
  
@@ -120,11 +139,11 @@ void open_file(char *path){
 void change_page(int new){
 	if (new <0 || new >= pdf_num_pages)
 		return;
-//	int old = current_page;
+	int old = current_page;
 	pdf_page_init(new);
 	current_page=new;
 	render_page();
-//	pdf_page_free(old);
+	pixbuf_free(old);
 }
 
 void key_up(){ 		change_page(current_page-1);}
@@ -257,6 +276,7 @@ int main(int argc, char * argv[]) {
 		}
 	} while (next_option != -1);
 
+	g_type_init();
 	file_path = argv[optind]; //vim ze tohle obecne nefunguje, ale tady to staci
 	open_file(file_path);
 

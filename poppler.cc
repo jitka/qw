@@ -1,13 +1,9 @@
-/*
- * Tohle predevala c++ obekty na hezci funkce
- *
- */
-
-#include <stdio.h>
-#include <glib-2.0/glib.h>
+//#include <stdio.h>
+//#include <glib-2.0/glib.h>
 #include <poppler/glib/poppler-document.h>
 
 extern "C" {
+#include "pixbuffer.h"
 #include "poppler.h"
 }
 
@@ -15,18 +11,21 @@ int pdf_num_pages;
 pdf_page pdf_page_1;
 
 PopplerDocument * doc;
+pixbuf_database * current_database;
+
 PopplerPage * page;
 GError * err;
 char *pdf_err;
 
 char * pdf_init( char* filePath) {
-	g_type_init();
 
 	err = (GError *) 0;
 	doc = poppler_document_new_from_file(filePath,0,&err); //0->nema heslo
 	if (err != 0)
 		return err->message;
 	pdf_num_pages = poppler_document_get_n_pages(doc);
+	pixbuf_create_database(current_database, pdf_num_pages);
+
 	return NULL;
 }
 
