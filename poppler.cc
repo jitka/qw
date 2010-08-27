@@ -11,7 +11,7 @@ int pdf_num_pages;
 pdf_page pdf_page_1;
 
 PopplerDocument * doc;
-pixbuf_database * current_database;
+pixbuf_database current_database;
 
 PopplerPage * page;
 GError * err;
@@ -24,7 +24,7 @@ char * pdf_init( char* filePath) {
 	if (err != 0)
 		return err->message;
 	pdf_num_pages = poppler_document_get_n_pages(doc);
-	pixbuf_create_database(current_database, pdf_num_pages);
+	pixbuf_create_database(&current_database, pdf_num_pages);
 
 	return NULL;
 }

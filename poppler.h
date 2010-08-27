@@ -12,6 +12,7 @@ typedef struct pdf_page{
 
 extern int pdf_num_pages;
 extern pdf_page pdf_page_1;
+extern pixbuf_database current_database;
 
 char * pdf_init(char *fileName);
 void pdf_page_init(int n);

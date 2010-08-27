@@ -7,12 +7,13 @@
 #include <getopt.h> //parametry
 #include <gdk/gdk.h> //okynka
 #include <glib.h> 
+#include "pixbuffer.h" //zasoba vykreslenych
 #include "poppler.h"  //ovladani c++ knihovny
 #include "inputs.h" //vstup -> funkce
-#include "pixbuffer.h" //zasoba vykreslenych
 
 int current_page = 0;
 extern int pdf_num_pages;
+extern pixbuf_database current_database;
 int document_rotation = 0;
 extern pdf_page pdf_page_1;
 char * file_path;
@@ -63,7 +64,8 @@ void render_page(){
 			pdf_page_1.shift_height = 0;
 		}
 	}
-	if ( (pdf_page_1.pixbuf_width != p_w) 
+	pixbuf_render(&current_database,current_page,p_w,p_h,scale,rotation);
+/*	if ( (pdf_page_1.pixbuf_width != p_w) 
 			|| (pdf_page_1.pixbuf_height != p_h) 
 			|| (pdf_page_1.pixbuf_rotation != rotation)){
 		pdf_page_1.pixbuf_width = p_w;
@@ -76,7 +78,7 @@ void render_page(){
 				scale, //double scale
 				rotation); //int rotation);
 		//smazat stare rozmery
-	}
+	} */
 	int w,h;
 	if (pdf_page_1.shift_width == 0){
 		if (pdf_page_1.shift_height == 0){
@@ -143,7 +145,7 @@ void change_page(int new){
 	pdf_page_init(new);
 	current_page=new;
 	render_page();
-	pixbuf_free(old);
+	pixbuf_free(&current_database,old);
 }
 
 void key_up(){ 		change_page(current_page-1);}
@@ -180,6 +182,7 @@ void key_rotate_document(){
 }
 
 void key_reload(){
+//predelat
 	open_file(file_path);
 	pdf_page_init(current_page);
 	document_rotation = 0;
@@ -322,4 +325,3 @@ int main(int argc, char * argv[]) {
 
 	return 0;
 }
-	
