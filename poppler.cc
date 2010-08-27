@@ -3,8 +3,8 @@
 #include <poppler/glib/poppler-document.h>
 
 extern "C" {
-#include "pixbuffer.h"
-#include "poppler.h"
+	#include "pixbuffer.h"
+	#include "poppler.h"
 }
 
 int pdf_num_pages;
@@ -22,10 +22,11 @@ char * pdf_init( char* filePath) {
 
 	err = (GError *) 0;
 	doc = poppler_document_new_from_file(filePath,0,&err); //0->nema heslo
+		//vrati-li NULL -> ma chybu
 	if (err != 0)
 		return err->message;
 	pdf_num_pages = poppler_document_get_n_pages(doc);
-	pixbuf_create_database(&current_database, pdf_num_pages);
+//	pixbuf_create_database(&current_database, pdf_num_pages);
 
 	return NULL;
 }

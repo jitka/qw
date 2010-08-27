@@ -1,4 +1,4 @@
-#include <gdk/gdk.h>
+#include <gdk/gdk.h> //pixbuffery
 
 struct pixbuf_pixbuf{
 	GdkPixbuf *pixbuf;

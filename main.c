@@ -6,35 +6,41 @@
 #include <unistd.h> //cwd
 #include <getopt.h> //parametry
 #include <gdk/gdk.h> //okynka
-#include <glib.h> 
+//#include <glib.h> 
 #include "pixbuffer.h" //zasoba vykreslenych
 #include "poppler.h"  //ovladani c++ knihovny
 #include "inputs.h" //vstup -> funkce
 
+//global
 enum {
 	START,
 	PAGE,
 } mode = START;
-
 int current_page = 0;
 extern int pdf_num_pages;
 extern pixbuf_database current_database;
 extern pixbuf_database new_database;
 int document_rotation = 0;
+
+//render
 extern pdf_page pdf_page_1;
+
+//file
 char * file_path;
 time_t modification_time;
 
+//window
 GMainLoop *mainloop;
 GdkWindow *root_window;
 int is_fullscreen = FALSE;
 GdkGC *gdkGC;
 
-void render_page(){
+void render_page(pixbuf_database * database){
 	gint w_w,w_h;
 	gdk_drawable_get_size(root_window,&w_w,&w_h);
 	int p_w,p_h;
 	double scale;
+	//int rotation = (database->page[current_page].rotation+document_rotation) % 360;
 	int rotation = (pdf_page_1.rotation+document_rotation) % 360;
 // zapamatovat si stare rozmery
 	if ((rotation)%180 == 0){
@@ -70,21 +76,9 @@ void render_page(){
 			pdf_page_1.shift_height = 0;
 		}
 	}
-	pixbuf_render(&current_database,current_page,p_w,p_h,scale,rotation);
-/*	if ( (pdf_page_1.pixbuf_width != p_w) 
-			|| (pdf_page_1.pixbuf_height != p_h) 
-			|| (pdf_page_1.pixbuf_rotation != rotation)){
-		pdf_page_1.pixbuf_width = p_w;
-		pdf_page_1.pixbuf_height = p_h;
-		pdf_page_1.pixbuf_rotation = rotation;
 
-		pdf_render_page_to_pixbuf(
-				current_page, //int num_page
-				pdf_page_1.pixbuf_width,pdf_page_1.pixbuf_height, //int width, int height
-				scale, //double scale
-				rotation); //int rotation);
-		//smazat stare rozmery
-	} */
+	pixbuf_render(database,current_page,p_w,p_h,scale,rotation);
+
 	int w,h;
 	if (pdf_page_1.shift_width == 0){
 		if (pdf_page_1.shift_height == 0){
@@ -148,9 +142,11 @@ void change_page(int new){
 	if (new <0 || new >= pdf_num_pages)
 		return;
 	int old = current_page;
+	//!!
+	pdf_page_1.rotation=0;
 	pdf_page_init(new);
 	current_page=new;
-	render_page();
+	render_page(&current_database);
 	pixbuf_free(&current_database,old);
 }
 
@@ -179,22 +175,28 @@ void key_fullscreen(){
 
 void key_rotate(){ 
 	pdf_page_1.rotation = (pdf_page_1.rotation + 90) % 360;
-	render_page();
+//	current_database.page[current_page].rotation = (pdf_page_1.rotation + 90) % 360;
+	render_page(&current_database);
 }
 
 void key_rotate_document(){
 	document_rotation = (document_rotation+90)%360; 
-	render_page();
+	render_page(&current_database);
 }
 
 void key_reload(){
-//predelat
+// 	close_file(file_path); //je potreba?
 	open_file(file_path);
-	pdf_page_init(current_page);
+	pixbuf_create_database(&new_database, pdf_num_pages);
 	document_rotation = 0;
-	pdf_page_1.rotation = 0;
-	pdf_page_1.pixbuf_height = 0;
-	render_page();
+
+	pdf_page_1.rotation = 0; //fuj
+	pdf_page_init(current_page); //to vse bude v rendrovani
+	current_page %= pdf_num_pages; //a navic rozumejsi
+
+	render_page(&new_database);
+
+	pixbuf_replace_database(&current_database,&new_database);
 }
 
 void click_distance(int first_x, int first_y, int second_x, int second_y){
@@ -225,14 +227,15 @@ static void event_func(GdkEvent *ev, gpointer data) {
 				break;
 			}
 		case GDK_CONFIGURE: //zmena pozici ci velikosti-zavola exspose
-			render_page();		
+			render_page(&current_database);		
 			break;
 		case GDK_EXPOSE:
 			//rekne mi kolik jich je ve fronte-> zabijeni zbytecnych rendrovani
 			switch (mode) {
 				case START:
 					//jeste by se tu dal vlozit nejaky hezky obrazek
-					render_page();
+					key_reload();
+//					render_page();
 					mode = PAGE;
 					break;
 				case PAGE:
@@ -293,13 +296,11 @@ int main(int argc, char * argv[]) {
 				break;
 		}
 	} while (next_option != -1);
-
-	g_type_init();
 	file_path = argv[optind]; //vim ze tohle obecne nefunguje, ale tady to staci
 
-	//!!!11
-	open_file(file_path);
-	pdf_page_init(current_page);
+	g_type_init();
+
+	open_file(file_path); //ověří, jestli soubor je skutečně pdf
 
 	//vytvoreni okna
 	gdk_init(NULL,NULL);

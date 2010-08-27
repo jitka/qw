@@ -2,10 +2,10 @@ typedef struct pdf_page{
 	double width;
 	double height;
 	int rotation;
-	GdkPixbuf *pixbuf;
+//	GdkPixbuf *pixbuf;
 //	int pixbuf_width;
-	int pixbuf_height;
-	int pixbuf_rotation;
+//	int pixbuf_height;
+//	int pixbuf_rotation;
 	int shift_width;
 	int shift_height;
 } pdf_page;

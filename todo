@@ -22,12 +22,15 @@ vlakna
 	pouzivat hash
 hlavni
 	parametry
-	zapnuti okna prazdneho nastavitelne velikosti
-	rendrovani
-	mainloop
+	existence pdf
+	expose 1-zapnuti okna prazdneho nastavitelne velikosti
+	pak r
+	
+nove q
 	ulozeni stavu hash
 
 nezapomenout :
 nenechat si posilat eventy, ktere nepotrebuji
+uklizeni/smazani poppler_document
 zjistit jak funguji okynka a pripadne uklidit moje
 pořádek v includech
