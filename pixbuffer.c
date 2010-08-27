@@ -3,7 +3,7 @@
 #include "pixbuffer.h"
 #include "poppler.h"
 
-void pixbuf_really_free(struct pixbuf_pixbuf s){
+void really_free(struct pixbuf_pixbuf s){
 	g_object_unref(s.pixbuf);
 	s.width = 0;
 	s.height = 0;
@@ -17,8 +17,9 @@ void pixbuf_create_database(pixbuf_database * database, int number_pages){
 }
 
 void pixbuf_replace_database(pixbuf_database * old_db, pixbuf_database * new_db){
+	//kvuli reloudovani
 	for (int i=0; i < old_db->number_pages; i++)
-		pixbuf_really_free(old_db->page[i]);
+		really_free(old_db->page[i]);
 	free(old_db->page);
 	free(old_db->cached);
 	memcpy(old_db,new_db,sizeof(pixbuf_database));
@@ -46,6 +47,8 @@ void pixbuf_render(pixbuf_database * database, int page, int width, int height, 
 }
 
 void pixbuf_free(pixbuf_database * database, int number_page){
+	database->page[number_page].is_used = FALSE;
+	really_free(database->page[number_page]);
 	/*bit v databazi
 	vloz do zasobniky
 	je-li tam moc smaz duplicity
