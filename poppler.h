@@ -1,3 +1,4 @@
+#include <gdk/gdk.h>
 char * pdf_init(char *fileName);
 int pdf_get_number_pages(); //používá jen! create_document_database()
 void pdf_page_init(int n);

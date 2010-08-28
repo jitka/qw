@@ -4,7 +4,7 @@
 #include <sys/stat.h> //hlidani zmen v souboru
 #include <unistd.h> //cwd
 #include <getopt.h> //parametry
-#include <gdk/gdk.h> //okynka
+//#include <gdk/gdk.h> //okynka,poppler.h pixbuffer.h
 #include "poppler.h" //open_file
 #include "render.h" //render,expose
 #include "inputs.h" //vstup -> funkce
@@ -25,10 +25,9 @@ int current_page = 0;
 
 
 //render veci co po reloudu zustavaji
-//extern int pdf_num_pages;
-extern struct document document;
-extern struct document new_document;
-extern pdf_page pdf_page_1;
+extern document_t document;
+extern document_t new_document;
+//extern pdf_page pdf_page_1;
 
 //file
 char * file_path;
@@ -97,8 +96,8 @@ void key_fullscreen(){
 }
 
 void key_rotate(){ 
-	pdf_page_1.rotation = (pdf_page_1.rotation + 90) % 360;
-//	current_database.page[current_page].rotation = (pdf_page_1.rotation + 90) % 360;
+	document.pages[current_page].rotation = (document.pages[current_page].rotation + 90) % 360;
+//	current_database.page[current_page].rotation = (document.pages[current_page].rotation + 90) % 360;
 	render_page(&document,root_window);
 }
 
@@ -116,16 +115,18 @@ void key_reload(){
 }
 
 void click_distance(int first_x, int first_y, int second_x, int second_y){
-	printf("hui %f %f %d %d - %d %d\n",pdf_page_1.width,pdf_page_1.height,first_x,first_y,second_x,second_y);
+	printf("hui %f %f %d %d - %d %d\n",document.pages[current_page].width,document.pages[current_page].height,first_x,first_y,second_x,second_y);
 }
 void click_position(int x, int y){
-	printf("hui %f %f %d %d\n",pdf_page_1.width,pdf_page_1.height,x,y);
+	printf("hui %f %f %d %d\n",document.pages[current_page].width,document.pages[current_page].height,x,y);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
 
 static void event_func(GdkEvent *ev, gpointer data) {
 	switch(ev->type) {
+		//fuj
+		case GDK_NOTHING: case GDK_DESTROY: case GDK_MOTION_NOTIFY: case GDK_2BUTTON_PRESS: case GDK_3BUTTON_PRESS: case GDK_BUTTON_RELEASE: case GDK_KEY_RELEASE: case GDK_ENTER_NOTIFY: case GDK_LEAVE_NOTIFY: case GDK_MAP: case GDK_UNMAP: case GDK_PROPERTY_NOTIFY: case GDK_SELECTION_CLEAR: case GDK_SELECTION_REQUEST: case GDK_SELECTION_NOTIFY: case GDK_PROXIMITY_IN: case GDK_PROXIMITY_OUT: case GDK_DRAG_ENTER: case GDK_DRAG_LEAVE: case GDK_DRAG_MOTION: case GDK_DRAG_STATUS: case GDK_DROP_START: case GDK_DROP_FINISHED: case GDK_CLIENT_EVENT: case GDK_VISIBILITY_NOTIFY: case GDK_NO_EXPOSE: case GDK_SCROLL: case GDK_WINDOW_STATE: case GDK_SETTING: case GDK_OWNER_CHANGE: case GDK_GRAB_BROKEN: case GDK_DAMAGE: case GDK_EVENT_LAST: break;
 		case GDK_KEY_PRESS:
 			handling_key(ev->key.keyval);
 			break;
@@ -153,7 +154,7 @@ static void event_func(GdkEvent *ev, gpointer data) {
 					key_reload();
 					mode = PAGE;
 					break;
-				case PAGE:
+				case PAGE: case PRESENTATION:
 					expose(root_window,gdkGC);
 					break;
 			}
@@ -191,7 +192,7 @@ int main(int argc, char * argv[]) {
 			case 'i':
 				open_file(optarg);
 //				printf("Stran: %d\n",pdf_num_pages);
-//				printf("Strana: %d sirka: %f cm vyska: %f cm\n",current_page,pdf_page_1.width*0.035278,pdf_page_1.height*0.035278);
+//printf("Strana: %d sirka: %f cm vyska: %f cm\n",current_page,document->pages[current_page].width*0.035278,document->pages[current_page].height*0.035278);
 				return 0;
 			case 'p':
 				current_page = atoi(optarg) - 1; //lide cisluji od 1
