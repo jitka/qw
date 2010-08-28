@@ -1,14 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <math.h>
+#include <string.h> //open_file
 #include <sys/stat.h> //hlidani zmen v souboru
 #include <unistd.h> //cwd
 #include <getopt.h> //parametry
 #include <gdk/gdk.h> //okynka
-//#include <glib.h> 
-#include "pixbuffer.h" //zasoba vykreslenych
-#include "poppler.h"  //ovladani c++ knihovny
+#include "poppler.h" //open_file
+#include "render.h" //render,expose
 #include "inputs.h" //vstup -> funkce
 
 //global
@@ -18,16 +16,20 @@ enum {
 	PRESENTATION
 } mode = START;
 int is_fullscreen = FALSE;
-//tady budou rezimi a veskere veci
+//tady budou rezimy a veskere veci
 //co se reloudem nemeni
 
-//pixbuf
+//settings
+
+
+//pixbuf tu nebude
 extern pixbuf_database current_database;
 extern pixbuf_database new_database;
-//render
-extern int pdf_num_pages;
-int document_rotation = 0;
-int current_page = 0;
+
+//render veci co po reloudu zustavaji
+//extern int pdf_num_pages;
+extern int document_rotation;
+extern int current_page;
 extern pdf_page pdf_page_1;
 
 //file
@@ -39,72 +41,9 @@ GMainLoop *mainloop;
 GdkWindow *root_window;
 GdkGC *gdkGC;
 
-void render_page(pixbuf_database * database){
-	gint w_w,w_h;
-	gdk_drawable_get_size(root_window,&w_w,&w_h);
-	int p_w,p_h;
-	double scale;
-	//int rotation = (database->page[current_page].rotation+document_rotation) % 360;
-	int rotation = (pdf_page_1.rotation+document_rotation) % 360;
-// zapamatovat si stare rozmery
-	if ((rotation)%180 == 0){
-		if (w_w*pdf_page_1.height < pdf_page_1.width*w_h){
-			//šířka je stejná
-			p_w = w_w;
-			p_h = ceil(w_w*pdf_page_1.height/pdf_page_1.width);
-			scale = w_w/pdf_page_1.width;
-			pdf_page_1.shift_width = 0;
-			pdf_page_1.shift_height = (w_h-p_h+1)/2;
-		} else {
-			//výška je stejná
-			p_w = ceil(w_h*(pdf_page_1.width/pdf_page_1.height));
-			p_h = w_h;
-			scale = w_h/pdf_page_1.height;
-			pdf_page_1.shift_width = (w_w-p_w+1)/2;
-			pdf_page_1.shift_height = 0;
-		}
-	} else {
-		if (w_w*pdf_page_1.width < pdf_page_1.height*w_h){
-			//šířka je stejná
-			p_w = w_w;
-			p_h = ceil(w_w*pdf_page_1.width/pdf_page_1.height);
-			scale = w_w/pdf_page_1.height;
-			pdf_page_1.shift_width = 0;
-			pdf_page_1.shift_height = (w_h-p_h+1)/2;
-		} else {
-			//výška je stejná
-			p_w = ceil(w_h*(pdf_page_1.height/pdf_page_1.width));
-			p_h = w_h;
-			scale = w_h/pdf_page_1.width;
-			pdf_page_1.shift_width = (w_w-p_w+1)/2;
-			pdf_page_1.shift_height = 0;
-		}
-	}
-
-	pixbuf_render(database,current_page,p_w,p_h,scale,rotation);
-
-	int w,h;
-	if (pdf_page_1.shift_width == 0){
-		if (pdf_page_1.shift_height == 0){
-			w = 0; h = 0;
-		} else {
-			w = w_w; h = pdf_page_1.shift_height;
-		}
-	} else {
-		w = pdf_page_1.shift_width; h = w_h;
-	}
-	gdk_window_clear_area_e(
-			root_window,
-			0,0,
-			w,h);
-	gdk_window_clear_area_e(
-			root_window,
-			w_w-w,w_h-h,
-			w,h);
-gdk_window_invalidate_rect(root_window,NULL,FALSE); //prekresleni
-}
-
  
+/////////////////////////////////////////////////////////////////
+	
 void open_file(char *path){
 	if (path == NULL){
 		fprintf(stderr,"Nebylo zadáno jméno souboru.\n");
@@ -140,27 +79,13 @@ void open_file(char *path){
 		current_page = 0;
 }
 
-/////////////////////////////////////////////////////////////////
-	
-void change_page(int new){
-	if (new <0 || new >= pdf_num_pages)
-		return;
-	int old = current_page;
-	//!!
-	pdf_page_1.rotation=0;
-	pdf_page_init(new);
-	current_page=new;
-	render_page(&current_database);
-	pixbuf_free(&current_database,old);
-}
-
-void key_up(){ 		change_page(current_page-1);}
-void key_down(){ 	change_page(current_page+1);}
-void key_home(){ 	change_page(0);}
-void key_end(){ 	change_page(pdf_num_pages-1);}
-void key_jump(int num_page){ 	change_page(num_page);}
-void key_jump_up(int diff){ 	change_page(current_page - diff);}
-void key_jump_down(int diff){ 	change_page(current_page + diff);}
+void key_up(){ 		change_page(root_window,current_page-1);}
+void key_down(){ 	change_page(root_window,current_page+1);}
+void key_home(){ 	change_page(root_window,0);}
+void key_end(){ 	change_page(root_window,pdf_num_pages-1);}
+void key_jump(int num_page){ 	change_page(root_window,num_page);}
+void key_jump_up(int diff){ 	change_page(root_window,current_page - diff);}
+void key_jump_down(int diff){ 	change_page(root_window,current_page + diff);}
 
 void key_quit(){
 	gdk_event_put( gdk_event_new(GDK_DELETE));
@@ -180,25 +105,27 @@ void key_fullscreen(){
 void key_rotate(){ 
 	pdf_page_1.rotation = (pdf_page_1.rotation + 90) % 360;
 //	current_database.page[current_page].rotation = (pdf_page_1.rotation + 90) % 360;
-	render_page(&current_database);
+	render_page(&current_database,root_window);
 }
 
 void key_rotate_document(){
 	document_rotation = (document_rotation+90)%360; 
-	render_page(&current_database);
+	render_page(&current_database,root_window);
 }
 
 void key_reload(){
 // 	close_file(file_path); //je potreba?
 	open_file(file_path);
+
+	document_structures_init();
+/*	//toto bude jedna fce
 	pixbuf_create_database(&new_database, pdf_num_pages);
 	document_rotation = 0;
-
 	pdf_page_1.rotation = 0; //fuj
 	pdf_page_init(current_page); //to vse bude v rendrovani
-	current_page %= pdf_num_pages; //a navic rozumejsi
-
-	render_page(&new_database);
+//	current_page %= pdf_num_pages; //a navic rozumejsi
+*/
+	render_page(&new_database,root_window);
 
 	pixbuf_replace_database(&current_database,&new_database);
 }
@@ -226,12 +153,12 @@ static void event_func(GdkEvent *ev, gpointer data) {
 				struct stat s;
 				if (stat(file_path, &s) == -1)
 					break; //stat neprosel
-				if (modification_time != s.st_mtime)
+				if (modification_time != s.st_mtime && mode != PRESENTATION)
 					key_reload();
 				break;
 			}
 		case GDK_CONFIGURE: //zmena pozici ci velikosti-zavola exspose
-			render_page(&current_database);		
+			render_page(&current_database,root_window);		
 			break;
 		case GDK_EXPOSE:
 			//rekne mi kolik jich je ve fronte-> zabijeni zbytecnych rendrovani
@@ -239,20 +166,10 @@ static void event_func(GdkEvent *ev, gpointer data) {
 				case START:
 					//jeste by se tu dal vlozit nejaky hezky obrazek
 					key_reload();
-//					render_page();
 					mode = PAGE;
 					break;
 				case PAGE:
-					gdk_pixbuf_render_to_drawable(
-							current_database.page[current_page].pixbuf,
-							root_window,//GdkDrawable *drawable,
-							gdkGC, //GdkGC *gc,
-							0,0, //vykreslit cely pixbuf
-							pdf_page_1.shift_width,pdf_page_1.shift_height, //posunuti
-							current_database.page[current_page].width, //rozmery
-							current_database.page[current_page].height,
-							GDK_RGB_DITHER_NONE, //fujvec nechci
-							0,0);
+					expose(root_window,gdkGC);
 					break;
 			}
 			break;
@@ -264,6 +181,8 @@ static void event_func(GdkEvent *ev, gpointer data) {
 
 int main(int argc, char * argv[]) {
 
+	g_type_init()
+		;
 	//zpracovani parametru
 	const char *short_options = "hi:p:";
 	const struct option long_options[] = {
@@ -287,8 +206,7 @@ int main(int argc, char * argv[]) {
 			case 'i':
 				open_file(optarg);
 				printf("Stran: %d\n",pdf_num_pages);
-				pdf_page_init(current_page);
-				printf("Strana: %d sirka: %f cm vyska: %f cm\n",current_page,pdf_page_1.width*0.035278,pdf_page_1.height*0.035278);
+//				printf("Strana: %d sirka: %f cm vyska: %f cm\n",current_page,pdf_page_1.width*0.035278,pdf_page_1.height*0.035278);
 				return 0;
 			case 'p':
 				current_page = atoi(optarg) - 1; //lide cisluji od 1
@@ -301,8 +219,6 @@ int main(int argc, char * argv[]) {
 		}
 	} while (next_option != -1);
 	file_path = argv[optind]; //vim ze tohle obecne nefunguje, ale tady to staci
-
-	g_type_init();
 
 	open_file(file_path); //ověří, jestli soubor je skutečně pdf
 

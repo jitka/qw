@@ -4,16 +4,13 @@
 
 extern "C" {
 	#include "pixbuffer.h"
+	#include "render.h"
 	#include "poppler.h"
 }
 
-int pdf_num_pages;
-pdf_page pdf_page_1;
+extern int pdf_num_pages;
 
 PopplerDocument * doc;
-pixbuf_database current_database;
-pixbuf_database new_database;
-
 PopplerPage * page;
 GError * err;
 char *pdf_err;
@@ -37,6 +34,7 @@ void pdf_page_init(int n){
 }
 
 void pdf_render_page_to_pixbuf(GdkPixbuf **pixbuf,int num_page, int width, int height, double scale, int rotation) {
+	pdf_page_init(num_page);
 	*pixbuf = gdk_pixbuf_new(
 		GDK_COLORSPACE_RGB,
 		FALSE,	//gboolean has_alpha,
