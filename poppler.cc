@@ -8,7 +8,8 @@ extern "C" {
 	#include "poppler.h"
 }
 
-extern int pdf_num_pages;
+//extern int pdf_num_pages;
+int poppler_number_pages;
 
 PopplerDocument * doc;
 
@@ -23,10 +24,15 @@ char * pdf_init( char* filePath) {
 		//vrati-li NULL -> ma chybu
 	if (err != 0)
 		return err->message;
-	pdf_num_pages = poppler_document_get_n_pages(doc);
+	poppler_number_pages = poppler_document_get_n_pages(doc);
+//	pdf_num_pages = poppler_document_get_n_pages(doc);
 //	pixbuf_create_database(&current_database, pdf_num_pages);
 
 	return NULL;
+}
+
+int pdf_get_number_pages(){
+	return poppler_number_pages;
 }
 
 void pdf_page_init(int n){

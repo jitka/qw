@@ -12,7 +12,6 @@ typedef struct pdf_page{
 struct document{
 	int number_pages;
 	int rotation;
-	int current_page;
 	pixbuf_database pixbufs;
 	pdf_page * pages;
 	int culoms;

@@ -4,29 +4,28 @@
 #include "render.h"
 
 pdf_page pdf_page_1;
-int current_page = 0;
-int pdf_num_pages;
+//int pdf_num_pages;
 
+extern int current_page;
 struct document document;
 struct document new_document;
 
-//pixbuf_database current_database;
-//pixbuf_database new_database;
-
 void document_create_databse(struct document * document){
-	pixbuf_create_database(&document->pixbufs, pdf_num_pages);
 	document->rotation = 0;
-//	document_rotation = 0;
+	document->number_pages = pdf_get_number_pages();	
+	pixbuf_create_database(&document->pixbufs, document->number_pages);
+
+	if (current_page < 0) current_page = 0;
+	if (current_page >= document->number_pages) current_page = document->number_pages -1;
+
 	pdf_page_1.rotation = 0; //fuj
 	pdf_page_init(current_page); //to vse bude v rendrovani
-
-
 }
 
 void document_replace_database(struct document *old_db, struct document *new_db){
-	
-//	pixbuf_replace_database(&current_database,&new_database);
 	pixbuf_replace_database(&old_db->pixbufs,&new_db->pixbufs);
+	old_db->rotation = new_db->rotation;
+	old_db->number_pages = new_db->number_pages;
 }
 
 void render_page(struct document * document,GdkWindow * root_window){
@@ -96,7 +95,7 @@ gdk_window_invalidate_rect(root_window,NULL,FALSE); //prekresleni
 }
 
 void change_page(GdkWindow * root_window, int new){
-	if (new <0 || new >= pdf_num_pages)
+	if (new <0 || new >= document.number_pages)
 		return;
 	int old = current_page;
 	//!!

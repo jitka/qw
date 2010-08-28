@@ -16,6 +16,7 @@ enum {
 	PRESENTATION
 } mode = START;
 int is_fullscreen = FALSE;
+int current_page = 0;
 //tady budou rezimy a veskere veci
 //co se reloudem nemeni
 
@@ -27,7 +28,6 @@ int is_fullscreen = FALSE;
 //extern int pdf_num_pages;
 extern struct document document;
 extern struct document new_document;
-extern int current_page;
 extern pdf_page pdf_page_1;
 
 //file
@@ -71,16 +71,12 @@ void open_file(char *path){
 	if (stat(file_path, &s) != -1){
 		modification_time = s.st_mtime;
 	}
-
-	
-	if ((current_page < 0) || (current_page > pdf_num_pages))
-		current_page = 0;
 }
 
 void key_up(){ 		change_page(root_window,current_page-1);}
 void key_down(){ 	change_page(root_window,current_page+1);}
 void key_home(){ 	change_page(root_window,0);}
-void key_end(){ 	change_page(root_window,pdf_num_pages-1);}
+void key_end(){ 	change_page(root_window,document.number_pages-1);}
 void key_jump(int num_page){ 	change_page(root_window,num_page);}
 void key_jump_up(int diff){ 	change_page(root_window,current_page - diff);}
 void key_jump_down(int diff){ 	change_page(root_window,current_page + diff);}
@@ -194,7 +190,7 @@ int main(int argc, char * argv[]) {
 				return 0;
 			case 'i':
 				open_file(optarg);
-				printf("Stran: %d\n",pdf_num_pages);
+//				printf("Stran: %d\n",pdf_num_pages);
 //				printf("Strana: %d sirka: %f cm vyska: %f cm\n",current_page,pdf_page_1.width*0.035278,pdf_page_1.height*0.035278);
 				return 0;
 			case 'p':
