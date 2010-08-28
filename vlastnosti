@@ -1,4 +1,5 @@
 	jednoduché 'neokýnko' bez lištičky, tlačítek
+víc jazyků
 vykresleni par stranek dopredu - je-li potreba
 zjistit si velikost pisma a podle toho volit velikost okna
 	velikosti obrázků nebo s černým rámečkem
@@ -14,14 +15,14 @@ záložky
 	automaticky sledovat změny + r
 	skákat po víc stránkách
 otevrit poklepanim/ entrem v mc
+	cela obrazovka
 rezimy:
 -1strana/tabulka
 -presne/prolinani pod sebou
-*cela obrazovka
 -moc velke priblizeni 1 strany/normal vyskoceni esc
+-prezentace s casem z pdf ci nastavenym
 mereni
 ukazovat co pisu
-prezentace s casem z pdf ci nastavenym
 mit ikonku
 	rotace-cely dokument i jen stranka
 výběr textu

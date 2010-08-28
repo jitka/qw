@@ -6,14 +6,19 @@ CFLAGS=-g -Wall -W -std=gnu99 $(CFL)
 CPPFLAGS=-g -Wall -W  $(CFL)
 LDFLAGS=$(LFL)
 
-qw: pixbuffer.o inputs.o poppler.o main.o
-	gcc -o qw pixbuffer.o inputs.o poppler.o main.o $(LDFLAGS)
 
-inputs.o: inputs.c inputs.h
+sources=$(wildcard *.c)
+
+qw: poppler.o $(sources:.c=.o)
+	gcc -o qw poppler.o $(sources:.c=.o) $(LDFLAGS)
+
+%.d: %.c
+	@set -e; rm -f $@; \
+		gcc -MM $< | \
+		sed -e 's,\($*\)\.o[ :]*,\1.o $@ : ,g' > $@;
+
+include $(sources:.c=.d)
 poppler.o: poppler.cc poppler.h pixbuffer.h
-pixbuffer.o: pixbuffer.c pixbuffer.h
-
-main.o: main.c pixbuffer.h inputs.h poppler.h
 
 clean:
-	rm -f *.o qw
+	rm -f *.o *.d qw

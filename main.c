@@ -15,14 +15,19 @@
 enum {
 	START,
 	PAGE,
+	PRESENTATION
 } mode = START;
-int current_page = 0;
-extern int pdf_num_pages;
+int is_fullscreen = FALSE;
+//tady budou rezimi a veskere veci
+//co se reloudem nemeni
+
+//pixbuf
 extern pixbuf_database current_database;
 extern pixbuf_database new_database;
-int document_rotation = 0;
-
 //render
+extern int pdf_num_pages;
+int document_rotation = 0;
+int current_page = 0;
 extern pdf_page pdf_page_1;
 
 //file
@@ -32,7 +37,6 @@ time_t modification_time;
 //window
 GMainLoop *mainloop;
 GdkWindow *root_window;
-int is_fullscreen = FALSE;
 GdkGC *gdkGC;
 
 void render_page(pixbuf_database * database){

@@ -5,7 +5,7 @@ struct pixbuf_pixbuf{
 	int width;
 	int height;
 	int rotation;
-	int is_used;
+	enum {DONT_EXIST=0,USED,CACHED} state;
 };
 
 typedef struct pixbuf_database{
