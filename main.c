@@ -22,13 +22,11 @@ int is_fullscreen = FALSE;
 //settings
 
 
-//pixbuf tu nebude
-extern pixbuf_database current_database;
-extern pixbuf_database new_database;
 
 //render veci co po reloudu zustavaji
 //extern int pdf_num_pages;
-extern int document_rotation;
+extern struct document document;
+extern struct document new_document;
 extern int current_page;
 extern pdf_page pdf_page_1;
 
@@ -105,29 +103,20 @@ void key_fullscreen(){
 void key_rotate(){ 
 	pdf_page_1.rotation = (pdf_page_1.rotation + 90) % 360;
 //	current_database.page[current_page].rotation = (pdf_page_1.rotation + 90) % 360;
-	render_page(&current_database,root_window);
+	render_page(&document,root_window);
 }
 
 void key_rotate_document(){
-	document_rotation = (document_rotation+90)%360; 
-	render_page(&current_database,root_window);
+	document.rotation = (document.rotation+90)%360; 
+	render_page(&document,root_window);
 }
 
 void key_reload(){
 // 	close_file(file_path); //je potreba?
 	open_file(file_path);
-
-	document_structures_init();
-/*	//toto bude jedna fce
-	pixbuf_create_database(&new_database, pdf_num_pages);
-	document_rotation = 0;
-	pdf_page_1.rotation = 0; //fuj
-	pdf_page_init(current_page); //to vse bude v rendrovani
-//	current_page %= pdf_num_pages; //a navic rozumejsi
-*/
-	render_page(&new_database,root_window);
-
-	pixbuf_replace_database(&current_database,&new_database);
+	document_create_databse(&new_document);
+	render_page(&new_document,root_window);
+	document_replace_database(&document,&new_document);
 }
 
 void click_distance(int first_x, int first_y, int second_x, int second_y){
@@ -158,7 +147,7 @@ static void event_func(GdkEvent *ev, gpointer data) {
 				break;
 			}
 		case GDK_CONFIGURE: //zmena pozici ci velikosti-zavola exspose
-			render_page(&current_database,root_window);		
+			render_page(&document,root_window);		
 			break;
 		case GDK_EXPOSE:
 			//rekne mi kolik jich je ve fronte-> zabijeni zbytecnych rendrovani
