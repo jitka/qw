@@ -21,6 +21,7 @@ int current_page = 0;
 //co se reloudem nemeni
 
 //settings
+int key_cancel_waiting = TRUE;
 
 
 

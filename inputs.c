@@ -1,6 +1,7 @@
 #include <gdk/gdk.h>
 #include <gdk/gdkkeysyms.h>
 #include "input_functions.h"
+#include "settings.h"
 
 /* kouzelna krabicka na zpracovani klaves
  * stavy: 
@@ -24,7 +25,6 @@ enum {
 int number;
 int click_x;
 int click_y;
-int key_cancel_waiting = TRUE;
 
 void wait_distance();
 void wait_position();
