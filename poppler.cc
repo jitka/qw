@@ -3,7 +3,7 @@
 #include <poppler/glib/poppler-document.h>
 
 extern "C" {
-	#include "pixbuffer.h"
+//	#include "pixbuffer.h"
 	#include "render.h"
 	#include "poppler.h"
 }
@@ -30,13 +30,13 @@ int pdf_get_number_pages(){
 	return poppler_number_pages;
 }
 
-void pdf_page_init(int n){
+void pdf_page_get_size(int n, double *width, double *height){
 	page = poppler_document_get_page (doc, n);
-if (document.number_pages >0 )	poppler_page_get_size(page, &document.pages[n].width, &document.pages[n].height);
-if (new_document.number_pages >0)	poppler_page_get_size(page, &new_document.pages[n].width, &new_document.pages[n].height);
+	poppler_page_get_size(page, width, height);
 }
 
 void pdf_render_page_to_pixbuf(GdkPixbuf **pixbuf,int num_page, int width, int height, double scale, int rotation) {
+	page = poppler_document_get_page (doc, num_page);
 	*pixbuf = gdk_pixbuf_new(
 		GDK_COLORSPACE_RGB,
 		FALSE,	//gboolean has_alpha,

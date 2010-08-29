@@ -1,10 +1,9 @@
 #include <math.h> //ceil
 #include <stdlib.h> //calloc
 #include <string.h> //memcpy
+#include "window.h"
 #include "poppler.h"
 #include "render.h"
-
-//pdf_page pdf_page_1;
 
 extern int current_page;
 document_t document;
@@ -20,9 +19,6 @@ void document_create_databse(struct document_t * doc){
 
 	if (current_page < 0) current_page = 0;
 	if (current_page >= doc->number_pages) current_page = doc->number_pages -1;
-
-	doc->pages[current_page].rotation = 0; //fuj
-//	pdf_page_init(current_page); //to vse _NE_bude v rendrovani
 }
 
 void document_replace_database(struct document_t *old_db, struct document_t *new_db){
@@ -31,15 +27,23 @@ void document_replace_database(struct document_t *old_db, struct document_t *new
 	memcpy(old_db,new_db,sizeof(struct document_t));
 }
 
-void render_page(struct document_t * doc,GdkWindow * root_window){
+
+void render_page(struct document_t * doc){
 	gint w_w,w_h;
 	gdk_drawable_get_size(root_window,&w_w,&w_h);
 	int p_w,p_h;
 	double scale;
-	//int rotation = (database->page[current_page].rotation+doc_rotation) % 360;
 	int rotation = (doc->pages[current_page].rotation+doc->rotation) % 360;
+	switch (doc->pages[current_page].state){
+		case DONT_INIT:
+			pdf_page_get_size(
+					current_page,
+					&doc->pages[current_page].width,
+					&doc->pages[current_page].height); //to vse bude v rendrovani
+			doc->pages[current_page].state = INITED;
+		case INITED: 
+
 // zapamatovat si stare rozmery
-	pdf_page_init(current_page); //to vse bude v rendrovani
 	if ((rotation)%180 == 0){
 		if (w_w*doc->pages[current_page].height < doc->pages[current_page].width*w_h){
 			//šířka je stejná
@@ -73,6 +77,7 @@ void render_page(struct document_t * doc,GdkWindow * root_window){
 			doc->pages[current_page].shift_height = 0;
 		}
 	}
+	}
 
 	pixbuf_render(&doc->pixbufs,current_page,p_w,p_h,scale,rotation);
 
@@ -97,19 +102,21 @@ void render_page(struct document_t * doc,GdkWindow * root_window){
 gdk_window_invalidate_rect(root_window,NULL,FALSE); //prekresleni
 }
 
-void change_page(GdkWindow * root_window, int new){
+void render(struct document_t *doc){
+	render_page(doc);
+}
+
+void change_page(int new){
 	if (new <0 || new >= document.number_pages)
 		return;
 	int old = current_page;
-	//!!
-	document.pages[current_page].rotation=0;
-	pdf_page_init(new);
+//	pdf_page_init(new);
 	current_page=new;
-	render_page(&document,root_window);
+	render_page(&document);
 	pixbuf_free(&document.pixbufs,old);
 }
 
-void expose(GdkWindow * root_window,GdkGC *gdkGC){
+void expose(){
 	gdk_pixbuf_render_to_drawable(
 			document.pixbufs.page[current_page].pixbuf,
 			root_window,//GdkDrawable *drawable,

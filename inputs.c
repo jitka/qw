@@ -1,6 +1,6 @@
 #include <gdk/gdk.h>
 #include <gdk/gdkkeysyms.h>
-#include "main.h"
+#include "input_functions.h"
 
 /* kouzelna krabicka na zpracovani klaves
  * stavy: 

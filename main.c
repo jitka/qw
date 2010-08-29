@@ -27,7 +27,6 @@ int current_page = 0;
 //render veci co po reloudu zustavaji
 extern document_t document;
 extern document_t new_document;
-//extern pdf_page pdf_page_1;
 
 //file
 char * file_path;
@@ -72,13 +71,13 @@ void open_file(char *path){
 	}
 }
 
-void key_up(){ 		change_page(root_window,current_page-1);}
-void key_down(){ 	change_page(root_window,current_page+1);}
-void key_home(){ 	change_page(root_window,0);}
-void key_end(){ 	change_page(root_window,document.number_pages-1);}
-void key_jump(int num_page){ 	change_page(root_window,num_page);}
-void key_jump_up(int diff){ 	change_page(root_window,current_page - diff);}
-void key_jump_down(int diff){ 	change_page(root_window,current_page + diff);}
+void key_up(){ 		change_page(current_page-1);}
+void key_down(){ 	change_page(current_page+1);}
+void key_home(){ 	change_page(0);}
+void key_end(){ 	change_page(document.number_pages-1);}
+void key_jump(int num_page){ 	change_page(num_page);}
+void key_jump_up(int diff){ 	change_page(current_page - diff);}
+void key_jump_down(int diff){ 	change_page(current_page + diff);}
 
 void key_quit(){
 	gdk_event_put( gdk_event_new(GDK_DELETE));
@@ -97,20 +96,19 @@ void key_fullscreen(){
 
 void key_rotate(){ 
 	document.pages[current_page].rotation = (document.pages[current_page].rotation + 90) % 360;
-//	current_database.page[current_page].rotation = (document.pages[current_page].rotation + 90) % 360;
-	render_page(&document,root_window);
+	render(&document);
 }
 
 void key_rotate_document(){
 	document.rotation = (document.rotation+90)%360; 
-	render_page(&document,root_window);
+	render(&document);
 }
 
 void key_reload(){
 // 	close_file(file_path); //je potreba?
 	open_file(file_path);
 	document_create_databse(&new_document);
-	render_page(&new_document,root_window);
+	render(&new_document);
 	document_replace_database(&document,&new_document);
 }
 
@@ -144,7 +142,7 @@ static void event_func(GdkEvent *ev, gpointer data) {
 				break;
 			}
 		case GDK_CONFIGURE: //zmena pozici ci velikosti-zavola exspose
-			render_page(&document,root_window);		
+			render(&document);		
 			break;
 		case GDK_EXPOSE:
 			//rekne mi kolik jich je ve fronte-> zabijeni zbytecnych rendrovani
@@ -155,7 +153,7 @@ static void event_func(GdkEvent *ev, gpointer data) {
 					mode = PAGE;
 					break;
 				case PAGE: case PRESENTATION:
-					expose(root_window,gdkGC);
+					expose();
 					break;
 			}
 			break;

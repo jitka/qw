@@ -16,11 +16,14 @@ qw: poppler.o $(sources:.c=.o)
 	@set -e; rm -f $@; \
 		gcc -MM $< | \
 		sed -e 's,\($*\)\.o[ :]*,\1.o $@ : ,g' > $@;
-	@echo "\t@gcc $(CFLAGS) -c $<" >> $@
 
-include $(sources:.c=.d)
+%.o: %.c
+	@gcc $(CFLAGS) -c $<
+
 poppler.o: poppler.cc poppler.h pixbuffer.h
 	@g++ $(CPPFLAGS) -c $<
 
 clean:
 	@rm -f *.o *.d qw
+
+include $(sources:.c=.d)
