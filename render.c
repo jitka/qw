@@ -29,19 +29,18 @@ void document_replace_database(struct document_t *old_db, struct document_t *new
 
 
 void render_page(struct document_t * doc, int number_page, int space_width, int space_height, int space_shift_w, int space_shift_h){
-	gint w_w,w_h;
-	gdk_drawable_get_size(root_window,&w_w,&w_h);
-	int p_w,p_h;
-	double scale;
-	int rotation = (doc->pages[current_page].rotation+doc->rotation) % 360;
+	int rotation = (doc->pages[number_page].rotation+doc->rotation) % 360;
 	double page_width,page_height;
-	switch (doc->pages[current_page].state){
+	int pixbuf_width,pixbuf_height;
+	int black_w,black_h;
+	double scale;
+	switch (doc->pages[number_page].state){
 		case DONT_INIT:
 			pdf_page_get_size(
-					current_page,
-					&doc->pages[current_page].width,
-					&doc->pages[current_page].height); //to vse bude v rendrovani
-			doc->pages[current_page].state = INITED;
+					number_page,
+					&doc->pages[number_page].width,
+					&doc->pages[number_page].height);
+			doc->pages[number_page].state = INITED;
 		case INITED: 
 			if (rotation%180 == 0){
 				page_width = doc->pages[number_page].width;
@@ -50,73 +49,57 @@ void render_page(struct document_t * doc, int number_page, int space_width, int 
 				page_width = doc->pages[number_page].height;
 				page_height = doc->pages[number_page].width;
 			}
-
-			// zapamatovat si stare rozmery
-			//if ((rotation)%180 == 0){
-				if (w_w*page_height < page_width*w_h){
-					//šířka je stejná
-					p_w = w_w;
-					p_h = ceil(w_w*page_height/page_width);
-					scale = w_w/page_width;
-					doc->pages[current_page].shift_width = 0;
-					doc->pages[current_page].shift_height = (w_h-p_h+1)/2;
-				} else {
-					//výška je stejná
-					p_w = ceil(w_h*(page_width/page_height));
-					p_h = w_h;
-					scale = w_h/page_height;
-					doc->pages[current_page].shift_width = (w_w-p_w+1)/2;
-					doc->pages[current_page].shift_height = 0;
-				}
-/*			} else {
-				if (w_w*doc->pages[current_page].width < doc->pages[current_page].height*w_h){
-					//šířka je stejná
-					p_w = w_w;
-					p_h = ceil(w_w*doc->pages[current_page].width/doc->pages[current_page].height);
-					scale = w_w/doc->pages[current_page].height;
-					doc->pages[current_page].shift_width = 0;
-					doc->pages[current_page].shift_height = (w_h-p_h+1)/2;
-				} else {
-					//výška je stejná
-					p_w = ceil(w_h*(doc->pages[current_page].height/doc->pages[current_page].width));
-					p_h = w_h;
-					scale = w_h/doc->pages[current_page].width;
-					doc->pages[current_page].shift_width = (w_w-p_w+1)/2;
-					doc->pages[current_page].shift_height = 0;
-				}
+			if (space_width*page_height < page_width*space_height){
+				//šířka /width je stejná
+				pixbuf_width = space_width;
+				pixbuf_height = ceil(space_width*page_height/page_width);
+				black_w = space_width;
+				black_h = (space_height-pixbuf_height+1)/2;
+				doc->pages[number_page].shift_width = space_shift_w;
+				doc->pages[number_page].shift_height = space_shift_h + black_h;
+				scale = space_width/page_width;
+			} else {
+				//výška/height je stejná
+				pixbuf_width = ceil(space_height*(page_width/page_height));
+				pixbuf_height = space_height;
+				black_w = (space_width-pixbuf_width+1)/2;
+				black_h = space_height;
+				doc->pages[number_page].shift_width = space_shift_w + black_w;
+				doc->pages[number_page].shift_height = space_shift_h;
+				scale = space_height/page_height;
 			}
-*/	}
-
-	pixbuf_render(&doc->pixbufs,current_page,p_w,p_h,scale,rotation);
-
-	int w,h;
-	if (doc->pages[current_page].shift_width == 0){
-		if (doc->pages[current_page].shift_height == 0){
-			w = 0; h = 0;
-		} else {
-			w = w_w; h = doc->pages[current_page].shift_height;
-		}
-	} else {
-		w = doc->pages[current_page].shift_width; h = w_h;
 	}
+
+	pixbuf_render(&doc->pixbufs,number_page,pixbuf_width,pixbuf_height,scale,rotation);
+
+	//cisteni
 	gdk_window_clear_area_e(
 			root_window,
-			0,0,
-			w,h);
+			space_shift_w,space_shift_h,
+			black_w,black_h);
 	gdk_window_clear_area_e(
 			root_window,
-			w_w-w,w_h-h,
-			w,h);
+			space_shift_w + space_width - black_w,
+			space_shift_h + space_height - black_h,
+			black_w,black_h);
 }
 
 void render(struct document_t *doc){
+	/* zjistim velikost okna, podle tabulky/rezimu rozdelim
+	 * na casti (space) a do tech vlozim stranky
+	 */
 	gint w_w,w_h;
 	gdk_drawable_get_size(root_window,&w_w,&w_h);
 	render_page(
 			doc,//struct document_t * doc,
 		        current_page,//int number_page,	
-			w_w,w_h,//int space_width, int space_height
-			0,0);//int space_shift_w, int space_shift_h){
+			w_w/2,w_h,//int space_width, int space_height
+			0,0);//int space_shift_w, int space_shift_h)
+	render_page(
+			doc,//struct document_t * doc,
+		        current_page+1,//int number_page,	
+			w_w/2,w_h,//int space_width, int space_height
+			w_w/2,0);//int space_shift_w, int space_shift_h)
 }
 
 void change_page(int new){
@@ -140,5 +123,17 @@ void expose(){
 			document.pixbufs.page[current_page].height,
 			GDK_RGB_DITHER_NONE, //fujvec nechci
 			0,0);
+	gdk_pixbuf_render_to_drawable(
+			document.pixbufs.page[current_page+1].pixbuf,
+			root_window,//GdkDrawable *drawable,
+			gdkGC, //GdkGC *gc,
+			0,0, //vykreslit cely pixbuf
+			document.pages[current_page+1].shift_width,
+			document.pages[current_page+1].shift_height, //posunuti
+			document.pixbufs.page[current_page+1].width, //rozmery
+			document.pixbufs.page[current_page+1].height,
+			GDK_RGB_DITHER_NONE, //fujvec nechci
+			0,0);
 }
+
 	
