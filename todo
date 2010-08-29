@@ -1,35 +1,4 @@
-
-navrch papir :
-krabicka na pixbufery
-	g_object_unref() - mazani nepouzitelnych pixbuferu
-	vykreslovat dopredu - kontrolovat hash
-krabicka na rendrovani
-	informace o pdf struktura - hash stranky
-	rozlozeni stranek v okne
-	info o zobrazenych strankach
-	vykreslovani okna pomci krabicky na pixbufery
-	mazat jen tu cast co musim
-	rikat co uz nepotrebuje
-	mazani vsecho
-nove r
-	otevre vedle
-	vyrendruje
-	prehodi
-	smaze stare
-vlakna
-	pixbufery do predu
-	renderovani
-	pouzivat hash
-hlavni
-	parametry
-	existence pdf
-	expose 1-zapnuti okna prazdneho nastavitelne velikosti
-	pak r
-	
-nove q
-	ulozeni stavu hash
-
-nezapomenout :
+vlakna-pixbuffery, rendrovani
 nenechat si posilat eventy, ktere nepotrebuji
 uklizeni/smazani poppler_document, poppler_page
 zjistit jak funguji okynka a pripadne uklidit moje

@@ -3,18 +3,6 @@
 #include "input_functions.h"
 #include "settings.h"
 
-/* kouzelna krabicka na zpracovani klaves
- * stavy: 
- * 1 - zakladni
- * 	prima jednoznakove rozkazy, muze prejit do rezimu 2,3
- * 2 - cisliska
- * 	pricita cislo jak ho uzivatel zada ukonci se neciselnym znakem
- * 	podle toho se cislo vyuzije a smazne
- * 3 - po znaku se ceka neco delsiho, mozna nekdy bude hledani
- * 4-6 - ceka na kliknuti (zrusi to stisknuti klavesy?)
- *
- */
-
 enum {
 	BASIC,
 	NUMBERS,
@@ -50,7 +38,7 @@ static struct number_char number_chars[] = {
 };
 
 //jednopismenka
-static struct command_char command_chars[] = {
+static struct command_char page_command_chars[] = {
 	{ GDK_Page_Down, key_down }, 	// dolu o stranu/radu
 	{ GDK_Right, key_down }, 	// dolu o stranu/stranku
 	{ GDK_Down, key_down },		// dolu o stranu/kousek
@@ -68,43 +56,63 @@ static struct command_char command_chars[] = {
 	//klikaci pismenka
 	{ GDK_d, wait_distance },
 	{ GDK_D, wait_position },
+	//zmena modu
 };
+
+//static struct command_char zoom_command_chars[] = {
+//	{ GDK_ESC, key_page_mode },
+//}
 
 
 void wait_distance(){ 	state = DISTANCE_1;}
 void wait_position(){ 	state = POSITION;}
 
 void handling_key(guint keyval){
-	switch(state){
-		case BASIC:
-//			printf("key press %d\n",keyval);
-			for (unsigned int i=0; i < sizeof(command_chars) / sizeof(command_chars[0]); i++)
-				if (command_chars[i].pressed_char == keyval) {
-					command_chars[i].function();
+	switch(mode){
+		case START:
+			break;
+		case PAGE:
+			switch(state){
+				case BASIC:
+					//printf("key press %d\n",keyval);
+					for (unsigned int i=0; i < sizeof(page_command_chars) / sizeof(page_command_chars[0]); i++)
+						if (page_command_chars[i].pressed_char == keyval) {
+							page_command_chars[i].function();
+							break;
+						}
+					if ((keyval >= GDK_0) && (keyval <= GDK_9)){
+						state = NUMBERS;
+						number = keyval - GDK_0;
+					}	
 					break;
-				}
-			if ((keyval >= GDK_0) && (keyval <= GDK_9)){
-				state = NUMBERS;
-				number = keyval - GDK_0;
-			}	
- 			break;
-		case NUMBERS:
-			if ((keyval >= GDK_0) && (keyval <= GDK_9)){
-				number = number*10 + keyval - GDK_0;
-				break;
+				case NUMBERS:
+					if ((keyval >= GDK_0) && (keyval <= GDK_9)){
+						number = number*10 + keyval - GDK_0;
+						break;
+					}
+					for (unsigned int i=0; i < sizeof(number_chars) / sizeof(number_chars[0]); i++)
+						if (number_chars[i].pressed_char == keyval) {
+							number_chars[i].function(number);
+							break;
+						}
+					state = BASIC;
+
+					break;
+				case DISTANCE_1: case DISTANCE_2: case POSITION:
+					if (key_cancel_waiting)
+						state = BASIC;
+					break;
 			}
-			for (unsigned int i=0; i < sizeof(number_chars) / sizeof(number_chars[0]); i++)
-				if (number_chars[i].pressed_char == keyval) {
-					number_chars[i].function(number);
+			break;
+		case PRESENTATION:
+			break;
+		case ZOOM:
+/*			for (unsigned int i=0; i < sizeof(zoom_command_chars) / sizeof(zoom_command_chars[0]); i++)
+				if (zoom_command_chars[i].pressed_char == keyval) {
+					zoom_command_chars[i].function();
 					break;
 				}
-			state = BASIC;
-		
-			break;
-		case DISTANCE_1: case DISTANCE_2: case POSITION:
-			if (key_cancel_waiting)
-				state = BASIC;
-			break;
+*/			break;
 	}
 }
 

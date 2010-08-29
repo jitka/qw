@@ -5,13 +5,14 @@
 
 int max_cached = 30;
 
-void really_free(struct pixbuf_pixbuf s){
+void really_free(struct pixbuf_pixbuf *s){
 //	g_free(s.pixbuf);
 //	gdk_pixbuf_finalize(s.pixbuf);
-//	g_object_unref(s.pixbuf);
+	if (s->state != DONT_EXIST) g_object_unref(s->pixbuf);
 //	   gdk_pixbuf_unref                    (s.pixbuf);
-	s.width = 0;
-	s.height = 0;
+	s->state = DONT_EXIST;
+	s->width = 0;
+	s->height = 0;
 }
 
 void pixbuf_create_database(pixbuf_database * database, int number_pages){
@@ -23,7 +24,8 @@ void pixbuf_create_database(pixbuf_database * database, int number_pages){
 
 void pixbuf_delete_database(pixbuf_database * old_db){
 	for (int i=0; i < old_db->number_pages; i++)
-		really_free(old_db->page[i]);
+//		if (old_db->page[i].state != DONT_EXIST) 
+			really_free(&old_db->page[i]);
 	free(old_db->page);
 	free(old_db->cached);
 }
@@ -43,7 +45,7 @@ void pixbuf_render(pixbuf_database * database, int page, int width, int height, 
 		case USED:
 			if (db->width == width && db->height == height && db->rotation == rotation)
 				return;
-			really_free(*db);
+			really_free(db);
 		case DONT_EXIST:
 			db->width = width;
 			db->height = height;
@@ -68,12 +70,12 @@ void pixbuf_free(pixbuf_database * database, int number_page){
  	if (database->cached_length > max_cached){
 		int i = 0;
 		for (; i< max_cached/2; i++)
-			really_free(database->page[i]);
+			really_free(&database->page[i]);
 		for (; i<number_page; i++)
 			database->cached[i-max_cached]=database->cached[max_cached];
 		database->cached_length -= max_cached/2;
 	}
-	really_free(database->page[number_page]);
+//	really_free(&database->page[number_page]);
 	/*bit v databazi
 	vloz do zasobniky
 	je-li tam moc smaz duplicity

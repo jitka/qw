@@ -6,33 +6,35 @@ extern "C" {
 //	#include "pixbuffer.h"
 	#include "render.h"
 	#include "poppler.h"
+	#include "settings.h"
 }
 
-int poppler_number_pages;
+extern enum mode_t mode;
 
 PopplerDocument * doc;
 PopplerPage * page;
 
 char * pdf_init( char* filePath) {
 	GError * err;
+	if (mode != START) g_object_unref(doc);
 
 	err = (GError *) 0;
 	doc = poppler_document_new_from_file(filePath,0,&err); //0->nema heslo
 		//vrati-li NULL -> ma chybu
 	if (err != 0)
 		return err->message;
-	poppler_number_pages = poppler_document_get_n_pages(doc);
 	//kontrolovat nulovy pocet stran!!!!!!!!
 	return NULL;
 }
 
 int pdf_get_number_pages(){
-	return poppler_number_pages;
+	return poppler_document_get_n_pages(doc);
 }
 
 void pdf_page_get_size(int n, double *width, double *height){
 	page = poppler_document_get_page (doc, n);
 	poppler_page_get_size(page, width, height);
+	g_object_unref(page);
 }
 
 void pdf_render_page_to_pixbuf(GdkPixbuf **pixbuf,int num_page, int width, int height, double scale, int rotation) {
@@ -49,5 +51,5 @@ void pdf_render_page_to_pixbuf(GdkPixbuf **pixbuf,int num_page, int width, int h
 		scale, //scale hustota
 		rotation, //ve stupních
 		*pixbuf);
-
+	g_object_unref(page);
 }

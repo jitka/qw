@@ -5,16 +5,14 @@
 #include <unistd.h> //cwd
 #include <getopt.h> //parametry
 //#include <gdk/gdk.h> //okynka,poppler.h pixbuffer.h
+//#include <glib-2.0/glib.h>
 #include "poppler.h" //open_file
 #include "render.h" //render,expose
 #include "inputs.h" //vstup -> funkce
+#include "settings.h"
 
 //global
-enum {
-	START,
-	PAGE,
-	PRESENTATION
-} mode = START;
+enum mode_t mode = START;
 int is_fullscreen = FALSE;
 int current_page = 0;
 //tady budou rezimy a veskere veci
@@ -22,8 +20,10 @@ int current_page = 0;
 
 //settings
 int key_cancel_waiting = TRUE;
-
-
+int start_window_width = 400;
+int start_window_height = 500;
+int start_window_maximalise = FALSE;
+int start_window_fullscrean = FALSE;
 
 //render veci co po reloudu zustavaji
 extern document_t document;
@@ -85,7 +85,6 @@ void key_quit(){
 }
 
 void key_fullscreen(){
-	printf("%d\n",is_fullscreen);
 	if (is_fullscreen){
 		gdk_window_unfullscreen(root_window);
 		is_fullscreen = 0;
@@ -215,16 +214,15 @@ int main(int argc, char * argv[]) {
 	gdk_init(NULL,NULL);
 
 	GdkVisual *visual = gdk_visual_get_system();
-	GdkColormap *colormap = gdk_colormap_new(visual,TRUE);
 
 	GdkWindowAttr attr = {
-		"huiii", //gchar *title;
+		NULL, //gchar *title; //nefunguje
 		0x3FFFFE, //gint event_mask; all events mask
 		100,0, //gint x, y;
-		545,692,
+		start_window_width,start_window_height,
 	 	GDK_INPUT_OUTPUT, //GdkWindowClass wclass;
 		visual, //GdkVisual *visual;
-		colormap, //GdkColormap *colormap;
+		gdk_colormap_new(visual,TRUE), //GdkColormap *colormap;
 		GDK_WINDOW_TOPLEVEL, //GdkWindowType window_type;
 		GDK_X_CURSOR, //GdkCursor *cursor;
 		NULL, //gchar *wmclass_name;
@@ -240,11 +238,15 @@ int main(int argc, char * argv[]) {
 	);
 	gdkGC  = gdk_gc_new(root_window);
 
+	//netusim jak udelat pixbuff ze souboru
+	//key_reload();
+	//GList* icons = g_list_append(NULL,document.pixbufs.page[0].pixbuf);
+	//gdk_window_set_icon_list(root_window,icons);
+	gdk_window_set_title(root_window,"huiii");
+
 	gdk_window_show(root_window);
 	gdk_event_handler_set(event_func, NULL, NULL);
-	mainloop = g_main_loop_new(g_main_context_default(), FALSE);
-	
-	
+	mainloop = g_main_loop_new(g_main_context_default(), FALSE);	
 	g_main_loop_run(mainloop);
 	gdk_window_destroy(root_window); 
 
