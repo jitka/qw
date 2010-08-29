@@ -97,11 +97,13 @@ void key_fullscreen(){
 void key_rotate(){ 
 	document.pages[current_page].rotation = (document.pages[current_page].rotation + 90) % 360;
 	render(&document);
+	expose();
 }
 
 void key_rotate_document(){
 	document.rotation = (document.rotation+90)%360; 
 	render(&document);
+	expose();
 }
 
 void key_reload(){
@@ -110,6 +112,7 @@ void key_reload(){
 	document_create_databse(&new_document);
 	render(&new_document);
 	document_replace_database(&document,&new_document);
+	expose();
 }
 
 void click_distance(int first_x, int first_y, int second_x, int second_y){
@@ -143,6 +146,7 @@ static void event_func(GdkEvent *ev, gpointer data) {
 			}
 		case GDK_CONFIGURE: //zmena pozici ci velikosti-zavola exspose
 			render(&document);		
+			expose();
 			break;
 		case GDK_EXPOSE:
 			//rekne mi kolik jich je ve fronte-> zabijeni zbytecnych rendrovani
