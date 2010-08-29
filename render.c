@@ -12,8 +12,8 @@ document_t new_document;
 void document_create_databse(struct document_t * doc){
 	doc->rotation = 0;
 	doc->number_pages = pdf_get_number_pages();
-	doc->columns = 1;
-	doc->rows = 1;
+	doc->columns = 4;
+	doc->rows = 2;
 	pixbuf_create_database(&doc->pixbufs, doc->number_pages);
 	doc->pages = calloc(doc->number_pages, sizeof(struct pdf_page));
 
@@ -90,17 +90,15 @@ void render(struct document_t *doc){
 	 */
 	gint w_w,w_h;
 	gdk_drawable_get_size(root_window,&w_w,&w_h);
-	render_page(
-			doc,//struct document_t * doc,
-		        current_page,//int number_page,	
-			w_w,w_h,//int space_width, int space_height
-			0,0);//int space_shift_w, int space_shift_h)
-/*	render_page(
-			doc,//struct document_t * doc,
-		        current_page+1,//int number_page,	
-			w_w/2,w_h,//int space_width, int space_height
-			w_w/2,0);//int space_shift_w, int space_shift_h)
-			*/
+	for (int j=0; j < doc->rows; j++){
+		for (int i=0; i < doc->columns; i++){
+			render_page(
+					doc,//struct document_t * doc,
+					current_page+i+j*doc->columns,//int number_page,	
+					w_w/(doc->columns),w_h/doc->rows,//int space_width, int space_height
+					i*w_w/doc->columns,j*w_h/doc->rows);//int space_shift_w, int space_shift_h)
+		}
+	}
 }
 
 void change_page(int new){
@@ -113,29 +111,21 @@ void change_page(int new){
 }
 
 void expose(){
-	gdk_pixbuf_render_to_drawable(
-			document.pixbufs.page[current_page].pixbuf,
-			root_window,//GdkDrawable *drawable,
-			gdkGC, //GdkGC *gc,
-			0,0, //vykreslit cely pixbuf
-			document.pages[current_page].shift_width,
-			document.pages[current_page].shift_height, //posunuti
-			document.pixbufs.page[current_page].width, //rozmery
-			document.pixbufs.page[current_page].height,
-			GDK_RGB_DITHER_NONE, //fujvec nechci
-			0,0);
-/*	gdk_pixbuf_render_to_drawable(
-			document.pixbufs.page[current_page+1].pixbuf,
-			root_window,//GdkDrawable *drawable,
-			gdkGC, //GdkGC *gc,
-			0,0, //vykreslit cely pixbuf
-			document.pages[current_page+1].shift_width,
-			document.pages[current_page+1].shift_height, //posunuti
-			document.pixbufs.page[current_page+1].width, //rozmery
-			document.pixbufs.page[current_page+1].height,
-			GDK_RGB_DITHER_NONE, //fujvec nechci
-			0,0);
-			*/
+	
+	for (int j=0; j < document.rows; j++)
+		for (int i=0; i < document.columns; i++){
+			gdk_pixbuf_render_to_drawable(
+					document.pixbufs.page[current_page+i+j*document.columns].pixbuf,
+					root_window,//GdkDrawable *drawable,
+					gdkGC, //GdkGC *gc,
+					0,0, //vykreslit cely pixbuf
+					document.pages[current_page+i+j*document.columns].shift_width,
+					document.pages[current_page+i+j*document.columns].shift_height, //posunuti
+					document.pixbufs.page[current_page+i+j*document.columns].width, //rozmery
+					document.pixbufs.page[current_page+i+j*document.columns].height,
+					GDK_RGB_DITHER_NONE, //fujvec nechci
+					0,0);
+		}
 }
 
 	

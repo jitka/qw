@@ -214,6 +214,7 @@ int main(int argc, char * argv[]) {
 	gdk_init(NULL,NULL);
 
 	GdkVisual *visual = gdk_visual_get_system();
+	GdkColormap *colormap = gdk_colormap_new(visual,TRUE);
 
 	GdkWindowAttr attr = {
 		NULL, //gchar *title; //nefunguje
@@ -222,7 +223,7 @@ int main(int argc, char * argv[]) {
 		start_window_width,start_window_height,
 	 	GDK_INPUT_OUTPUT, //GdkWindowClass wclass;
 		visual, //GdkVisual *visual;
-		gdk_colormap_new(visual,TRUE), //GdkColormap *colormap;
+		colormap, //GdkColormap *colormap;
 		GDK_WINDOW_TOPLEVEL, //GdkWindowType window_type;
 		GDK_X_CURSOR, //GdkCursor *cursor;
 		NULL, //gchar *wmclass_name;
@@ -238,10 +239,13 @@ int main(int argc, char * argv[]) {
 	);
 	gdkGC  = gdk_gc_new(root_window);
 
-	//netusim jak udelat pixbuff ze souboru
-	//key_reload();
-	//GList* icons = g_list_append(NULL,document.pixbufs.page[0].pixbuf);
-	//gdk_window_set_icon_list(root_window,icons);
+	//ikona
+	GdkPixmap* icon_pixmap = gdk_pixmap_create_from_xpm(root_window, NULL, NULL, "icon.xpm");
+	GdkPixbuf * icon_pixbuf = gdk_pixbuf_get_from_drawable( NULL, icon_pixmap, colormap, 0,0, 0,0, 32,32);
+	GList* icons = g_list_append(NULL,icon_pixbuf);	
+	gdk_window_set_icon_list(root_window,icons);
+
+	//titulek
 	gdk_window_set_title(root_window,"huiii");
 
 	gdk_window_show(root_window);
