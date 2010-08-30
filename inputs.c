@@ -42,6 +42,7 @@ static struct number_char number_chars[] = {
 static struct command_char page_command_chars[] = {
 	{ GDK_Page_Down, key_down }, 	// dolu o stranu/radu
 	{ GDK_Right, key_down }, 	// dolu o stranu/stranku
+	{ GDK_space, key_down }, 	// dolu o stranu/stranku
 	{ GDK_Down, key_down },		// dolu o stranu/kousek
 	{ GDK_Page_Up, key_up },	// nahoru o stranu/radu
 	{ GDK_Left, key_up },		// nahoru o stranu/stranku
