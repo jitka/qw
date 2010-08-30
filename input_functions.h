@@ -11,5 +11,6 @@ void key_rotate_document();
 void key_quit();
 void key_fullscreen();
 void key_reload();
+void key_this_page_has_number(int);
 void click_distance(int first_x, int first_y, int second_x, int second_y);
 void click_position(int x, int y);

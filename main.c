@@ -4,17 +4,20 @@
 #include <sys/stat.h> //hlidani zmen v souboru
 #include <unistd.h> //cwd
 #include <getopt.h> //parametry
+#include <libintl.h> //preklady
 //#include <gdk/gdk.h> //okynka,poppler.h pixbuffer.h
 //#include <glib-2.0/glib.h>
 #include "poppler.h" //open_file
 #include "render.h" //render,expose
 #include "inputs.h" //vstup -> funkce
 #include "settings.h"
+#define _(X) gettext(X)
 
 //global
 enum mode_t mode = START;
 int is_fullscreen = FALSE;
 int current_page = 0;
+int page_number_shift = -1; //lide pocitaji od 1
 //tady budou rezimy a veskere veci
 //co se reloudem nemeni
 
@@ -38,18 +41,18 @@ GMainLoop *mainloop;
 GdkWindow *root_window;
 GdkGC *gdkGC;
 
- 
+
 /////////////////////////////////////////////////////////////////
 	
 void open_file(char *path){
 	if (path == NULL){
-		fprintf(stderr,"Nebylo zadáno jméno souboru.\n");
+		fprintf(stderr,_("Nebylo zadáno jmeno souboru.\n"));
 		exit(1);
 	}
 	//absoulutni adresa
 	char pwd[1024];
 	if (!getcwd(pwd, sizeof(pwd))) {
-		printf("au getcwd \n");
+		fprintf(stderr,_("au getcwd \n"));
 		exit(1);
 	}
 	char abs_path[strlen("file://")+strlen(path)+1+strlen(pwd)+1];
@@ -63,7 +66,7 @@ void open_file(char *path){
 	char *err;
 	err = pdf_init(abs_path);
 	if (err != NULL){
-		fprintf(stderr,"Chyba načtení: %s\n",err);
+		fprintf(stderr,_("Chyba načtení: %s\n"),err);
 		exit(1);
 	}				
 	struct stat s;
@@ -76,9 +79,10 @@ void key_up(){ 		change_page(current_page-1);}
 void key_down(){ 	change_page(current_page+1);}
 void key_home(){ 	change_page(0);}
 void key_end(){ 	change_page(document.number_pages-1);}
-void key_jump(int num_page){ 	change_page(num_page);}
+void key_jump(int num_page){ 	change_page(num_page+page_number_shift);}
 void key_jump_up(int diff){ 	change_page(current_page - diff);}
 void key_jump_down(int diff){ 	change_page(current_page + diff);}
+void key_this_page_has_number(int printed_number){ 	page_number_shift = -printed_number+current_page;}
 
 void key_quit(){
 	gdk_event_put( gdk_event_new(GDK_DELETE));
@@ -116,10 +120,10 @@ void key_reload(){
 }
 
 void click_distance(int first_x, int first_y, int second_x, int second_y){
-	printf("hui %f %f %d %d - %d %d\n",document.pages[current_page].width,document.pages[current_page].height,first_x,first_y,second_x,second_y);
+	printf(_("hui %f %f %d %d - %d %d\n"),document.pages[current_page].width,document.pages[current_page].height,first_x,first_y,second_x,second_y);
 }
 void click_position(int x, int y){
-	printf("hui %f %f %d %d\n",document.pages[current_page].width,document.pages[current_page].height,x,y);
+	printf(_("hui %f %f %d %d\n"),document.pages[current_page].width,document.pages[current_page].height,x,y);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -185,11 +189,11 @@ int main(int argc, char * argv[]) {
 		next_option = getopt_long(argc, argv, short_options, long_options, NULL);
 		switch(next_option){
 			case 'h': 
-				printf("Nápověda qw: \n"
+				printf(_("Nápověda qw: \n"
 					" šipečky posunuji, okynko se da zvětšit\n"
 					" -h 	-help 	nápověda\n"
 					" -p 	-page 	počáteční stránka\n"
-					" -i 	-info 	info dokumentu\n");
+					" -i 	-info 	info dokumentu\n"));
 				return 0;
 			case 'i':
 				open_file(optarg);

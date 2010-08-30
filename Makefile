@@ -26,4 +26,7 @@ poppler.o: poppler.cc poppler.h pixbuffer.h
 clean:
 	@rm -f *.o *.d qw
 
+messages:
+	xgettext *.c --from-code=UTF-8 -k_
+
 include $(sources:.c=.d)

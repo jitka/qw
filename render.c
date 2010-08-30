@@ -12,8 +12,8 @@ document_t new_document;
 void document_create_databse(struct document_t * doc){
 	doc->rotation = 0;
 	doc->number_pages = pdf_get_number_pages();
-	doc->columns = 4;
-	doc->rows = 2;
+	doc->columns = 1;
+	doc->rows = 1;
 	pixbuf_create_database(&doc->pixbufs, doc->number_pages);
 	doc->pages = calloc(doc->number_pages, sizeof(struct pdf_page));
 
