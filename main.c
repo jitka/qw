@@ -130,8 +130,6 @@ void click_position(int x, int y){
 
 static void event_func(GdkEvent *ev, gpointer data) {
 	switch(ev->type) {
-		//fuj
-		case GDK_NOTHING: case GDK_DESTROY: case GDK_MOTION_NOTIFY: case GDK_2BUTTON_PRESS: case GDK_3BUTTON_PRESS: case GDK_BUTTON_RELEASE: case GDK_KEY_RELEASE: case GDK_ENTER_NOTIFY: case GDK_LEAVE_NOTIFY: case GDK_MAP: case GDK_UNMAP: case GDK_PROPERTY_NOTIFY: case GDK_SELECTION_CLEAR: case GDK_SELECTION_REQUEST: case GDK_SELECTION_NOTIFY: case GDK_PROXIMITY_IN: case GDK_PROXIMITY_OUT: case GDK_DRAG_ENTER: case GDK_DRAG_LEAVE: case GDK_DRAG_MOTION: case GDK_DRAG_STATUS: case GDK_DROP_START: case GDK_DROP_FINISHED: case GDK_CLIENT_EVENT: case GDK_VISIBILITY_NOTIFY: case GDK_NO_EXPOSE: case GDK_WINDOW_STATE: case GDK_SETTING: case GDK_OWNER_CHANGE: case GDK_GRAB_BROKEN: case GDK_DAMAGE: case GDK_EVENT_LAST: break;
 		case GDK_KEY_PRESS:
 			handling_key(ev->key.keyval);
 			break;
@@ -171,6 +169,7 @@ static void event_func(GdkEvent *ev, gpointer data) {
 		case GDK_DELETE:
 			g_main_loop_quit(mainloop);
 			break;
+		default: ;
 	}
 }
 

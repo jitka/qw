@@ -7,10 +7,11 @@ CPPFLAGS=-g -Wall -W  $(CFL)
 LDFLAGS=$(LFL)
 
 
-sources=$(wildcard *.c)
+sources=inputs main pixbuffer render
 
-qw: poppler.o $(sources:.c=.o)
-	@gcc -o qw poppler.o $(sources:.c=.o) $(LDFLAGS)
+qw: poppler.o $(addsuffix .o,$(sources))
+	@echo LD $@
+	@gcc -o $@ $^ $(LDFLAGS)
 
 %.d: %.c
 	@set -e; rm -f $@; \
@@ -18,15 +19,18 @@ qw: poppler.o $(sources:.c=.o)
 		sed -e 's,\($*\)\.o[ :]*,\1.o $@ : ,g' > $@;
 
 %.o: %.c
-	@gcc $(CFLAGS) -c $<
+	@echo CC $<
+	@gcc $(CFLAGS) -c $< -o $@
 
 poppler.o: poppler.cc poppler.h pixbuffer.h
-	@g++ $(CPPFLAGS) -c $<
+	@echo CPP $<
+	@g++ $(CPPFLAGS) -c $< -o $@
 
 clean:
+	@echo CLEAN
 	@rm -f *.o *.d qw
 
 messages:
 	xgettext *.c --from-code=UTF-8 -k_
 
-include $(sources:.c=.d)
+-include $(addsuffix .d,$(sources))
