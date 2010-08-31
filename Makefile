@@ -29,4 +29,4 @@ clean:
 messages:
 	xgettext *.c --from-code=UTF-8 -k_
 
-include $(sources:.c=.d)
+-include $(sources:.c=.d)

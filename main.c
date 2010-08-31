@@ -14,7 +14,7 @@
 #define _(X) gettext(X)
 
 //global
-enum mode_t mode = START;
+view_mode_t mode = START;
 int is_fullscreen = FALSE;
 int current_page = 0;
 int page_number_shift = -1; //lide pocitaji od 1
@@ -23,6 +23,7 @@ int page_number_shift = -1; //lide pocitaji od 1
 
 //settings
 int key_cancel_waiting = TRUE;
+int margin = 5; //sirka mezery v pixelech
 int start_window_width = 400;
 int start_window_height = 500;
 int start_window_maximalise = FALSE;
@@ -73,6 +74,15 @@ void open_file(char *path){
 	if (stat(file_path, &s) != -1){
 		modification_time = s.st_mtime;
 	}
+}
+
+void change_page(int new){
+	if (new <0 || new >= document.number_pages)
+		return;
+	int old = current_page;
+	current_page=new;
+	render(&document);
+	pixbuf_free(&document.pixbufs,old);
 }
 
 void key_up(){ 		change_page(current_page-1);}
@@ -130,8 +140,6 @@ void click_position(int x, int y){
 
 static void event_func(GdkEvent *ev, gpointer data) {
 	switch(ev->type) {
-		//fuj
-		case GDK_NOTHING: case GDK_DESTROY: case GDK_MOTION_NOTIFY: case GDK_2BUTTON_PRESS: case GDK_3BUTTON_PRESS: case GDK_BUTTON_RELEASE: case GDK_KEY_RELEASE: case GDK_ENTER_NOTIFY: case GDK_LEAVE_NOTIFY: case GDK_MAP: case GDK_UNMAP: case GDK_PROPERTY_NOTIFY: case GDK_SELECTION_CLEAR: case GDK_SELECTION_REQUEST: case GDK_SELECTION_NOTIFY: case GDK_PROXIMITY_IN: case GDK_PROXIMITY_OUT: case GDK_DRAG_ENTER: case GDK_DRAG_LEAVE: case GDK_DRAG_MOTION: case GDK_DRAG_STATUS: case GDK_DROP_START: case GDK_DROP_FINISHED: case GDK_CLIENT_EVENT: case GDK_VISIBILITY_NOTIFY: case GDK_NO_EXPOSE: case GDK_WINDOW_STATE: case GDK_SETTING: case GDK_OWNER_CHANGE: case GDK_GRAB_BROKEN: case GDK_DAMAGE: case GDK_EVENT_LAST: break;
 		case GDK_KEY_PRESS:
 			handling_key(ev->key.keyval);
 			break;
@@ -160,9 +168,8 @@ static void event_func(GdkEvent *ev, gpointer data) {
 			switch (mode) {
 				case START:
 					//jeste by se tu dal vlozit nejaky hezky obrazek
-					key_reload();
 					mode = PAGE;
-					break;
+					key_reload();
 				case PAGE: case PRESENTATION:
 					expose();
 					break;
@@ -170,6 +177,8 @@ static void event_func(GdkEvent *ev, gpointer data) {
 			break;
 		case GDK_DELETE:
 			g_main_loop_quit(mainloop);
+			break;
+		default:
 			break;
 	}
 }

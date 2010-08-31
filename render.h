@@ -21,5 +21,5 @@ typedef struct document_t{
 void document_create_databse(struct document_t * document);
 void document_replace_database(struct document_t *old_db, struct document_t *new_db);
 void render(struct document_t * document);
-void change_page(int new_page);
+//void change_page(int new_page);
 void expose();

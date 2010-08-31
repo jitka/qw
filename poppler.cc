@@ -9,7 +9,7 @@ extern "C" {
 	#include "settings.h"
 }
 
-extern enum mode_t mode;
+//extern enum mode_t mode;
 
 PopplerDocument * doc;
 PopplerPage * page;
