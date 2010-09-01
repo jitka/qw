@@ -83,6 +83,7 @@ void change_page(int new){
 	current_page=new;
 	render(&document);
 	pixbuf_free(&document.pixbufs,old);
+	expose();
 }
 
 void key_up(){ 		change_page(current_page-1);}

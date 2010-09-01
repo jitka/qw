@@ -4,7 +4,9 @@
 #include "window.h"
 #include "poppler.h"
 #include "render.h"
-
+#include "settings.h"
+#define min(A,B) ( (A) < (B) ? (A) : (B) )
+//doladit vetsi tabulky
 extern int current_page;
 document_t document;
 document_t new_document;
@@ -12,7 +14,7 @@ document_t new_document;
 void document_create_databse(document_t * doc){
 	doc->rotation = 0;
 	doc->number_pages = pdf_get_number_pages();
-	doc->columns = 3;
+	doc->columns = 2;
 	doc->rows = 2;
 	pixbuf_create_database(&doc->pixbufs, doc->number_pages);
 	doc->pages = calloc(doc->number_pages, sizeof(struct pdf_page));
@@ -96,8 +98,8 @@ void render(document_t *doc){
 	/* zjistim velikost okna, podle tabulky/rezimu rozdelim
 	 * na casti (space) a do tech vlozim stranky
 	 */
-	int num_displayed = doc->columns * doc->rows;
-
+	int num_displayed = min(doc->columns * doc->rows, doc->number_pages-current_page);
+	//median pomeru stran
 	double aspects[num_displayed];
 	for (int i=0; i<num_displayed; i++){
 		double a,b;
@@ -105,7 +107,7 @@ void render(document_t *doc){
 		aspects[i] = a/b;
 	}
 	int unsorted = TRUE;
-	while (unsorted){
+	while (unsorted){ //tenhle bublesort by mel byt na normalnim pdf linearni
 		unsorted = FALSE;
 		for (int i=0; i<num_displayed-1; i++)
 			if (aspects[i]>aspects[i+1]){
@@ -115,37 +117,56 @@ void render(document_t *doc){
 				unsorted = TRUE;
 			}
 	}
-	int aspect = aspects[num_displayed/2];
+	double aspect = aspects[num_displayed/2];
 
+	//velikost okynka na jednu stranku
 	gint window_width,window_height;
 	gdk_drawable_get_size(root_window,&window_width,&window_height);
-	int width,height;
-
-	if ( window_width*doc->columns / (double) window_height*doc->rows < aspect){
+	//printf("win%d %d\n",window_width,window_height);
+	//printf("co,ro %d %d\n",doc->columns,doc->rows);
+	int space_width,space_height;
+	if ( (double) ((window_width-(doc->columns-1)*margin) //pouzitlna sirka
+		/doc->columns) //na jeden ramecek
+	   / (double) ((window_height-(doc->rows-1)*margin)
+	   	/doc->rows)
+	   > aspect){
 		//vyska je stejna
-		width = ceil(window_height/aspect);
-		height = window_height;
+		space_height = ( window_height - (doc->rows-1)*margin ) / doc->rows;
+		space_width = floor(space_height*aspect);
 	} else {
 		//sirka je stejna
-		width = window_width;
-		height = ceil(window_width*aspect);
+		space_width = ( window_width-(doc->columns-1)*margin ) / doc->columns;
+		space_height = floor(space_width/aspect);
 	}
-	printf("%d %d\n",width,height);
+	//printf("space %lf %d %d\n",aspect,space_width,space_height);
+	int ulc_shift_width = (window_width - space_width*doc->columns - margin*(doc->columns-1) ) / 2;
+	int ulc_shift_height = (window_height - space_height*doc->rows - margin*(doc->rows-1) ) / 2;
+	//printf("ulc %d %d\n",ulc_shift_width,ulc_shift_height);
+	//mazani okraju + mezer/margin
+	//vykresleni jednotlivych ramecku		
 	for (int j=0; j < doc->rows; j++){
 		for (int i=0; i < doc->columns; i++){
 			if ((current_page+i+j*doc->columns < doc->number_pages) &&
-					(current_page+i+j*doc->columns >= 0))
+					(current_page+i+j*doc->columns >= 0)){
 				render_page(
 						doc,//document_t * doc,
 						current_page+i+j*doc->columns,//int number_page,	
-						window_width/(doc->columns),window_height/doc->rows,//int space_width, int space_height
-						i*window_width/doc->columns,j*window_height/doc->rows);//int space_shift_w, int space_shift_h)
+						space_width,space_height,//int space_width, int space_height
+						ulc_shift_width + i * (space_width + margin),
+						ulc_shift_height + j * (space_height + margin));//int space_shift_w, int space_shift_h)
+			} else {
+				//mazat
+				gdk_window_clear_area_e(
+						root_window,
+						ulc_shift_width + i * (space_width + margin),
+						ulc_shift_height + j * (space_height + margin),
+						space_width,space_height);
+			}
 		}
 	}
 }
 
 void expose(){
-//mazat!!!	
 	for (int j=0; j < document.rows; j++)
 		for (int i=0; i < document.columns; i++){
 			if ((current_page+i+j*document.columns < document.number_pages) &&
