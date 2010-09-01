@@ -128,11 +128,12 @@ void key_reload(){
 	render(new);
 	document_delete_database(document);
 	document=new;
-	expose();
 }
 
 void key_set_columns(int c){	document->columns = c; render(document); expose(); }
 void key_set_rows(int r){	document->rows = r; render(document); expose(); }
+void key_page_mode(){	mode=PAGE; render(document); expose();}
+void key_zoom_mode(){	mode=ZOOM; render(document); expose();}
 
 void click_distance(int first_x, int first_y, int second_x, int second_y){
 	printf(_("hui %f %f %d %d - %d %d\n"),document->pages[current_page].width,document->pages[current_page].height,first_x,first_y,second_x,second_y);
@@ -175,7 +176,7 @@ static void event_func(GdkEvent *ev, gpointer data) {
 					//jeste by se tu dal vlozit nejaky hezky obrazek
 					mode = PAGE;
 					key_reload();
-				case PAGE: case PRESENTATION:
+				default:
 					expose();
 					break;
 			}

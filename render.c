@@ -96,7 +96,7 @@ void render_page(document_t * doc, int number_page, int space_width, int space_h
 			black_w,black_h);
 }
 
-void render(document_t *doc){
+void render_mode_page(document_t *doc){
 	/* zjistim velikost okna, podle tabulky/rezimu rozdelim
 	 * na casti (space) a do tech vlozim stranky
 	 */
@@ -144,24 +144,7 @@ void render(document_t *doc){
 	int ulc_shift_width = (window_width - space_width*doc->columns - margin*(doc->columns-1) +1) / 2;
 	int ulc_shift_height = (window_height - space_height*doc->rows - margin*(doc->rows-1) +1) / 2;
 	//printf("ulc %d %d\n",ulc_shift_width,ulc_shift_height);
-	//mazani okraju + mezer/margin
-	gdk_window_clear_area_e(window,0,0,window_width,ulc_shift_height);
-	gdk_window_clear_area_e(window,0,window_height-ulc_shift_height,window_width,ulc_shift_height);
-	gdk_window_clear_area_e(window,0,0,ulc_shift_width,window_height);
-	gdk_window_clear_area_e(window,window_width-ulc_shift_width,0,ulc_shift_width,window_height);
-	for (int i=0; i < doc->rows-1; i++){
-			gdk_window_clear_area_e(
-				window,
-				0, ulc_shift_height + (i+1) * space_height + i * margin,
-				window_width, margin);
-			}
-	for (int i=0; i < doc->columns-1; i++){
-			gdk_window_clear_area_e(
-				window,
-				ulc_shift_width + (i+1) * space_width + i * margin, 0,
-				margin,window_height);
-			}
-	//vykresleni jednotlivych ramecku		
+		//vykresleni jednotlivych ramecku		
 	for (int j=0; j < doc->rows; j++){
 		for (int i=0; i < doc->columns; i++){
 			if ((current_page+i+j*doc->columns < doc->number_pages) &&
@@ -182,25 +165,70 @@ void render(document_t *doc){
 			}
 		}
 	}
+	//mazani okraju + mezer/margin
+	gdk_window_clear_area_e(window,0,0,window_width,ulc_shift_height);
+	gdk_window_clear_area_e(window,0,window_height-ulc_shift_height,window_width,ulc_shift_height);
+	gdk_window_clear_area_e(window,0,0,ulc_shift_width,window_height);
+	gdk_window_clear_area_e(window,window_width-ulc_shift_width,0,ulc_shift_width,window_height);
+	for (int i=0; i < doc->rows-1; i++){
+			gdk_window_clear_area_e(
+				window,
+				0, ulc_shift_height + (i+1) * space_height + i * margin,
+				window_width, margin);
+			}
+	for (int i=0; i < doc->columns-1; i++){
+			gdk_window_clear_area_e(
+				window,
+				ulc_shift_width + (i+1) * space_width + i * margin, 0,
+				margin,window_height);
+			}
+
 }
 
+void render_mode_zoom(document_t *doc){
+//	gint window_width,window_height;
+//	gdk_drawable_get_size(window,&window_width,&window_height);
+	gdk_window_clear(window);
+}
+
+void render(document_t *doc){
+	switch(mode){
+		case START:
+			break;
+		case PAGE: case PRESENTATION:
+			render_mode_page(doc);
+			break;
+		case ZOOM:
+			render_mode_zoom(doc);
+			break;
+	}
+	
+}
 void expose(){
-	for (int j=0; j < document->rows; j++)
-		for (int i=0; i < document->columns; i++){
-			if ((current_page+i+j*document->columns < document->number_pages) &&
-					(current_page+i+j*document->columns >= 0))
-				gdk_pixbuf_render_to_drawable(
-						document->pixbufs.page[current_page+i+j*document->columns].pixbuf,
-						window,//GdkDrawable *drawable,
-						gdkGC, //GdkGC *gc,
-						0,0, //vykreslit cely pixbuf
-						document->pages[current_page+i+j*document->columns].shift_width,
-						document->pages[current_page+i+j*document->columns].shift_height, //posunuti
-						document->pixbufs.page[current_page+i+j*document->columns].width, //rozmery
-						document->pixbufs.page[current_page+i+j*document->columns].height,
-						GDK_RGB_DITHER_NONE, //fujvec nechci
-						0,0);
-		}
+	switch(mode){
+		case START:
+			break;
+		case PAGE: case PRESENTATION:
+			for (int j=0; j < document->rows; j++)
+				for (int i=0; i < document->columns; i++)
+					if ((current_page+i+j*document->columns < document->number_pages) &&
+							(current_page+i+j*document->columns >= 0))
+						gdk_pixbuf_render_to_drawable(
+								document->pixbufs.page[current_page+i+j*document->columns].pixbuf,
+								window,//GdkDrawable *drawable,
+								gdkGC, //GdkGC *gc,
+								0,0, //vykreslit cely pixbuf
+								document->pages[current_page+i+j*document->columns].shift_width,
+								document->pages[current_page+i+j*document->columns].shift_height, //posunuti
+								document->pixbufs.page[current_page+i+j*document->columns].width, //rozmery
+								document->pixbufs.page[current_page+i+j*document->columns].height,
+								GDK_RGB_DITHER_NONE, //fujvec nechci
+								0,0);		
+			break;
+		case ZOOM:		
+			gdk_window_clear(window);
+			break;
+	}
 }
 
 	

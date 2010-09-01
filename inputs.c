@@ -61,11 +61,12 @@ static struct command_char page_command_chars[] = {
 	{ GDK_d, wait_distance },
 	{ GDK_D, wait_position },
 	//zmena modu
+	{ GDK_z, key_zoom_mode },
 };
 
-//static struct command_char zoom_command_chars[] = {
-//	{ GDK_ESC, key_page_mode },
-//}
+static struct command_char zoom_command_chars[] = {
+	{ GDK_Escape, key_page_mode },
+};
 
 
 void wait_distance(){ 	state = DISTANCE_1;}
@@ -102,7 +103,7 @@ void handling_key(guint keyval){
 					state = BASIC;
 
 					break;
-				case DISTANCE_1: case DISTANCE_2: case POSITION:
+				default:
 					if (key_cancel_waiting)
 						state = BASIC;
 					break;
@@ -111,31 +112,36 @@ void handling_key(guint keyval){
 		case PRESENTATION:
 			break;
 		case ZOOM:
-/*			for (unsigned int i=0; i < sizeof(zoom_command_chars) / sizeof(zoom_command_chars[0]); i++)
+			for (unsigned int i=0; i < sizeof(zoom_command_chars) / sizeof(zoom_command_chars[0]); i++)
 				if (zoom_command_chars[i].pressed_char == keyval) {
 					zoom_command_chars[i].function();
 					break;
 				}
-*/			break;
+			break;
 	}
 }
 
 void handling_click(int x, int y){
-	switch(state){
-		case BASIC: case NUMBERS:
-			break;
-		case DISTANCE_1:
-			click_x=x;
-			click_y=y;
-			state=DISTANCE_2;
-			break;
-		case DISTANCE_2:
-			click_distance(click_x,click_y,x,y);
-			state=BASIC;
-			break;
-		case POSITION:
-			click_position(x,y);
-			state=BASIC;
+	switch(mode){
+		case PAGE:
+			switch(state){
+				case BASIC: case NUMBERS:
+					break;
+				case DISTANCE_1:
+					click_x=x;
+					click_y=y;
+					state=DISTANCE_2;
+					break;
+				case DISTANCE_2:
+					click_distance(click_x,click_y,x,y);
+					state=BASIC;
+					break;
+				case POSITION:
+					click_position(x,y);
+					state=BASIC;
+					break;
+			}
+		default:
 			break;
 	}
 }
