@@ -88,6 +88,10 @@ void change_page(int new){
 
 void key_up(){ 		change_page(current_page-1);}
 void key_down(){ 	change_page(current_page+1);}
+void key_row_up(){ 	change_page(current_page-document->columns);}
+void key_row_down(){ 	change_page(current_page+document->columns);}
+void key_screan_up(){ 	change_page(current_page-document->columns*document->rows);}
+void key_screan_down(){ change_page(current_page+document->columns*document->rows);}
 void key_home(){ 	change_page(0);}
 void key_end(){ 	change_page(document->number_pages-1);}
 void key_jump(int num_page){ 	change_page(num_page+page_number_shift);}

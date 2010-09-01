@@ -42,11 +42,8 @@ static number_char number_chars[] = {
 
 //jednopismenka
 static command_char basic_command_chars[] = {
-	{ GDK_Page_Down, key_down }, 	// dolu o tabulku
 	{ GDK_space, key_down }, 	// dolu o 1 stranku
-	{ GDK_Down, key_down },		// dolu o 1 radu
-	{ GDK_Page_Up, key_up },	// nahoru o tabulku
-	{ GDK_Up, key_up },		// nahoru o radu
+	{ GDK_BackSpace, key_down },	// nahoru o 1 stranku
 	{ GDK_Home, key_home },
 	{ GDK_End, key_end },
 	{ GDK_a, key_rotate },
@@ -60,8 +57,12 @@ static command_char basic_command_chars[] = {
 	{ GDK_D, wait_position },
 };
 static command_char page_command_chars[] = {
-	{ GDK_Right, key_down }, 	// dolu o 1 stranku
-	{ GDK_Left, key_up },		// nahoru o 1 stranku
+	{ GDK_Right, key_down }, 		// dolu o 1 stranku
+	{ GDK_Left, key_up },			// nahoru o 1 stranku
+	{ GDK_Down, key_row_down },		// dolu o 1 radu
+	{ GDK_Up, key_row_up },			// nahoru o radu
+	{ GDK_Page_Down, key_screan_down },	// dolu o tabulku
+	{ GDK_Page_Up, key_screan_up },		// nahoru o tabulku
 	{ GDK_z, key_zoom_mode },
 };
 static command_char zoom_command_chars[] = {

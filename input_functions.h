@@ -1,6 +1,10 @@
 
 void key_up();
 void key_down();
+void key_row_up();
+void key_row_down();
+void key_screan_up();
+void key_screan_down();
 void key_home();
 void key_end();
 void key_jump(int);
