@@ -30,8 +30,8 @@ int start_window_maximalise = FALSE;
 int start_window_fullscrean = FALSE;
 
 //render veci co po reloudu zustavaji
-extern document_t document;
-extern document_t new_document;
+extern document_t *document;
+//extern document_t new_document;
 
 //file
 char * file_path;
@@ -77,19 +77,19 @@ void open_file(char *path){
 }
 
 void change_page(int new){
-	if (new <0 || new >= document.number_pages)
+	if (new <0 || new >= document->number_pages)
 		return;
 	int old = current_page;
 	current_page=new;
-	render(&document);
-	pixbuf_free(&document.pixbufs,old);
+	render(document);
+	pixbuf_free(&document->pixbufs,old);
 	expose();
 }
 
 void key_up(){ 		change_page(current_page-1);}
 void key_down(){ 	change_page(current_page+1);}
 void key_home(){ 	change_page(0);}
-void key_end(){ 	change_page(document.number_pages-1);}
+void key_end(){ 	change_page(document->number_pages-1);}
 void key_jump(int num_page){ 	change_page(num_page+page_number_shift);}
 void key_jump_up(int diff){ 	change_page(current_page - diff);}
 void key_jump_down(int diff){ 	change_page(current_page + diff);}
@@ -110,31 +110,35 @@ void key_fullscreen(){
 }
 
 void key_rotate(){ 
-	document.pages[current_page].rotation = (document.pages[current_page].rotation + 90) % 360;
-	render(&document);
+	document->pages[current_page].rotation = (document->pages[current_page].rotation + 90) % 360;
+	render(document);
 	expose();
 }
 
 void key_rotate_document(){
-	document.rotation = (document.rotation+90)%360; 
-	render(&document);
+	document->rotation = (document->rotation+90)%360; 
+	render(document);
 	expose();
 }
 
 void key_reload(){
-// 	close_file(file_path); //je potreba?
+	document_t *new;
 	open_file(file_path);
-	document_create_databse(&new_document);
-	render(&new_document);
-	document_replace_database(&document,&new_document);
+	new = document_create_databse();
+	render(new);
+	document_delete_database(document);
+	document=new;
 	expose();
 }
 
+void key_set_columns(int c){	document->columns = c; render(document); expose(); }
+void key_set_rows(int r){	document->rows = r; render(document); expose(); }
+
 void click_distance(int first_x, int first_y, int second_x, int second_y){
-	printf(_("hui %f %f %d %d - %d %d\n"),document.pages[current_page].width,document.pages[current_page].height,first_x,first_y,second_x,second_y);
+	printf(_("hui %f %f %d %d - %d %d\n"),document->pages[current_page].width,document->pages[current_page].height,first_x,first_y,second_x,second_y);
 }
 void click_position(int x, int y){
-	printf(_("hui %f %f %d %d\n"),document.pages[current_page].width,document.pages[current_page].height,x,y);
+	printf(_("hui %f %f %d %d\n"),document->pages[current_page].width,document->pages[current_page].height,x,y);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -161,7 +165,7 @@ static void event_func(GdkEvent *ev, gpointer data) {
 				break;
 			}
 		case GDK_CONFIGURE: //zmena pozici ci velikosti-zavola exspose
-			render(&document);		
+			render(document);		
 			expose();
 			break;
 		case GDK_EXPOSE:

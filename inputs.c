@@ -36,6 +36,8 @@ static struct number_char number_chars[] = {
 	{ GDK_Page_Down, key_jump_down },
 	{ GDK_Page_Up, key_jump_up },
         { GDK_o, key_this_page_has_number },
+	{ GDK_c, key_set_columns},
+	{ GDK_r, key_set_rows},
 };
 
 //jednopismenka

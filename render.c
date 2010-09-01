@@ -8,25 +8,27 @@
 #define min(A,B) ( (A) < (B) ? (A) : (B) )
 //doladit vetsi tabulky
 extern int current_page;
-document_t document;
-document_t new_document;
+document_t *document;
 
-void document_create_databse(document_t * doc){
+document_t * document_create_databse(){
+	document_t * doc = calloc(1, sizeof(document_t));
 	doc->rotation = 0;
 	doc->number_pages = pdf_get_number_pages();
-	doc->columns = 2;
-	doc->rows = 2;
+	doc->columns = 1;
+	doc->rows = 1;
 	pixbuf_create_database(&doc->pixbufs, doc->number_pages);
 	doc->pages = calloc(doc->number_pages, sizeof(struct pdf_page));
 
 	if (current_page < 0) current_page = 0;
 	if (current_page >= doc->number_pages) current_page = doc->number_pages -1;
+	return doc;
 }
 
-void document_replace_database(document_t *old_db, struct document_t *new_db){
-	pixbuf_delete_database(&old_db->pixbufs);
-	free(old_db->pages);
-	memcpy(old_db,new_db,sizeof(document_t));
+void document_delete_database(document_t *old){
+	if (old == NULL) return;
+	pixbuf_delete_database(&old->pixbufs);
+	free(old->pages);
+	free(old);
 }
 
 void render_get_size(document_t * doc, int number_page, double *width, double *height){
@@ -147,8 +149,6 @@ void render(document_t *doc){
 	gdk_window_clear_area_e(window,0,window_height-ulc_shift_height,window_width,ulc_shift_height);
 	gdk_window_clear_area_e(window,0,0,ulc_shift_width,window_height);
 	gdk_window_clear_area_e(window,window_width-ulc_shift_width,0,ulc_shift_width,window_height);
-
-
 	for (int i=0; i < doc->rows-1; i++){
 			gdk_window_clear_area_e(
 				window,
@@ -185,19 +185,19 @@ void render(document_t *doc){
 }
 
 void expose(){
-	for (int j=0; j < document.rows; j++)
-		for (int i=0; i < document.columns; i++){
-			if ((current_page+i+j*document.columns < document.number_pages) &&
-					(current_page+i+j*document.columns >= 0))
+	for (int j=0; j < document->rows; j++)
+		for (int i=0; i < document->columns; i++){
+			if ((current_page+i+j*document->columns < document->number_pages) &&
+					(current_page+i+j*document->columns >= 0))
 				gdk_pixbuf_render_to_drawable(
-						document.pixbufs.page[current_page+i+j*document.columns].pixbuf,
+						document->pixbufs.page[current_page+i+j*document->columns].pixbuf,
 						window,//GdkDrawable *drawable,
 						gdkGC, //GdkGC *gc,
 						0,0, //vykreslit cely pixbuf
-						document.pages[current_page+i+j*document.columns].shift_width,
-						document.pages[current_page+i+j*document.columns].shift_height, //posunuti
-						document.pixbufs.page[current_page+i+j*document.columns].width, //rozmery
-						document.pixbufs.page[current_page+i+j*document.columns].height,
+						document->pages[current_page+i+j*document->columns].shift_width,
+						document->pages[current_page+i+j*document->columns].shift_height, //posunuti
+						document->pixbufs.page[current_page+i+j*document->columns].width, //rozmery
+						document->pixbufs.page[current_page+i+j*document->columns].height,
 						GDK_RGB_DITHER_NONE, //fujvec nechci
 						0,0);
 		}
