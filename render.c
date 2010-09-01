@@ -84,11 +84,11 @@ void render_page(document_t * doc, int number_page, int space_width, int space_h
 
 	//cisteni
 	gdk_window_clear_area_e(
-			root_window,
+			window,
 			space_shift_w,space_shift_h,
 			black_w,black_h);
 	gdk_window_clear_area_e(
-			root_window,
+			window,
 			space_shift_w + space_width - black_w,
 			space_shift_h + space_height - black_h,
 			black_w,black_h);
@@ -121,7 +121,7 @@ void render(document_t *doc){
 
 	//velikost okynka na jednu stranku
 	gint window_width,window_height;
-	gdk_drawable_get_size(root_window,&window_width,&window_height);
+	gdk_drawable_get_size(window,&window_width,&window_height);
 	//printf("win%d %d\n",window_width,window_height);
 	//printf("co,ro %d %d\n",doc->columns,doc->rows);
 	int space_width,space_height;
@@ -139,10 +139,28 @@ void render(document_t *doc){
 		space_height = floor(space_width/aspect);
 	}
 	//printf("space %lf %d %d\n",aspect,space_width,space_height);
-	int ulc_shift_width = (window_width - space_width*doc->columns - margin*(doc->columns-1) ) / 2;
-	int ulc_shift_height = (window_height - space_height*doc->rows - margin*(doc->rows-1) ) / 2;
+	int ulc_shift_width = (window_width - space_width*doc->columns - margin*(doc->columns-1) +1) / 2;
+	int ulc_shift_height = (window_height - space_height*doc->rows - margin*(doc->rows-1) +1) / 2;
 	//printf("ulc %d %d\n",ulc_shift_width,ulc_shift_height);
 	//mazani okraju + mezer/margin
+	gdk_window_clear_area_e(window,0,0,window_width,ulc_shift_height);
+	gdk_window_clear_area_e(window,0,window_height-ulc_shift_height,window_width,ulc_shift_height);
+	gdk_window_clear_area_e(window,0,0,ulc_shift_width,window_height);
+	gdk_window_clear_area_e(window,window_width-ulc_shift_width,0,ulc_shift_width,window_height);
+
+
+	for (int i=0; i < doc->rows-1; i++){
+			gdk_window_clear_area_e(
+				window,
+				0, ulc_shift_height + (i+1) * space_height + i * margin,
+				window_width, margin);
+			}
+	for (int i=0; i < doc->columns-1; i++){
+			gdk_window_clear_area_e(
+				window,
+				ulc_shift_width + (i+1) * space_width + i * margin, 0,
+				margin,window_height);
+			}
 	//vykresleni jednotlivych ramecku		
 	for (int j=0; j < doc->rows; j++){
 		for (int i=0; i < doc->columns; i++){
@@ -157,7 +175,7 @@ void render(document_t *doc){
 			} else {
 				//mazat
 				gdk_window_clear_area_e(
-						root_window,
+						window,
 						ulc_shift_width + i * (space_width + margin),
 						ulc_shift_height + j * (space_height + margin),
 						space_width,space_height);
@@ -173,7 +191,7 @@ void expose(){
 					(current_page+i+j*document.columns >= 0))
 				gdk_pixbuf_render_to_drawable(
 						document.pixbufs.page[current_page+i+j*document.columns].pixbuf,
-						root_window,//GdkDrawable *drawable,
+						window,//GdkDrawable *drawable,
 						gdkGC, //GdkGC *gc,
 						0,0, //vykreslit cely pixbuf
 						document.pages[current_page+i+j*document.columns].shift_width,

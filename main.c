@@ -23,7 +23,7 @@ int page_number_shift = -1; //lide pocitaji od 1
 
 //settings
 int key_cancel_waiting = TRUE;
-int margin = 5; //sirka mezery v pixelech
+int margin = 20; //sirka mezery v pixelech
 int start_window_width = 400;
 int start_window_height = 500;
 int start_window_maximalise = FALSE;
@@ -39,7 +39,7 @@ time_t modification_time;
 
 //window
 GMainLoop *mainloop;
-GdkWindow *root_window;
+GdkWindow *window;
 GdkGC *gdkGC;
 
 
@@ -101,10 +101,10 @@ void key_quit(){
 
 void key_fullscreen(){
 	if (is_fullscreen){
-		gdk_window_unfullscreen(root_window);
+		gdk_window_unfullscreen(window);
 		is_fullscreen = 0;
 	} else {
-		gdk_window_fullscreen(root_window);
+		gdk_window_fullscreen(window);
 		is_fullscreen = 1;
 	}
 }
@@ -249,28 +249,28 @@ int main(int argc, char * argv[]) {
 		GDK_WINDOW_TYPE_HINT_NORMAL, //GdkWindowTypeHint type_hint;
 	};
 
-	root_window = gdk_window_new(
+	window = gdk_window_new(
 			NULL, //GdkWindow *parent,
 			&attr, //GdkWindowAttr *attributes,
 			0 //gint attributes_mask ????
 	);
-	gdkGC  = gdk_gc_new(root_window);
+	gdkGC  = gdk_gc_new(window);
 
 	//ikona
-	GdkPixmap* icon_pixmap = gdk_pixmap_create_from_xpm(root_window, NULL, NULL, "icon.xpm");
+	GdkPixmap* icon_pixmap = gdk_pixmap_create_from_xpm(window, NULL, NULL, "icon.xpm");
 	GdkPixbuf * icon_pixbuf = gdk_pixbuf_get_from_drawable( NULL, icon_pixmap, colormap, 0,0, 0,0, 32,32);
 	GList* icons = g_list_append(NULL,icon_pixbuf);	
-	gdk_window_set_icon_list(root_window,icons);
+	gdk_window_set_icon_list(window,icons);
 
 	//titulek
-	gdk_window_set_title(root_window,"huiii");
+	gdk_window_set_title(window,"huiii");
 
-		//gdk_window_fullscreen(root_window);
-	gdk_window_show(root_window);
+		//gdk_window_fullscreen(window);
+	gdk_window_show(window);
 	gdk_event_handler_set(event_func, NULL, NULL);
 	mainloop = g_main_loop_new(g_main_context_default(), FALSE);	
 	g_main_loop_run(mainloop);
-	gdk_window_destroy(root_window); 
+	gdk_window_destroy(window); 
 
 	return 0;
 }
