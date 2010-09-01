@@ -1,7 +1,7 @@
 	jednoduché 'neokýnko' bez lištičky, tlačítek
 víc jazyků
 vykresleni par stranek dopredu - je-li potreba
-nastavitelna uvodni velikost okna
+	nastavitelna uvodni velikost okna
 	velikosti obrázků nebo s černým rámečkem
 volitelne - pamatovat si nastevi tohoto pdf z minula..
 	ovládání písmenky, myš jen při výběru, určování pozice
@@ -17,9 +17,8 @@ záložky
 otevrit poklepanim/ entrem v mc
 	cela obrazovka
 rezimy:
--1strana/tabulka
--presne/prolinani pod sebou
--moc velke priblizeni 1 strany/normal vyskoceni esc
+	-tabulka
+-az moc velke priblizeni 1 strany, 
 -prezentace s casem z pdf ci nastavenym
 mereni
 ukazovat co pisu
