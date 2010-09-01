@@ -18,19 +18,19 @@ void wait_distance();
 void wait_position();
 
 
-struct command_char {
+typedef struct command_char {
 	guint pressed_char;
 	void (*function)(void);
-};
-struct number_char {
+} command_char;
+
+typedef struct number_char {
 	guint pressed_char;
 	void (*function)(int);
-};
-typedef struct command_char click_char;
+} number_char;
 
 
 //pocislove pismenka
-static struct number_char number_chars[] = {
+static number_char number_chars[] = {
 	{ GDK_p, key_jump },
 	{ GDK_P, key_jump },
 	{ GDK_Page_Down, key_jump_down },
@@ -41,14 +41,12 @@ static struct number_char number_chars[] = {
 };
 
 //jednopismenka
-static struct command_char page_command_chars[] = {
-	{ GDK_Page_Down, key_down }, 	// dolu o stranu/radu
-	{ GDK_Right, key_down }, 	// dolu o stranu/stranku
-	{ GDK_space, key_down }, 	// dolu o stranu/stranku
-	{ GDK_Down, key_down },		// dolu o stranu/kousek
-	{ GDK_Page_Up, key_up },	// nahoru o stranu/radu
-	{ GDK_Left, key_up },		// nahoru o stranu/stranku
-	{ GDK_Up, key_up },		// nahoru o stranu/kousek
+static command_char basic_command_chars[] = {
+	{ GDK_Page_Down, key_down }, 	// dolu o tabulku
+	{ GDK_space, key_down }, 	// dolu o 1 stranku
+	{ GDK_Down, key_down },		// dolu o 1 radu
+	{ GDK_Page_Up, key_up },	// nahoru o tabulku
+	{ GDK_Up, key_up },		// nahoru o radu
 	{ GDK_Home, key_home },
 	{ GDK_End, key_end },
 	{ GDK_a, key_rotate },
@@ -60,31 +58,36 @@ static struct command_char page_command_chars[] = {
 	//klikaci pismenka
 	{ GDK_d, wait_distance },
 	{ GDK_D, wait_position },
-	//zmena modu
+};
+static command_char page_command_chars[] = {
+	{ GDK_Right, key_down }, 	// dolu o 1 stranku
+	{ GDK_Left, key_up },		// nahoru o 1 stranku
 	{ GDK_z, key_zoom_mode },
 };
-
-static struct command_char zoom_command_chars[] = {
+static command_char zoom_command_chars[] = {
 	{ GDK_Escape, key_page_mode },
 };
-
 
 void wait_distance(){ 	state = DISTANCE_1;}
 void wait_position(){ 	state = POSITION;}
 
+void aplicate_function(guint keyval, command_char *arr, int count){
+	for (int i=0; i < count; i++)
+		if (arr[i].pressed_char == keyval) {
+			arr[i].function();
+			break;
+		}
+}
+
 void handling_key(guint keyval){
+	aplicate_function(keyval,basic_command_chars,sizeof(basic_command_chars)/sizeof(basic_command_chars[0]));
 	switch(mode){
 		case START:
 			break;
 		case PAGE:
 			switch(state){
 				case BASIC:
-					//printf("key press %d\n",keyval);
-					for (unsigned int i=0; i < sizeof(page_command_chars) / sizeof(page_command_chars[0]); i++)
-						if (page_command_chars[i].pressed_char == keyval) {
-							page_command_chars[i].function();
-							break;
-						}
+					aplicate_function(keyval,page_command_chars,sizeof(page_command_chars)/sizeof(page_command_chars[0]));
 					if ((keyval >= GDK_0) && (keyval <= GDK_9)){
 						state = NUMBERS;
 						number = keyval - GDK_0;
@@ -112,11 +115,7 @@ void handling_key(guint keyval){
 		case PRESENTATION:
 			break;
 		case ZOOM:
-			for (unsigned int i=0; i < sizeof(zoom_command_chars) / sizeof(zoom_command_chars[0]); i++)
-				if (zoom_command_chars[i].pressed_char == keyval) {
-					zoom_command_chars[i].function();
-					break;
-				}
+			aplicate_function(keyval,zoom_command_chars,sizeof(zoom_command_chars)/sizeof(zoom_command_chars[0]));
 			break;
 	}
 }
