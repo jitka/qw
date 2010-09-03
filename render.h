@@ -18,8 +18,7 @@ typedef struct document_t{
 	int rows;
 } document_t;
 
-void document_create_databse(struct document_t * document);
-void document_replace_database(struct document_t *old_db, struct document_t *new_db);
+document_t * document_create_databse();
+void document_delete_database(document_t *old);
 void render(struct document_t * document);
-void change_page(int new_page);
 void expose();

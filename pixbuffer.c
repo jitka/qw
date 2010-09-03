@@ -72,13 +72,7 @@ void pixbuf_free(pixbuf_database * database, int number_page){
 		for (; i< max_cached/2; i++)
 			really_free(&database->page[i]);
 		for (; i<number_page; i++)
-			database->cached[i-max_cached]=database->cached[max_cached];
+			database->cached[i-max_cached/2]=database->cached[i];
 		database->cached_length -= max_cached/2;
 	}
-//	really_free(&database->page[number_page]);
-	/*bit v databazi
-	vloz do zasobniky
-	je-li tam moc smaz duplicity
-	nestaci-li maz odzadu
-*/
 }

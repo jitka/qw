@@ -14,7 +14,7 @@
 #define _(X) gettext(X)
 
 //global
-enum mode_t mode = START;
+view_mode_t mode = START;
 int is_fullscreen = FALSE;
 int current_page = 0;
 int page_number_shift = -1; //lide pocitaji od 1
@@ -23,14 +23,15 @@ int page_number_shift = -1; //lide pocitaji od 1
 
 //settings
 int key_cancel_waiting = TRUE;
+int margin = 20; //sirka mezery v pixelech
 int start_window_width = 400;
 int start_window_height = 500;
 int start_window_maximalise = FALSE;
 int start_window_fullscrean = FALSE;
 
 //render veci co po reloudu zustavaji
-extern document_t document;
-extern document_t new_document;
+extern document_t *document;
+//extern document_t new_document;
 
 //file
 char * file_path;
@@ -38,7 +39,7 @@ time_t modification_time;
 
 //window
 GMainLoop *mainloop;
-GdkWindow *root_window;
+GdkWindow *window;
 GdkGC *gdkGC;
 
 
@@ -75,10 +76,24 @@ void open_file(char *path){
 	}
 }
 
+void change_page(int new){
+	if (new <0 || new >= document->number_pages)
+		return;
+	int old = current_page;
+	current_page=new;
+	render(document);
+	pixbuf_free(&document->pixbufs,old);
+	expose();
+}
+
 void key_up(){ 		change_page(current_page-1);}
 void key_down(){ 	change_page(current_page+1);}
+void key_row_up(){ 	change_page(current_page-document->columns);}
+void key_row_down(){ 	change_page(current_page+document->columns);}
+void key_screan_up(){ 	change_page(current_page-document->columns*document->rows);}
+void key_screan_down(){ change_page(current_page+document->columns*document->rows);}
 void key_home(){ 	change_page(0);}
-void key_end(){ 	change_page(document.number_pages-1);}
+void key_end(){ 	change_page(document->number_pages-1);}
 void key_jump(int num_page){ 	change_page(num_page+page_number_shift);}
 void key_jump_up(int diff){ 	change_page(current_page - diff);}
 void key_jump_down(int diff){ 	change_page(current_page + diff);}
@@ -90,40 +105,45 @@ void key_quit(){
 
 void key_fullscreen(){
 	if (is_fullscreen){
-		gdk_window_unfullscreen(root_window);
+		gdk_window_unfullscreen(window);
 		is_fullscreen = 0;
 	} else {
-		gdk_window_fullscreen(root_window);
+		gdk_window_fullscreen(window);
 		is_fullscreen = 1;
 	}
 }
 
 void key_rotate(){ 
-	document.pages[current_page].rotation = (document.pages[current_page].rotation + 90) % 360;
-	render(&document);
+	document->pages[current_page].rotation = (document->pages[current_page].rotation + 90) % 360;
+	render(document);
 	expose();
 }
 
 void key_rotate_document(){
-	document.rotation = (document.rotation+90)%360; 
-	render(&document);
+	document->rotation = (document->rotation+90)%360; 
+	render(document);
 	expose();
 }
 
 void key_reload(){
-// 	close_file(file_path); //je potreba?
+	document_t *new;
 	open_file(file_path);
-	document_create_databse(&new_document);
-	render(&new_document);
-	document_replace_database(&document,&new_document);
-	expose();
+	new = document_create_databse();
+	render(new);
+	document_delete_database(document);
+	document=new;
 }
 
+void key_set_columns(int c){	document->columns = c; render(document); expose(); }
+void key_set_rows(int r){	document->rows = r; render(document); expose(); }
+void key_page_mode(){	mode=PAGE; render(document); expose();}
+void key_zoom_mode(){	mode=ZOOM; render(document); expose();}
+
 void click_distance(int first_x, int first_y, int second_x, int second_y){
-	printf(_("hui %f %f %d %d - %d %d\n"),document.pages[current_page].width,document.pages[current_page].height,first_x,first_y,second_x,second_y);
+	printf(_("hui %f %f %d %d - %d %d\n"),document->pages[current_page].width,document->pages[current_page].height,first_x,first_y,second_x,second_y);
 }
 void click_position(int x, int y){
-	printf(_("hui %f %f %d %d\n"),document.pages[current_page].width,document.pages[current_page].height,x,y);
+	printf(_("hui %f %f %d %d\n"),document->pages[current_page].width,document->pages[current_page].height,x,y);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -150,7 +170,7 @@ static void event_func(GdkEvent *ev, gpointer data) {
 				break;
 			}
 		case GDK_CONFIGURE: //zmena pozici ci velikosti-zavola exspose
-			render(&document);		
+			render(document);		
 			expose();
 			break;
 		case GDK_EXPOSE:
@@ -158,10 +178,9 @@ static void event_func(GdkEvent *ev, gpointer data) {
 			switch (mode) {
 				case START:
 					//jeste by se tu dal vlozit nejaky hezky obrazek
-					key_reload();
 					mode = PAGE;
-					break;
-				case PAGE: case PRESENTATION:
+					key_reload();
+				default:
 					expose();
 					break;
 			}
@@ -169,14 +188,14 @@ static void event_func(GdkEvent *ev, gpointer data) {
 		case GDK_DELETE:
 			g_main_loop_quit(mainloop);
 			break;
-		default: ;
+		default:
+			break;
 	}
 }
 
 int main(int argc, char * argv[]) {
 
-	g_type_init()
-		;
+	g_type_init();
 	//zpracovani parametru
 	const char *short_options = "hi:p:";
 	const struct option long_options[] = {
@@ -238,28 +257,28 @@ int main(int argc, char * argv[]) {
 		GDK_WINDOW_TYPE_HINT_NORMAL, //GdkWindowTypeHint type_hint;
 	};
 
-	root_window = gdk_window_new(
+	window = gdk_window_new(
 			NULL, //GdkWindow *parent,
 			&attr, //GdkWindowAttr *attributes,
 			0 //gint attributes_mask ????
 	);
-	gdkGC  = gdk_gc_new(root_window);
+	gdkGC  = gdk_gc_new(window);
 
 	//ikona
-	GdkPixmap* icon_pixmap = gdk_pixmap_create_from_xpm(root_window, NULL, NULL, "icon.xpm");
+	GdkPixmap* icon_pixmap = gdk_pixmap_create_from_xpm(window, NULL, NULL, "icon.xpm");
 	GdkPixbuf * icon_pixbuf = gdk_pixbuf_get_from_drawable( NULL, icon_pixmap, colormap, 0,0, 0,0, 32,32);
 	GList* icons = g_list_append(NULL,icon_pixbuf);	
-	gdk_window_set_icon_list(root_window,icons);
+	gdk_window_set_icon_list(window,icons);
 
 	//titulek
-	gdk_window_set_title(root_window,"huiii");
+	gdk_window_set_title(window,"huiii");
 
-		//gdk_window_fullscreen(root_window);
-	gdk_window_show(root_window);
+		//gdk_window_fullscreen(window);
+	gdk_window_show(window);
 	gdk_event_handler_set(event_func, NULL, NULL);
 	mainloop = g_main_loop_new(g_main_context_default(), FALSE);	
 	g_main_loop_run(mainloop);
-	gdk_window_destroy(root_window); 
+	gdk_window_destroy(window); 
 
 	return 0;
 }
