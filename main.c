@@ -15,9 +15,10 @@
 
 //global
 view_mode_t mode = START;
-int is_fullscreen = FALSE;
+static int is_fullscreen = FALSE;
 int current_page = 0;
-int page_number_shift = -1; //lide pocitaji od 1
+static int page_number_shift = -1; //lide pocitaji od 1
+static guint timer_id;
 //tady budou rezimy a veskere veci
 //co se reloudem nemeni
 
@@ -34,8 +35,8 @@ extern document_t *document;
 //extern document_t new_document;
 
 //file
-char * file_path;
-time_t modification_time;
+static char * file_path;
+static time_t modification_time;
 
 //window
 GMainLoop *mainloop;
@@ -136,8 +137,33 @@ void key_reload(){
 
 void key_set_columns(int c){	document->columns = c; render(document); expose(); }
 void key_set_rows(int r){	document->rows = r; render(document); expose(); }
-void key_page_mode(){	mode=PAGE; render(document); expose();}
-void key_zoom_mode(){	mode=ZOOM; render(document); expose();}
+void key_page_mode(){
+	if (mode == PRESENTATION)
+		 g_source_remove (timer_id); //odstrani vlakno casovace	
+	mode=PAGE; 
+	render(document); expose();
+}
+void key_zoom_mode(){	
+	if (mode == PRESENTATION)
+		 g_source_remove (timer_id);	
+	mode=ZOOM; 
+	render(document); expose();
+}
+static gboolean timeout_callback (gpointer data){
+	data = NULL; //at mi to nehazi warningy
+	key_screan_down(); 
+	return TRUE; //volat se znova
+}
+void key_presentation_mode(int time){ 
+	timer_id = gdk_threads_add_timeout(
+			time*1000,
+			timeout_callback,
+			NULL
+	);
+	mode=PRESENTATION;
+	render(document);
+	expose();
+}
 
 void click_distance(int first_x, int first_y, int second_x, int second_y){
 	printf(_("hui %f %f %d %d - %d %d\n"),document->pages[current_page].width,document->pages[current_page].height,first_x,first_y,second_x,second_y);
@@ -149,6 +175,7 @@ void click_position(int x, int y){
 ///////////////////////////////////////////////////////////////////////////////////
 
 static void event_func(GdkEvent *ev, gpointer data) {
+	data = NULL; //nemam rada warningy
 	switch(ev->type) {
 		case GDK_KEY_PRESS:
 			handling_key(ev->key.keyval);

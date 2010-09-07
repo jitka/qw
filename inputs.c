@@ -38,6 +38,7 @@ static number_char number_chars[] = {
         { GDK_o, key_this_page_has_number },
 	{ GDK_c, key_set_columns},
 	{ GDK_r, key_set_rows},
+	{ GDK_e, key_presentation_mode },
 };
 
 //jednopismenka
@@ -85,6 +86,8 @@ void handling_key(guint keyval){
 	switch(mode){
 		case START:
 			break;
+		case PRESENTATION:
+			key_page_mode();
 		case PAGE:
 			switch(state){
 				case BASIC:
@@ -112,8 +115,6 @@ void handling_key(guint keyval){
 						state = BASIC;
 					break;
 			}
-			break;
-		case PRESENTATION:
 			break;
 		case ZOOM:
 			aplicate_function(keyval,zoom_command_chars,sizeof(zoom_command_chars)/sizeof(zoom_command_chars[0]));

@@ -2,7 +2,6 @@ osetrit proti velkym mezeram a tisicovim tabulkam
 seakfaulty dolu+r, dolu+nahoru->pixbuf
 vlakna-pixbuffery, rendrovani
 nenechat si posilat eventy, ktere nepotrebuji
-uklizeni/smazani poppler_document, poppler_page
 zjistit jak funguji okynka a pripadne uklidit moje
 pořádek v includech
 -h

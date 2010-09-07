@@ -22,3 +22,4 @@ void click_distance(int first_x, int first_y, int second_x, int second_y);
 void click_position(int x, int y);
 void key_page_mode();
 void key_zoom_mode();
+void key_presentation_mode(int time);
