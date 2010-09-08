@@ -16,7 +16,7 @@ document_t * document_create_databse(){
 	doc->number_pages = pdf_get_number_pages();
 	doc->columns = 1;
 	doc->rows = 1;
-	pixbuf_create_database(&doc->pixbufs_cache, doc->number_pages);
+	pixbuf_create_database(&doc->pixbufs_cache);
 	doc->pages = calloc(doc->number_pages, sizeof(struct pdf_page));
 	doc->pixbufs_displayed = calloc(maximum_displayed, sizeof(pixbuf_item));
 	doc->pixbufs_displayed_length = 0;
@@ -33,8 +33,8 @@ void render_set_max_columns(document_t *doc){
 
 void document_delete_database(document_t *old){
 	if (old == NULL) return;
-//	pixbuf_delete_displayed(old->pixbuf_displayed,old->pixbuf_displayed_length);
-//	pixbuf_delete_database(&old->pixbufs_cache);
+	pixbuf_delete_displayed(&old->pixbufs_cache,old->pixbufs_displayed,old->pixbufs_displayed_length);
+	pixbuf_delete_database(&old->pixbufs_cache);
 	free(old->pixbufs_displayed);
 	free(old->pages);
 	free(old);
@@ -204,7 +204,7 @@ void render_mode_zoom(document_t *doc){
 }
 
 void render(document_t *doc){
-	pixbuf_delete_displayed(doc->pixbufs_displayed,doc->pixbufs_displayed_length);
+	pixbuf_delete_displayed(&doc->pixbufs_cache,doc->pixbufs_displayed,doc->pixbufs_displayed_length);
 	doc->pixbufs_displayed_length = 0;
 	switch(mode){
 		case START:
@@ -244,9 +244,12 @@ void render_get_relative_position(
 				item->height + item->shift_height > clicked_y
 		   ){
 			*page = item->page_number;
+			*space_height = item->height;
+			*space_width = item->width;
+			*relative_x = clicked_x - item->shift_width;
+			*relative_y = clicked_y - item->shift_height;
+			break;
 		}
-		break;
-		
 	}
 }
 

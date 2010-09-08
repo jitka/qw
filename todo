@@ -4,7 +4,6 @@ roztahovani okna resit
 rendrovat do neceho a na expoze kreslit jen kus
 	=vyresit kresleni mezer
 +renderovani paralelne pres eventy kontrolovat poradi/aktualnost
-ikona - pixbuf s png osetrit proti au
 nenechat si posilat eventy, ktere nepotrebuji
 pořádek v includech
 intuitivnejsi pismenka

@@ -1,7 +1,7 @@
 #ifndef _pixbuffer_h_
 #define _pixbuffer_h_
 #include <gdk/gdk.h> //pixbuffery
-#include <glib.h> //glist
+#include <glib.h> //GList
 
 typedef struct pixbuf_item{
 	GdkPixbuf *pixbuf;
@@ -15,16 +15,14 @@ typedef struct pixbuf_item{
 } pixbuf_item;
 
 typedef struct pixbuf_database{
-	int number_pages;
-	struct pixbuf_item * page; //pole, pro kazdou stronku jeden
-	int * cached; // shrobazdiste predpocitanych
-	int cached_length;
+	GList *cache;
+	int cache_size; 
 } pixbuf_database;
 
 
-void pixbuf_create_database(pixbuf_database * database, int number_pages);
+void pixbuf_create_database(pixbuf_database * database);
 void pixbuf_delete_database(pixbuf_database * old);
-void pixbuf_delete_displayed(pixbuf_item *arr, int length);
+void pixbuf_delete_displayed(pixbuf_database *cache, pixbuf_item *arr, int length);
 void pixbuf_render(pixbuf_database *cache, pixbuf_item *db);
 
 #endif

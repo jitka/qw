@@ -13,3 +13,4 @@ extern int start_window_height;
 extern int maximum_displayed;
 extern int minimal_width;
 extern int minimal_height;
+extern int max_size_of_cache;

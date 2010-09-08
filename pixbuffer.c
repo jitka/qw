@@ -1,31 +1,39 @@
-#include <stdlib.h> //calloc
+#include <stdlib.h> //free
+#include <string.h> //memcpy
 #include "pixbuffer.h"
 #include "poppler.h"
+#include "settings.h"
 
-int max_cached = 30;
-
-/*void really_free(pixbuf_item *s){
-	g_object_unref(s->pixbuf);
-}*/
-
-void pixbuf_create_database(pixbuf_database * database, int number_pages){
-	database->number_pages = number_pages;
-	database->page = calloc(number_pages, sizeof(pixbuf_item));
-	database->cached = calloc(max_cached, sizeof(int));
-	database->cached_length = 0;
+void pixbuf_create_database(pixbuf_database * database){
+	database->cache = NULL;
+	database->cache_size = 0;
 }
 
-void pixbuf_delete_database(pixbuf_database * old_db){
-//	for (int i=0; i < old_db->number_pages; i++)
-//		really_free(&old_db->page[i]);
-	free(old_db->page);
-	free(old_db->cached);
+void pixbuf_free(gpointer data, gpointer user_data){
+	pixbuf_item *item = data; 
+	g_object_unref(item->pixbuf);
+	free(item);
+	user_data = NULL;
+}
+void pixbuf_delete_database(pixbuf_database *db){
+	g_list_foreach(db->cache,pixbuf_free,NULL);
+	g_list_free(db->cache);
 }
 
-void pixbuf_delete_displayed(pixbuf_item *arr, int length){
-	//predat do cache, nulovat citatel
-	for(int i=0; i<length; i++)
-		g_object_unref(arr[i].pixbuf);
+void pixbuf_delete_displayed(pixbuf_database *cache, pixbuf_item *arr, int length){
+	//predat do cache
+/*	for(int i=0; i<length; i++){
+		pixbuf_item *tmp = malloc(sizeof(pixbuf_item));
+		memcpy(tmp,&arr[i],sizeof(pixbuf_item));
+		cache->cache = g_list_append(cache->cache,tmp);
+		cache->cache_size += 4 * tmp->width * tmp->height;
+		//g_object_unref(arr[i].pixbuf);
+	}
+*/	if (cache->cache_size > max_size_of_cache){
+		//provizorne zahodi vse
+		pixbuf_delete_database(cache);
+		cache = NULL;
+	}
 }
 
 void pixbuf_render(pixbuf_database *cache,pixbuf_item *db){

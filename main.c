@@ -5,6 +5,7 @@
 #include <unistd.h> //cwd
 #include <getopt.h> //parametry
 #include <libintl.h> //preklady
+#include <math.h> //sqrt
 #include <gdk-pixbuf/gdk-pixbuf.h> //kvuli ikonce
 //#include <gdk/gdk.h> //okynka,poppler.h pixbuffer.h
 //#include <glib-2.0/glib.h>
@@ -30,6 +31,7 @@ int start_window_height = 500;
 int maximum_displayed = 1000;
 int minimal_width = 10;
 int minimal_height = 10;
+int max_size_of_cache = 2000000;
 //int start_window_maximalise = FALSE;
 //int start_window_fullscrean = FALSE;
 //pri pousteni prezentace nastavit fullscrean
@@ -186,15 +188,51 @@ void key_presentation_mode(int time){
 
 void click_distance(int first_x, int first_y, int second_x, int second_y){
 	int page_1,page_2;
-	int x_1,x_2,y_1,y_2;
+	int x1,x2,y1,y2;
 	int height,width;
-	render_get_relative_position(first_x,first_y,&page_1,&x_1,&y_1,&height,&width);
-	render_get_relative_position(second_x,second_y,&page_2,&x_2,&y_2,&height,&width);
-	printf("page 1: %d\n page 2: %d\n",page_1+1,page_2+1);
-//	printf(_("hui %f %f %d %d - %d %d\n"),document->pages[current_page].width,document->pages[current_page].height,first_x,first_y,second_x,second_y);
+	render_get_relative_position(first_x,first_y,&page_1,&x1,&y1,&height,&width);
+	render_get_relative_position(second_x,second_y,&page_2,&x2,&y2,&height,&width);
+	if (page_1 != page_2 || page_1 == -1 || page_2 == -1){
+		printf(_("Priste klikejte do stejneho obrazku.\n"));
+		return;
+	}
+	printf(_("strana %d (cislovano od jedne) %d (logicke cislovani)\n"
+			"%lf cm x %lf cm     %d x %d pikelu\n"
+			//"kliknuti 1: %d,%d kliknuti 2: %d,%d\n"
+			"vzdalenot %lf cm %lf pixelu\n\n"),
+			page_1+1,
+			page_1-page_number_shift,
+			document->pages[page_1].width*0.035278,
+			document->pages[page_1].height*0.035278,
+			width,
+			height,
+			//x1,y1,x2,y2,
+			sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2)) / width * document->pages[page_1].width*0.035278,
+			sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2))
+			);
 }
-void click_position(int x, int y){
-	printf(_("hui %f %f %d %d\n"),document->pages[current_page].width,document->pages[current_page].height,x,y);
+void click_position(int click_x, int click_y){
+	int page;
+	int x,y;
+	int height,width;
+	render_get_relative_position(click_x,click_y,&page,&x,&y,&height,&width);
+	if (page == -1){
+		printf(_("Priste klikejte do obrazku.\n"));
+		return;
+	}
+	printf(_("strana %d (cislovano od jedne) %d (logicke cislovani)\n"
+			"%lf cm x %lf cm     %d x %d pikelu\n"
+			"kliknuti: %lf,%lf cm %d,%d pixelu \n\n"),
+			page+1,
+			page-page_number_shift,
+			document->pages[page].width*0.035278,
+			document->pages[page].height*0.035278,
+			width,
+			height,
+			(double) x / width * document->pages[page].width*0.035278,
+			(double) y / height * document->pages[page].height*0.035278,
+			x,y
+			);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -210,7 +248,7 @@ static void event_func(GdkEvent *ev, gpointer data) {
 			break;
 		case GDK_BUTTON_PRESS:
 			if (ev->button.button == 1)
-				handling_click((int)ev->button.x,(int)ev->button.x);
+				handling_click((int)ev->button.x,(int)ev->button.y);
 			break;
 		case GDK_FOCUS_CHANGE:
 			{
