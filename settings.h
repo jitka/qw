@@ -10,3 +10,4 @@ extern int key_cancel_waiting;
 extern int margin; //sirka mezery v pixelech
 extern int start_window_width;
 extern int start_window_height;
+extern int maximum_displayed;

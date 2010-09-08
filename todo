@@ -1,5 +1,5 @@
 rozdelane: zoom mereni
-mazat pri skakani vse
+vkladat,rendrovat,mazat pixbufery
 cistejsi krabicka na pixbufery
 seakfaulty dolu+r, dolu+nahoru->pixbuf
 roztahovani okna resit
@@ -7,6 +7,7 @@ vic pixfuferu na stranku
 aktivni do glistu, uz jednou vyrendrovane do mazatelne cache
 maximum jak na stranky tak na x*y
 rendrovat do neceho a na expoze kreslit jen kus
+	=vyresit kresleni mezer
 +renderovani paralelne pres eventy kontrolovat poradi/aktualnost
 osetrit proti velkym mezeram a tisicovim tabulkam
 ikona - pixbuf s png osetrit proti au
@@ -16,3 +17,4 @@ intuitivnejsi pismenka
 -h -i?
 +pixfufery dopredu paralene pres eventy
 +zvetsit stare driv nez krestlit nove
++pouzitat cairo misto pixbuferu

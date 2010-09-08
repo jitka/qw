@@ -26,9 +26,11 @@ int key_cancel_waiting = TRUE;
 int margin = 20; //sirka mezery v pixelech
 int start_window_width = 400;
 int start_window_height = 500;
+int maximum_displayed = 1000;
 //int start_window_maximalise = FALSE;
 //int start_window_fullscrean = FALSE;
 //pri pousteni prezentace nastavit fullscrean
+//na zacatku zarovnat
 
 //render veci co po reloudu zustavaji
 extern document_t *document;
@@ -83,10 +85,8 @@ void open_file(char *path){
 void change_page(int new){
 	if (new <0 || new >= document->number_pages)
 		return;
-	int old = current_page;
 	current_page=new;
 	render(document);
-	pixbuf_free(&document->pixbufs,old);
 	expose();
 }
 
@@ -138,8 +138,18 @@ void key_reload(){
 	document=new;
 }
 
-void key_set_columns(int c){	document->columns = c; render(document); expose(); }
-void key_set_rows(int r){	document->rows = r; render(document); expose(); }
+void key_set_columns(int c){
+	if (c * document->rows >= maximum_displayed)
+		return;
+	document->columns = c; 
+	render(document); expose(); 
+}
+void key_set_rows(int r){
+	if (r * document->columns >= maximum_displayed)
+		return;
+	document->rows = r; 
+	render(document); expose(); 
+}
 void key_page_mode(){
 	if (mode == PRESENTATION)
 		 g_source_remove (timer_id); //odstrani vlakno casovace	
@@ -169,7 +179,13 @@ void key_presentation_mode(int time){
 }
 
 void click_distance(int first_x, int first_y, int second_x, int second_y){
-	printf(_("hui %f %f %d %d - %d %d\n"),document->pages[current_page].width,document->pages[current_page].height,first_x,first_y,second_x,second_y);
+	int page_1,page_2;
+	int x_1,x_2,y_1,y_2;
+	int height,width;
+	render_get_relative_position(first_x,first_y,&page_1,&x_1,&y_1,&height,&width);
+	render_get_relative_position(second_x,second_y,&page_2,&x_2,&y_2,&height,&width);
+	printf("page 1: %d\n page 2: %d\n",page_1,page_2);
+//	printf(_("hui %f %f %d %d - %d %d\n"),document->pages[current_page].width,document->pages[current_page].height,first_x,first_y,second_x,second_y);
 }
 void click_position(int x, int y){
 	printf(_("hui %f %f %d %d\n"),document->pages[current_page].width,document->pages[current_page].height,x,y);
