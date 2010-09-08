@@ -23,10 +23,12 @@ static guint timer_id;
 
 //settings
 int key_cancel_waiting = TRUE;
-int margin = 20; //sirka mezery v pixelech
+int margin = 5; //sirka mezery v pixelech
 int start_window_width = 400;
 int start_window_height = 500;
 int maximum_displayed = 1000;
+int minimal_width = 10;
+int minimal_height = 10;
 //int start_window_maximalise = FALSE;
 //int start_window_fullscrean = FALSE;
 //pri pousteni prezentace nastavit fullscrean
@@ -133,19 +135,22 @@ void key_reload(){
 	document_t *new;
 	open_file(file_path);
 	new = document_create_databse();
+	render_set_max_columns(new);
 	render(new);
 	document_delete_database(document);
 	document=new;
 }
 
 void key_set_columns(int c){
-	if (c * document->rows >= maximum_displayed)
+	if (c * document->rows >= maximum_displayed
+			|| c > document->max_columns)
 		return;
 	document->columns = c; 
 	render(document); expose(); 
 }
 void key_set_rows(int r){
-	if (r * document->columns >= maximum_displayed)
+	if (r * document->columns >= maximum_displayed
+			|| r > document->max_rows)
 		return;
 	document->rows = r; 
 	render(document); expose(); 
@@ -223,6 +228,7 @@ static void event_func(GdkEvent *ev, gpointer data) {
 					//zmenila se velkost okna
 					window_width = w_width;
 					window_height = w_height;
+					render_set_max_columns(document);
 					render(document);		
 					expose();
 				}

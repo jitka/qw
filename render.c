@@ -26,6 +26,11 @@ document_t * document_create_databse(){
 	return doc;
 }
 
+void render_set_max_columns(document_t *doc){
+	doc->max_columns = (window_width + margin) / (minimal_width + margin);
+	doc->max_rows = (window_height + margin) / (minimal_height + margin);
+}
+
 void document_delete_database(document_t *old){
 	if (old == NULL) return;
 //	pixbuf_delete_displayed(old->pixbuf_displayed,old->pixbuf_displayed_length);
@@ -231,6 +236,24 @@ void render_get_relative_position(
 		int *space_height, int *space_width){
 //swich(state)
 }
+
+void expose_pixbufs(gpointer _item, gpointer _){
+	_ = NULL;
+	pixbuf_item *item = _item;
+	gdk_pixbuf_render_to_drawable(
+			item->pixbuf,
+			window,//GdkDrawable *drawable,
+			gdkGC, //GdkGC *gc,
+			0,0, //vykreslit cely pixbuf
+			item->shift_width,
+			item->shift_height, //posunuti
+			item->width, //rozmery
+			item->height,
+			GDK_RGB_DITHER_NONE, //fujvec nechci
+			0,0);		
+	
+}
+
 void expose(){
 	for(int i=0; i<document->pixbufs_displayed_length; i++){
 		pixbuf_item *item = &(document->pixbufs_displayed[i]);

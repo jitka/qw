@@ -1,15 +1,9 @@
 rozdelane: zoom mereni
-vkladat,rendrovat,mazat pixbufery
-cistejsi krabicka na pixbufery
-seakfaulty dolu+r, dolu+nahoru->pixbuf
+cache s maximem
 roztahovani okna resit
-vic pixfuferu na stranku
-aktivni do glistu, uz jednou vyrendrovane do mazatelne cache
-maximum jak na stranky tak na x*y
 rendrovat do neceho a na expoze kreslit jen kus
 	=vyresit kresleni mezer
 +renderovani paralelne pres eventy kontrolovat poradi/aktualnost
-osetrit proti velkym mezeram a tisicovim tabulkam
 ikona - pixbuf s png osetrit proti au
 nenechat si posilat eventy, ktere nepotrebuji
 pořádek v includech

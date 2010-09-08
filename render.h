@@ -19,10 +19,13 @@ typedef struct document_t{
 	pdf_page * pages;
 	int columns;
 	int rows;
+	int max_columns;
+	int max_rows;
 } document_t;
 
 document_t * document_create_databse();
 void document_delete_database(document_t *old);
+void render_set_max_columns(document_t *doc);
 void render(struct document_t * document);
 void expose();
 void render_get_relative_position(
