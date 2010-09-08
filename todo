@@ -1,5 +1,4 @@
-rozdelane: zoom mereni
-cache s maximem
+rozdelane: zoom, cache s maximem
 roztahovani okna resit
 rendrovat do neceho a na expoze kreslit jen kus
 	=vyresit kresleni mezer
