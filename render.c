@@ -62,25 +62,25 @@ void render_page(document_t * doc, int number_page, int space_width, int space_h
 	double page_width,page_height;
 	render_get_size(doc,number_page,&page_width,&page_height);
 
-			if (space_width*page_height < page_width*space_height){
-				//šířka /width je stejná
-				pixbuf_width = space_width;
-				pixbuf_height = ceil(space_width*page_height/page_width);
-				black_w = space_width;
-				black_h = (space_height-pixbuf_height+1)/2;
-				doc->pages[number_page].shift_width = space_shift_w;
-				doc->pages[number_page].shift_height = space_shift_h + black_h;
-				scale = space_width/page_width;
-			} else {
-				//výška/height je stejná
-				pixbuf_width = ceil(space_height*(page_width/page_height));
-				pixbuf_height = space_height;
-				black_w = (space_width-pixbuf_width+1)/2;
-				black_h = space_height;
-				doc->pages[number_page].shift_width = space_shift_w + black_w;
-				doc->pages[number_page].shift_height = space_shift_h;
-				scale = space_height/page_height;
-			}
+	if (space_width*page_height < page_width*space_height){
+		//šířka /width je stejná
+		pixbuf_width = space_width;
+		pixbuf_height = ceil(space_width*page_height/page_width);
+		black_w = space_width;
+		black_h = (space_height-pixbuf_height+1)/2;
+		doc->pages[number_page].shift_width = space_shift_w;
+		doc->pages[number_page].shift_height = space_shift_h + black_h;
+		scale = space_width/page_width;
+	} else {
+		//výška/height je stejná
+		pixbuf_width = ceil(space_height*(page_width/page_height));
+		pixbuf_height = space_height;
+		black_w = (space_width-pixbuf_width+1)/2;
+		black_h = space_height;
+		doc->pages[number_page].shift_width = space_shift_w + black_w;
+		doc->pages[number_page].shift_height = space_shift_h;
+		scale = space_height/page_height;
+	}
 
 	pixbuf_render(&doc->pixbufs,number_page,pixbuf_width,pixbuf_height,scale,rotation);
 
@@ -96,11 +96,9 @@ void render_page(document_t * doc, int number_page, int space_width, int space_h
 			black_w,black_h);
 }
 
-void render_mode_page(document_t *doc){
-	/* zjistim velikost okna, podle tabulky/rezimu rozdelim
-	 * na casti (space) a do tech vlozim stranky
-	 */
+void compute_space(document_t *doc,int *space_width, int *space_height){
 	int num_displayed = min(doc->columns * doc->rows, doc->number_pages-current_page);
+
 	//median pomeru stran
 	double aspects[num_displayed];
 	for (int i=0; i<num_displayed; i++){
@@ -121,30 +119,33 @@ void render_mode_page(document_t *doc){
 	}
 	double aspect = aspects[num_displayed/2];
 
-	//velikost okynka na jednu stranku
-	gint window_width,window_height;
-	gdk_drawable_get_size(window,&window_width,&window_height);
-	//printf("win%d %d\n",window_width,window_height);
-	//printf("co,ro %d %d\n",doc->columns,doc->rows);
-	int space_width,space_height;
+	//velikost okynka na vykresleni jedne stranky
 	if ( (double) ((window_width-(doc->columns-1)*margin) //pouzitlna sirka
 		/doc->columns) //na jeden ramecek
 	   / (double) ((window_height-(doc->rows-1)*margin)
 	   	/doc->rows)
 	   > aspect){
 		//vyska je stejna
-		space_height = ( window_height - (doc->rows-1)*margin ) / doc->rows;
-		space_width = floor(space_height*aspect);
+		*space_height = ( window_height - (doc->rows-1)*margin ) / doc->rows;
+		*space_width = floor(*space_height*aspect);
 	} else {
 		//sirka je stejna
-		space_width = ( window_width-(doc->columns-1)*margin ) / doc->columns;
-		space_height = floor(space_width/aspect);
+		*space_width = ( window_width-(doc->columns-1)*margin ) / doc->columns;
+		*space_height = floor(*space_width/aspect);
 	}
-	//printf("space %lf %d %d\n",aspect,space_width,space_height);
+
+}
+
+void render_mode_page(document_t *doc){
+	/* podle tabulky rozdelim
+	 * na casti (space) a do tech vlozim stranky
+	 */	
+	int space_width,space_height;
+	compute_space(doc,&space_width,&space_height);
 	int ulc_shift_width = (window_width - space_width*doc->columns - margin*(doc->columns-1) +1) / 2;
 	int ulc_shift_height = (window_height - space_height*doc->rows - margin*(doc->rows-1) +1) / 2;
-	//printf("ulc %d %d\n",ulc_shift_width,ulc_shift_height);
-		//vykresleni jednotlivych ramecku		
+
+	//vykresleni jednotlivych ramecku		
 	for (int j=0; j < doc->rows; j++){
 		for (int i=0; i < doc->columns; i++){
 			if ((current_page+i+j*doc->columns < doc->number_pages) &&
@@ -204,6 +205,17 @@ void render(document_t *doc){
 	}
 	
 }
+
+void key_crop(){
+  	if (is_fullscreen)
+		return;
+	int space_width,space_height;
+	compute_space(document,&space_width,&space_height);
+	gdk_window_resize(window,
+			document->columns*space_width + (document->columns-1)*margin,
+			document->rows*space_height + (document->rows-1)*margin);
+}
+
 void expose(){
 	switch(mode){
 		case START:

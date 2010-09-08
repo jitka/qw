@@ -37,11 +37,11 @@ static number_char number_chars[] = {
 	{ GDK_Page_Up, key_jump_up },
         { GDK_o, key_this_page_has_number },
 	{ GDK_c, key_set_columns},
-	{ GDK_r, key_set_rows},
+	{ GDK_l, key_set_rows},
 	{ GDK_e, key_presentation_mode },
 };
 
-//jednopismenka
+//jednopismenka pozor tohle se pusti opravdu _vzdy_
 static command_char basic_command_chars[] = {
 	{ GDK_space, key_down }, 	// dolu o 1 stranku
 	{ GDK_BackSpace, key_down },	// nahoru o 1 stranku
@@ -65,6 +65,7 @@ static command_char page_command_chars[] = {
 	{ GDK_Page_Down, key_screan_down },	// dolu o tabulku
 	{ GDK_Page_Up, key_screan_up },		// nahoru o tabulku
 	{ GDK_z, key_zoom_mode },
+	{ GDK_u, key_crop},
 };
 static command_char zoom_command_chars[] = {
 	{ GDK_Escape, key_page_mode },
@@ -82,7 +83,6 @@ void aplicate_function(guint keyval, command_char *arr, int count){
 }
 
 void handling_key(guint keyval){
-	aplicate_function(keyval,basic_command_chars,sizeof(basic_command_chars)/sizeof(basic_command_chars[0]));
 	switch(mode){
 		case START:
 			break;
@@ -120,6 +120,7 @@ void handling_key(guint keyval){
 			aplicate_function(keyval,zoom_command_chars,sizeof(zoom_command_chars)/sizeof(zoom_command_chars[0]));
 			break;
 	}
+	aplicate_function(keyval,basic_command_chars,sizeof(basic_command_chars)/sizeof(basic_command_chars[0]));
 }
 
 void handling_click(int x, int y){

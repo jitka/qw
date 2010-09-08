@@ -1,3 +1,5 @@
+	pdf
+ps
 	jednoduché 'neokýnko' bez lištičky, tlačítek
 víc jazyků
 vykresleni par stranek dopredu - je-li potreba
@@ -5,21 +7,21 @@ vykresleni par stranek dopredu - je-li potreba
 	velikosti obrázků nebo s černým rámečkem
 volitelne - pamatovat si nastevi tohoto pdf z minula..
 	ovládání písmenky, myš jen při výběru, určování pozice
-pismenko, ktere oreze okno na velikost pdf nebo orezavat vzdy
+pismenko, ktere oreze okno na velikost pdf
 nastavení písmenek v souboru
 nastavitelné výchozí chování
 	dát stránce číslo -> přečíslování
-logické číslování
 záložky
 	skok na stránku
 	automaticky sledovat změny + r
 	skákat po víc stránkách
 otevrit poklepanim/ entrem v mc
 	cela obrazovka
-rezimy:
 	-tabulka
--az moc velke priblizeni 1 strany, 
--prezentace s casem z pdf ci nastavenym
+z poklepani otevrit stranku
+-az moc velke priblizeni 1 strany,
+sipky, mys, skrolovatko
+	-prezentace
 mereni
 ukazovat co pisu
 	mit ikonku
@@ -28,7 +30,3 @@ výběr textu
 hypertextové odkazy
 hledání
 horni listiska - nechci radsi psat pres pdf
-michal : 
-maximalni zoom
-posouvat drzenim mysi, mezernik
-skrolovatkem

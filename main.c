@@ -15,7 +15,6 @@
 
 //global
 view_mode_t mode = START;
-static int is_fullscreen = FALSE;
 int current_page = 0;
 static int page_number_shift = -1; //lide pocitaji od 1
 static guint timer_id;
@@ -27,8 +26,9 @@ int key_cancel_waiting = TRUE;
 int margin = 20; //sirka mezery v pixelech
 int start_window_width = 400;
 int start_window_height = 500;
-int start_window_maximalise = FALSE;
-int start_window_fullscrean = FALSE;
+//int start_window_maximalise = FALSE;
+//int start_window_fullscrean = FALSE;
+//pri pousteni prezentace nastavit fullscrean
 
 //render veci co po reloudu zustavaji
 extern document_t *document;
@@ -42,6 +42,9 @@ static time_t modification_time;
 GMainLoop *mainloop;
 GdkWindow *window;
 GdkGC *gdkGC;
+int is_fullscreen = FALSE;
+int window_width;
+int window_height;
 
 
 /////////////////////////////////////////////////////////////////
@@ -197,9 +200,18 @@ static void event_func(GdkEvent *ev, gpointer data) {
 				break;
 			}
 		case GDK_CONFIGURE: //zmena pozici ci velikosti-zavola exspose
-			render(document);		
-			expose();
-			break;
+			{
+				int w_width, w_height;
+				gdk_drawable_get_size(window,&w_width,&w_height);
+				if (window_width != w_width || window_height != w_height){
+					//zmenila se velkost okna
+					window_width = w_width;
+					window_height = w_height;
+					render(document);		
+					expose();
+				}
+				break;
+			}
 		case GDK_EXPOSE:
 			//rekne mi kolik jich je ve fronte-> zabijeni zbytecnych rendrovani
 			switch (mode) {
@@ -291,6 +303,9 @@ int main(int argc, char * argv[]) {
 	);
 	gdkGC  = gdk_gc_new(window);
 
+	window_width = start_window_width;
+	window_height = start_window_height;
+
 	//ikona
 	GdkPixmap* icon_pixmap = gdk_pixmap_create_from_xpm(window, NULL, NULL, "icon.xpm");
 	GdkPixbuf * icon_pixbuf = gdk_pixbuf_get_from_drawable( NULL, icon_pixmap, colormap, 0,0, 0,0, 32,32);
@@ -300,7 +315,6 @@ int main(int argc, char * argv[]) {
 	//titulek
 	gdk_window_set_title(window,"huiii");
 
-		//gdk_window_fullscreen(window);
 	gdk_window_show(window);
 	gdk_event_handler_set(event_func, NULL, NULL);
 	mainloop = g_main_loop_new(g_main_context_default(), FALSE);	

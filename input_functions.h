@@ -23,3 +23,4 @@ void click_position(int x, int y);
 void key_page_mode();
 void key_zoom_mode();
 void key_presentation_mode(int time);
+void key_crop();
