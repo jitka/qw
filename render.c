@@ -6,7 +6,7 @@
 #include "render.h"
 #include "settings.h"
 #define min(A,B) ( (A) < (B) ? (A) : (B) )
-//doladit vetsi tabulky
+
 extern int current_page;
 document_t *document;
 
@@ -63,16 +63,16 @@ void render_get_size(document_t * doc, int number_page, double *width, double *h
 	
 }
 
-void render_page(document_t * doc, int number_page, int space_width, int space_height, int space_shift_w, int space_shift_h){
+void render_page(document_t * doc, int page_number, int space_width, int space_height, int space_shift_w, int space_shift_h){
 	//vyrendruje stranku doprosted krabicky
 	int black_w,black_h; //docasne
 	double page_width,page_height;
-	render_get_size(doc,number_page,&page_width,&page_height);
+	render_get_size(doc,page_number,&page_width,&page_height);
 	
 	pixbuf_item *tmp = &(doc->pixbufs_displayed[doc->pixbufs_displayed_length]);
 
-	tmp->page_number = number_page;
-	tmp->rotation = (doc->pages[number_page].rotation+doc->rotation) % 360;
+	tmp->page_number = page_number;
+	tmp->rotation = (doc->pages[page_number].rotation+doc->rotation) % 360;
 	if (space_width*page_height < page_width*space_height){
 		//šířka /width je stejná
 		tmp->width = space_width;
@@ -163,7 +163,7 @@ void render_mode_page(document_t *doc){
 					(current_page+i+j*doc->columns >= 0)){
 				render_page(
 						doc,//document_t * doc,
-						current_page+i+j*doc->columns,//int number_page,	
+						current_page+i+j*doc->columns,//int page_number,	
 						space_width,space_height,//int space_width, int space_height
 						ulc_shift_width + i * (space_width + margin),
 						ulc_shift_height + j * (space_height + margin));//int space_shift_w, int space_shift_h)
@@ -234,24 +234,20 @@ void render_get_relative_position(
 		int *page,
 		int *relative_x, int *relative_y,
 		int *space_height, int *space_width){
-//swich(state)
-}
-
-void expose_pixbufs(gpointer _item, gpointer _){
-	_ = NULL;
-	pixbuf_item *item = _item;
-	gdk_pixbuf_render_to_drawable(
-			item->pixbuf,
-			window,//GdkDrawable *drawable,
-			gdkGC, //GdkGC *gc,
-			0,0, //vykreslit cely pixbuf
-			item->shift_width,
-			item->shift_height, //posunuti
-			item->width, //rozmery
-			item->height,
-			GDK_RGB_DITHER_NONE, //fujvec nechci
-			0,0);		
-	
+	*page = -1;
+	for(int i=0; i<document->pixbufs_displayed_length; i++){
+		pixbuf_item *item = &(document->pixbufs_displayed[i]);
+		if (	
+				item->shift_width < clicked_x &&
+				item->shift_height < clicked_y &&
+				item->width + item->shift_width > clicked_x &&
+				item->height + item->shift_height > clicked_y
+		   ){
+			*page = item->page_number;
+		}
+		break;
+		
+	}
 }
 
 void expose(){
@@ -271,4 +267,3 @@ void expose(){
 
 	}
 }
-	

@@ -189,7 +189,7 @@ void click_distance(int first_x, int first_y, int second_x, int second_y){
 	int height,width;
 	render_get_relative_position(first_x,first_y,&page_1,&x_1,&y_1,&height,&width);
 	render_get_relative_position(second_x,second_y,&page_2,&x_2,&y_2,&height,&width);
-	printf("page 1: %d\n page 2: %d\n",page_1,page_2);
+	printf("page 1: %d\n page 2: %d\n",page_1+1,page_2+1);
 //	printf(_("hui %f %f %d %d - %d %d\n"),document->pages[current_page].width,document->pages[current_page].height,first_x,first_y,second_x,second_y);
 }
 void click_position(int x, int y){
