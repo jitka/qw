@@ -5,6 +5,7 @@
 #include <unistd.h> //cwd
 #include <getopt.h> //parametry
 #include <libintl.h> //preklady
+#include <gdk-pixbuf/gdk-pixbuf.h> //kvuli ikonce
 //#include <gdk/gdk.h> //okynka,poppler.h pixbuffer.h
 //#include <glib-2.0/glib.h>
 #include "poppler.h" //open_file
@@ -329,8 +330,7 @@ int main(int argc, char * argv[]) {
 	window_height = start_window_height;
 
 	//ikona
-	GdkPixmap* icon_pixmap = gdk_pixmap_create_from_xpm(window, NULL, NULL, "icon.xpm");
-	GdkPixbuf * icon_pixbuf = gdk_pixbuf_get_from_drawable( NULL, icon_pixmap, colormap, 0,0, 0,0, 32,32);
+	GdkPixbuf * icon_pixbuf = gdk_pixbuf_new_from_file("icon.png",NULL);
 	GList* icons = g_list_append(NULL,icon_pixbuf);	
 	gdk_window_set_icon_list(window,icons);
 
