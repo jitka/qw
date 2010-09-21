@@ -111,6 +111,9 @@ void key_jump_up(int diff){ 	change_page(current_page - diff);}
 void key_jump_down(int diff){ 	change_page(current_page + diff);}
 void key_this_page_has_number(int printed_number){ 	page_number_shift = -printed_number+current_page;}
 
+void key_zoom_in(){ 	document->scale/=1.5;}
+void key_zoom_out(){ 	document->scale/=1.5;}
+
 void key_quit(){
 	gdk_event_put( gdk_event_new(GDK_DELETE));
 }

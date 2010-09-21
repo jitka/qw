@@ -17,7 +17,7 @@ int click_y;
 void wait_distance(){ 	state = DISTANCE_1;}
 void wait_position(){ 	state = POSITION;}
 
-struct {
+static struct {
 	unsigned int mode_mask;
 	guint pressed_char;
 	void (*function)(int);
@@ -32,23 +32,6 @@ struct {
 	{ PAGE|PRESENTATION, GDK_c, key_set_columns},
 	{ PAGE|PRESENTATION, GDK_l, key_set_rows},
 	{ PAGE|PRESENTATION, GDK_e, key_presentation_mode },
-};
-
-struct number_char{
-	guint pressed_char;
-	void (*function)(int);
-};
-	
-//pocislove pismenka
-static struct number_char number_chars2[] = {
-	{ GDK_p, key_jump },
-	{ GDK_P, key_jump },
-	{ GDK_Page_Down, key_jump_down },
-	{ GDK_Page_Up, key_jump_up },
-        { GDK_o, key_this_page_has_number },
-	{ GDK_c, key_set_columns},
-	{ GDK_l, key_set_rows},
-	{ GDK_e, key_presentation_mode },
 };
 
 static struct {
@@ -81,6 +64,8 @@ static struct {
 	{ PAGE|PRESENTATION, GDK_u, key_crop},
 	//zoom
 	{ ZOOM, GDK_Escape, key_page_mode },
+	{ ZOOM, GDK_plus, key_zoom_in },
+	{ ZOOM, GDK_minus, key_zoom_out },
 };
 
 void handling_key(guint keyval){
@@ -122,26 +107,21 @@ void handling_key(guint keyval){
 }
 
 void handling_click(int x, int y){
-	switch(mode){
-		case PAGE:
-			switch(state){
-				case BASIC: case NUMBERS:
-					break;
-				case DISTANCE_1:
-					click_x=x;
-					click_y=y;
-					state=DISTANCE_2;
-					break;
-				case DISTANCE_2:
-					click_distance(click_x,click_y,x,y);
-					state=BASIC;
-					break;
-				case POSITION:
-					click_position(x,y);
-					state=BASIC;
-					break;
-			}
-		default:
+	switch(state){
+		case BASIC: case NUMBERS:
+			break;
+		case DISTANCE_1:
+			click_x=x;
+			click_y=y;
+			state=DISTANCE_2;
+			break;
+		case DISTANCE_2:
+			click_distance(click_x,click_y,x,y);
+			state=BASIC;
+			break;
+		case POSITION:
+			click_position(x,y);
+			state=BASIC;
 			break;
 	}
 }
