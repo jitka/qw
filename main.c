@@ -31,7 +31,8 @@ int maximum_displayed = 1000;
 int minimum_width = 10;
 int minimum_height = 10;
 int max_size_of_cache = 50000000;
-int zoom_speed = 1.5;
+double zoom_speed = 1.5;
+int zoom_shift = 10; //o kolik posouvaji sipky
 //int start_window_maximalise = FALSE;
 //int start_window_fullscrean = FALSE;
 //pri pousteni prezentace nastavit fullscrean
@@ -111,13 +112,13 @@ void key_jump_down(int diff){ 	change_page(current_page + diff);}
 void key_this_page_has_number(int printed_number){ 	page_number_shift = -printed_number+current_page;}
 
 
-void key_zoom_in(){ 	change_scale(document->scale*zoom_speed);};
-void key_zoom_out(){ 	change_scale(document->scale/zoom_speed);};
+void key_zoom_in(){ 	change_scale(document->scale*zoom_speed);}
+void key_zoom_out(){ 	change_scale(document->scale/zoom_speed);}
 
-void key_zoom_right(){};
-void key_zoom_left(){};
-void key_zoom_down(){};		
-void key_zoom_up(){};
+void key_zoom_right(){ 	document->zoom_shift_w += zoom_shift; render(document); expose();}
+void key_zoom_left(){ 	document->zoom_shift_w -= zoom_shift; render(document); expose();}
+void key_zoom_down(){ 	document->zoom_shift_h += zoom_shift; render(document); expose();}
+void key_zoom_up(){ 	document->zoom_shift_h -= zoom_shift; render(document); expose();}
 
 void key_quit(){
 	gdk_event_put( gdk_event_new(GDK_DELETE));
