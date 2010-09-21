@@ -17,6 +17,10 @@ void key_zoom_mode();
 void key_crop();
 void key_zoom_in();
 void key_zoom_out();
+void key_zoom_right();
+void key_zoom_left();
+void key_zoom_down();		
+void key_zoom_up();
 
 void key_jump(int);
 void key_jump_up(int);

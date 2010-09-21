@@ -30,8 +30,8 @@ document_t * document_create_databse(){
 }
 
 void render_set_max_columns(document_t *doc){
-	doc->max_columns = (window_width + margin) / (minimal_width + margin);
-	doc->max_rows = (window_height + margin) / (minimal_height + margin);
+	doc->max_columns = (window_width + margin) / (minimum_width + margin);
+	doc->max_rows = (window_height + margin) / (minimum_height + margin);
 }
 
 void document_delete_database(document_t *old){
@@ -302,8 +302,8 @@ void change_scale(double scale){
 	double width,height;
 	render_get_size(document,current_page,&width,&height);
 	if (
-			(floor(width*scale) > minimal_width) &&
-			(floor(height*scale) > minimal_height) &&
+			(floor(width*scale) > minimum_width) &&
+			(floor(height*scale) > minimum_height) &&
 			(floor(width*scale) * floor(height*scale) * 4 < max_size_of_cache) ){
 		document->zoom_shift_w += (int)( floor(width*document->scale) - floor(width*scale))/2;
 		document->zoom_shift_h += (int)( floor(height*document->scale) - floor(height*scale))/2;

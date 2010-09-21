@@ -68,6 +68,10 @@ static struct {
 	{ ZOOM, GDK_KP_Add, key_zoom_in },
 	{ ZOOM, GDK_minus, key_zoom_out },
 	{ ZOOM, GDK_KP_Subtract, key_zoom_out },
+	{ ZOOM, GDK_Right, key_zoom_right },	
+	{ ZOOM, GDK_Left, key_zoom_left },		
+	{ ZOOM, GDK_Down, key_zoom_down },		
+	{ ZOOM, GDK_Up, key_zoom_up },		
 };
 
 void handling_key(guint keyval){

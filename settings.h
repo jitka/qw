@@ -13,6 +13,7 @@ extern int margin; //sirka mezery v pixelech
 extern int start_window_width;
 extern int start_window_height;
 extern int maximum_displayed;
-extern int minimal_width;
-extern int minimal_height;
+extern int minimum_width;
+extern int minimum_height;
 extern int max_size_of_cache;
+extern int zoom_speed;
