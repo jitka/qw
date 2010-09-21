@@ -18,24 +18,24 @@ void pixbuf_free(gpointer data, gpointer user_data){
 void pixbuf_delete_database(pixbuf_database *db){
 	g_list_foreach(db->cache,pixbuf_free,NULL);
 	g_list_free(db->cache);
+	db->cache = NULL;
+	db->cache_size = 0;
 }
 
 void pixbuf_delete_displayed(pixbuf_database *cache, pixbuf_item *arr, int length){
 	//predat do cache
-/*	for(int i=0; i<length; i++){
+	for(int i=0; i<length; i++){
 		pixbuf_item *tmp = malloc(sizeof(pixbuf_item));
 		memcpy(tmp,&arr[i],sizeof(pixbuf_item));
 		cache->cache = g_list_append(cache->cache,tmp);
 		cache->cache_size += 4 * tmp->width * tmp->height;
 		//g_object_unref(arr[i].pixbuf);
 	}
-*///	if (cache->cache_size > max_size_of_cache){
+	if (cache->cache_size > max_size_of_cache){
 		//provizorne zahodi vse
-//		pixbuf_delete_database(cache);
-//		cache = NULL;
-//	}
-	for(int i=0; i<length; i++)
-		g_object_unref(arr[i].pixbuf);	
+		pixbuf_delete_database(cache);
+		cache = NULL;
+	}
 }
 
 void pixbuf_render(pixbuf_database *cache,pixbuf_item *it){
