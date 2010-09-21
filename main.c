@@ -20,12 +20,10 @@ view_mode_t mode = START;
 int current_page = 0;
 static int page_number_shift = -1; //lide pocitaji od 1
 static guint timer_id;
-//tady budou rezimy a veskere veci
-//co se reloudem nemeni
 
 //settings
 int key_cancel_waiting = TRUE;
-int keep_scale = TRUE;
+int keep_scale = TRUE; //otestovat
 int margin = 5; //sirka mezery v pixelech
 int start_window_width = 400;
 int start_window_height = 500;
@@ -93,7 +91,7 @@ void change_page(int new){
 		return;
 	current_page=new;
 	if (!keep_scale)
-		document->scale = UNKNOWN;
+		document->scale = UNKNOWN; //,posunuti
 	render(document);
 	expose();
 }
@@ -111,7 +109,7 @@ void key_jump_up(int diff){ 	change_page(current_page - diff);}
 void key_jump_down(int diff){ 	change_page(current_page + diff);}
 void key_this_page_has_number(int printed_number){ 	page_number_shift = -printed_number+current_page;}
 
-void key_zoom_in(){ 	document->scale/=1.5;}
+void key_zoom_in(){ 	document->scale/=1.5;} //vhodne posunout
 void key_zoom_out(){ 	document->scale/=1.5;}
 
 void key_quit(){
@@ -170,7 +168,7 @@ void key_page_mode(){
 	mode=PAGE; 
 	render(document); expose();
 }
-void key_zoom_mode(){	
+void key_zoom_mode(){//,posunuti	
 	if (mode == PRESENTATION)
 		 g_source_remove (timer_id);	
 	mode=ZOOM; 

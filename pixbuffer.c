@@ -36,13 +36,13 @@ void pixbuf_delete_displayed(pixbuf_database *cache, pixbuf_item *arr, int lengt
 	}
 }
 
-void pixbuf_render(pixbuf_database *cache,pixbuf_item *db){
+void pixbuf_render(pixbuf_database *cache,pixbuf_item *it){
 //	kouknout do cache, vyndat/rendrovat
 	pdf_render_page_to_pixbuf(
-			&db->pixbuf,
-			db->page_number,
-			db->width, db->height,
-			db->scale,
-			db->rotation);
+			&it->pixbuf,
+			it->page_number,
+			it->width, it->height,
+			it->scale,
+			it->rotation);
 }
 

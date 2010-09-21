@@ -22,6 +22,8 @@ typedef struct document_t{
 	int max_columns;
 	int max_rows;
 	double scale;
+	int zoom_shift_h;
+	int zoom_shift_w;
 } document_t;
 
 document_t * document_create_databse();

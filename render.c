@@ -100,6 +100,7 @@ void render_page(document_t * doc, int page_number, int space_width, int space_h
 	if (mode == ZOOM)
 		doc->scale = tmp->scale;
 
+
 	//cisteni
 	gdk_window_clear_area_e(
 			window,
@@ -201,7 +202,6 @@ void render_mode_page(document_t *doc){
 
 }
 
-
 void render_mode_zoom(document_t *doc){
 	//vykresli jednu stranku
 	//scale rotation posunuti z doc
@@ -210,6 +210,13 @@ void render_mode_zoom(document_t *doc){
 		render_page(doc, current_page, window_width, window_height, 0, 0);
 	else{
 		gdk_window_clear(window);
+		pixbuf_item *tmp = &(doc->pixbufs_displayed[0]);
+		tmp->page_number = current_page;
+		tmp->width=doc->pages[current_page].width*doc->scale,
+		tmp->height=doc->pages[current_page].height*doc->scale,
+		tmp->scale = doc->scale;
+		tmp->rotation = (doc->pages[current_page].rotation+doc->rotation) % 360;
+	//	pixbuf_render(&doc->pixbufs_cache,tmp);
 	}
 }
 
