@@ -23,14 +23,14 @@ static guint timer_id;
 
 //settings
 int key_cancel_waiting = TRUE;
-int keep_scale = TRUE; //otestovat
+int keep_scale = FALSE;
 int margin = 5; //sirka mezery v pixelech
 int start_window_width = 400;
 int start_window_height = 500;
 int maximum_displayed = 1000;
 int minimal_width = 10;
 int minimal_height = 10;
-int max_size_of_cache = 2000000;
+int max_size_of_cache = 50000000;
 //int start_window_maximalise = FALSE;
 //int start_window_fullscrean = FALSE;
 //pri pousteni prezentace nastavit fullscrean
@@ -91,7 +91,7 @@ void change_page(int new){
 		return;
 	current_page=new;
 	if (!keep_scale)
-		document->scale = UNKNOWN; //,posunuti
+		document->scale = UNKNOWN;
 	render(document);
 	expose();
 }
@@ -109,8 +109,9 @@ void key_jump_up(int diff){ 	change_page(current_page - diff);}
 void key_jump_down(int diff){ 	change_page(current_page + diff);}
 void key_this_page_has_number(int printed_number){ 	page_number_shift = -printed_number+current_page;}
 
-void key_zoom_in(){ 	document->scale/=1.5;} //vhodne posunout
-void key_zoom_out(){ 	document->scale/=1.5;}
+
+void key_zoom_in(){ 	change_scale(document->scale*1.5);};
+void key_zoom_out(){ 	change_scale(document->scale/1.5);};
 
 void key_quit(){
 	gdk_event_put( gdk_event_new(GDK_DELETE));
@@ -128,14 +129,12 @@ void key_fullscreen(){
 
 void key_rotate(){ 
 	document->pages[current_page].rotation = (document->pages[current_page].rotation + 90) % 360;
-	render(document);
-	expose();
+	render(document); expose();
 }
 
 void key_rotate_document(){
 	document->rotation = (document->rotation+90)%360; 
-	render(document);
-	expose();
+	render(document); expose();
 }
 
 void key_reload(){
@@ -165,6 +164,8 @@ void key_set_rows(int r){
 void key_page_mode(){
 	if (mode == PRESENTATION)
 		 g_source_remove (timer_id); //odstrani vlakno casovace	
+	if (!keep_scale) //v zoomu
+		document->scale = UNKNOWN;
 	mode=PAGE; 
 	render(document); expose();
 }
@@ -186,8 +187,8 @@ void key_presentation_mode(int time){
 			NULL
 	);
 	mode=PRESENTATION;
-	render(document);
-	expose();
+	//render(document);
+	//expose();
 }
 
 void click_distance(int first_x, int first_y, int second_x, int second_y){

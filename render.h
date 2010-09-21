@@ -31,6 +31,7 @@ void document_delete_database(document_t *old);
 void render_set_max_columns(document_t *doc);
 void render(struct document_t * document);
 void expose();
+void change_scale(double scale);
 void render_get_relative_position(
 		int clicked_x, int clicked_y,
 		int *page,

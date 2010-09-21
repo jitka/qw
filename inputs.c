@@ -65,7 +65,9 @@ static struct {
 	//zoom
 	{ ZOOM, GDK_Escape, key_page_mode },
 	{ ZOOM, GDK_plus, key_zoom_in },
+	{ ZOOM, GDK_KP_Add, key_zoom_in },
 	{ ZOOM, GDK_minus, key_zoom_out },
+	{ ZOOM, GDK_KP_Subtract, key_zoom_out },
 };
 
 void handling_key(guint keyval){

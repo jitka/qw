@@ -17,6 +17,8 @@ document_t * document_create_databse(){
 	doc->columns = 1;
 	doc->rows = 1;
 	doc->scale = UNKNOWN;
+	doc->zoom_shift_h=0;
+	doc->zoom_shift_w=0;
 	pixbuf_create_database(&doc->pixbufs_cache);
 	doc->pages = calloc(doc->number_pages, sizeof(struct pdf_page));
 	doc->pixbufs_displayed = calloc(maximum_displayed, sizeof(pixbuf_item));
@@ -206,17 +208,25 @@ void render_mode_zoom(document_t *doc){
 	//vykresli jednu stranku
 	//scale rotation posunuti z doc
 	//  nastavitelne mazani scale pri pagedown
-	if (doc->scale == UNKNOWN)
+	if (doc->scale == UNKNOWN){
+		//zistakt optimalni!
 		render_page(doc, current_page, window_width, window_height, 0, 0);
-	else{
+		doc->zoom_shift_w = doc->pixbufs_displayed[0].shift_width;
+		doc->zoom_shift_h = doc->pixbufs_displayed[0].shift_height;
+	} else {
 		gdk_window_clear(window);
 		pixbuf_item *tmp = &(doc->pixbufs_displayed[0]);
 		tmp->page_number = current_page;
-		tmp->width=doc->pages[current_page].width*doc->scale,
-		tmp->height=doc->pages[current_page].height*doc->scale,
+		double width,height;
+		render_get_size(doc,current_page,&width,&height);
+		tmp->width=(int)floor(width*doc->scale),
+		tmp->height=(int)floor(height*doc->scale),
+		tmp->shift_width = document->zoom_shift_w;
+		tmp->shift_height = document->zoom_shift_h;
 		tmp->scale = doc->scale;
 		tmp->rotation = (doc->pages[current_page].rotation+doc->rotation) % 360;
-	//	pixbuf_render(&doc->pixbufs_cache,tmp);
+		pixbuf_render(&doc->pixbufs_cache,tmp);
+		doc->pixbufs_displayed_length = 1;
 	}
 }
 
@@ -285,5 +295,21 @@ void expose(){
 				GDK_RGB_DITHER_NONE, //fujvec nechci
 				0,0);		
 
+	}
+}
+
+void change_scale(double scale){
+	double width,height;
+	render_get_size(document,current_page,&width,&height);
+	if (
+			(floor(width*scale) > minimal_width) &&
+			(floor(height*scale) > minimal_height) &&
+			(floor(width*scale) * floor(height*scale) * 4 < max_size_of_cache) ){
+		document->zoom_shift_w += (int)( floor(width*document->scale) - floor(width*scale))/2;
+		document->zoom_shift_h += (int)( floor(height*document->scale) - floor(height*scale))/2;
+		document->scale=scale;
+		//posouvat!
+		render(document);
+		expose();
 	}
 }
