@@ -29,11 +29,13 @@ void pixbuf_delete_displayed(pixbuf_database *cache, pixbuf_item *arr, int lengt
 		cache->cache_size += 4 * tmp->width * tmp->height;
 		//g_object_unref(arr[i].pixbuf);
 	}
-*/	if (cache->cache_size > max_size_of_cache){
+*///	if (cache->cache_size > max_size_of_cache){
 		//provizorne zahodi vse
-		pixbuf_delete_database(cache);
-		cache = NULL;
-	}
+//		pixbuf_delete_database(cache);
+//		cache = NULL;
+//	}
+	for(int i=0; i<length; i++)
+		g_object_unref(arr[i].pixbuf);	
 }
 
 void pixbuf_render(pixbuf_database *cache,pixbuf_item *it){
