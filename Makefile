@@ -2,7 +2,7 @@ PKGS=poppler-glib
 CFL:=$(shell pkg-config --cflags $(PKGS))
 LFL:=$(shell pkg-config --libs $(PKGS))
 
-CFLAGS=-g -Wall -W -std=gnu99 $(CFL)
+CFLAGS=-g -DDEBUG -Wall -W -std=gnu99 $(CFL)
 CPPFLAGS=-g -Wall -W  $(CFL)
 LDFLAGS=$(LFL)
 

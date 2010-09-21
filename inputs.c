@@ -71,6 +71,38 @@ static command_char zoom_command_chars[] = {
 	{ GDK_Escape, key_page_mode },
 };
 
+struct {
+	unsigned int mode_mask;
+	guint pressed_char;
+	void (*function)(void);
+} command_chars[] = {
+	//vzdy
+	{ ~0, GDK_space, key_down }, 		// dolu o 1 stranku
+	{ ~0, GDK_BackSpace, key_down },	// nahoru o 1 stranku
+	{ ~0, GDK_Home, key_home },
+	{ ~0, GDK_End, key_end },
+	{ ~0, GDK_a, key_rotate },
+	{ ~0, GDK_A, key_rotate_document },
+	{ ~0, GDK_q, key_quit },
+	{ ~0, GDK_F11, key_fullscreen },
+	{ ~0, GDK_f, key_fullscreen },
+	{ ~0, GDK_r, key_reload },
+	//klikaci pismenka budou vzdy
+	{ PAGE, GDK_d, wait_distance },
+	{ PAGE, GDK_D, wait_position },
+	//tabulka
+	{ PAGE|PRESENTATION, GDK_Right, key_down }, 		// dolu o 1 stranku
+	{ PAGE|PRESENTATION, GDK_Left, key_up },		// nahoru o 1 stranku
+	{ PAGE|PRESENTATION, GDK_Down, key_row_down },		// dolu o 1 radu
+	{ PAGE|PRESENTATION, GDK_Up, key_row_up },		// nahoru o radu
+	{ PAGE|PRESENTATION, GDK_Page_Down, key_screan_down },	// dolu o tabulku
+	{ PAGE|PRESENTATION, GDK_Page_Up, key_screan_up },	// nahoru o tabulku
+	{ PAGE|PRESENTATION, GDK_z, key_zoom_mode },
+	{ PAGE|PRESENTATION, GDK_u, key_crop},
+	//zoom
+	{ ZOOM, GDK_Escape, key_page_mode },
+};
+
 void wait_distance(){ 	state = DISTANCE_1;}
 void wait_position(){ 	state = POSITION;}
 
@@ -83,44 +115,54 @@ void aplicate_function(guint keyval, command_char *arr, int count){
 }
 
 void handling_key(guint keyval){
-	switch(mode){
-		case START:
-			break;
-		case PRESENTATION:
-			key_page_mode();
-		case PAGE:
-			switch(state){
-				case BASIC:
-					aplicate_function(keyval,page_command_chars,sizeof(page_command_chars)/sizeof(page_command_chars[0]));
-					if ((keyval >= GDK_0) && (keyval <= GDK_9)){
-						state = NUMBERS;
-						number = keyval - GDK_0;
-					}	
+	if (mode == PRESENTATION)
+		key_page_mode();
+	switch(state){
+		case NUMBERS:
+			if ((keyval >= GDK_0) && (keyval <= GDK_9)){
+				number = number*10 + keyval - GDK_0;
+				return;
+			}
+			for (unsigned int i=0; i < sizeof(number_chars) / sizeof(number_chars[0]); i++)
+				if (number_chars[i].pressed_char == keyval) {
+					number_chars[i].function(number);
 					break;
-				case NUMBERS:
-					if ((keyval >= GDK_0) && (keyval <= GDK_9)){
-						number = number*10 + keyval - GDK_0;
-						break;
-					}
-					for (unsigned int i=0; i < sizeof(number_chars) / sizeof(number_chars[0]); i++)
-						if (number_chars[i].pressed_char == keyval) {
-							number_chars[i].function(number);
-							break;
-						}
-					state = BASIC;
+				}
+			state = BASIC;
+			return;
+		case BASIC:	
+			if ((keyval >= GDK_0) && (keyval <= GDK_9)){
+				state = NUMBERS;
+				number = keyval - GDK_0;
+				return;
+			}
 
+/*			for (unsigned int i=0; i < sizeof(command_chars)/sizeof(command_chars[0]); i++)
+				if ( command_chars[i].pressed_char == keyval &&
+						(command_chars[i].mode_mask & mode)
+						) {
+					command_chars[i].function();
 					break;
-				default:
-					if (key_cancel_waiting)
-						state = BASIC;
+				}		
+*/			aplicate_function(keyval,basic_command_chars,sizeof(basic_command_chars)/sizeof(basic_command_chars[0]));
+			switch(mode){
+				case START:
+					break;
+				case PRESENTATION:
+					break;
+				case PAGE:
+					aplicate_function(keyval,page_command_chars,sizeof(page_command_chars)/sizeof(page_command_chars[0]));
+					break;
+				case ZOOM:
+					aplicate_function(keyval,zoom_command_chars,sizeof(zoom_command_chars)/sizeof(zoom_command_chars[0]));
 					break;
 			}
 			break;
-		case ZOOM:
-			aplicate_function(keyval,zoom_command_chars,sizeof(zoom_command_chars)/sizeof(zoom_command_chars[0]));
+		default:
+			if (key_cancel_waiting)
+				state = BASIC;
 			break;
 	}
-	aplicate_function(keyval,basic_command_chars,sizeof(basic_command_chars)/sizeof(basic_command_chars[0]));
 }
 
 void handling_click(int x, int y){

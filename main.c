@@ -25,6 +25,7 @@ static guint timer_id;
 
 //settings
 int key_cancel_waiting = TRUE;
+int keep_scale = TRUE;
 int margin = 5; //sirka mezery v pixelech
 int start_window_width = 400;
 int start_window_height = 500;
@@ -91,6 +92,8 @@ void change_page(int new){
 	if (new <0 || new >= document->number_pages)
 		return;
 	current_page=new;
+	if (!keep_scale)
+		document->scale = UNKNOWN;
 	render(document);
 	expose();
 }

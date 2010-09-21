@@ -16,6 +16,7 @@ document_t * document_create_databse(){
 	doc->number_pages = pdf_get_number_pages();
 	doc->columns = 1;
 	doc->rows = 1;
+	doc->scale = UNKNOWN;
 	pixbuf_create_database(&doc->pixbufs_cache);
 	doc->pages = calloc(doc->number_pages, sizeof(struct pdf_page));
 	doc->pixbufs_displayed = calloc(maximum_displayed, sizeof(pixbuf_item));
@@ -95,6 +96,9 @@ void render_page(document_t * doc, int page_number, int space_width, int space_h
 
 	pixbuf_render(&doc->pixbufs_cache,tmp);
 	doc->pixbufs_displayed_length++;
+
+	if (mode == ZOOM)
+		doc->scale = tmp->scale;
 
 	//cisteni
 	gdk_window_clear_area_e(
@@ -197,10 +201,16 @@ void render_mode_page(document_t *doc){
 
 }
 
+
 void render_mode_zoom(document_t *doc){
-//	gint window_width,window_height;
-//	gdk_drawable_get_size(window,&window_width,&window_height);
-	gdk_window_clear(window);
+	//vykresli jednu stranku
+	//scale rotation posunuti z doc
+	//  nastavitelne mazani scale pri pagedown
+	if (doc->scale == UNKNOWN)
+		render_page(doc, current_page, window_width, window_height, 0, 0);
+	else{
+		gdk_window_clear(window);
+	}
 }
 
 void render(document_t *doc){

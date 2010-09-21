@@ -21,6 +21,7 @@ typedef struct document_t{
 	int rows;
 	int max_columns;
 	int max_rows;
+	double scale;
 } document_t;
 
 document_t * document_create_databse();
