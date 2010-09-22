@@ -1,6 +1,7 @@
 rozdelane: cache s maximem
 zaokrouhlovaci chyba: videt je pri prepnuti na zoom
-otaceni v zoomu
+predelat posunuti zoomu na stred, otaceni v zoomu
+zobrazene pixbufery na glist
 roztahovani okna resit
 rendrovat do neceho a na expoze kreslit jen kus
 	=vyresit kresleni mezer

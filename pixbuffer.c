@@ -52,13 +52,17 @@ int compare(gconstpointer a, gconstpointer b){
 void pixbuf_render(pixbuf_database *cache,pixbuf_item *it){
 //	kouknout do cache, vyndat/rendrovat
 	GList *tmp = g_list_find_custom(cache->glist,it,compare);
-	if (tmp != NULL)
+	if (tmp != NULL){
+		cache->glist = g_list_remove_link(cache->glist,tmp);
+		memcpy(it,tmp->data,sizeof(pixbuf_item));
 		printf("nalezeno\n");
-	pdf_render_page_to_pixbuf(
+	} else {
+		pdf_render_page_to_pixbuf(
 			&it->pixbuf,
 			it->page_number,
 			it->width, it->height,
 			it->scale,
 			it->rotation);
+	}
 }
 
