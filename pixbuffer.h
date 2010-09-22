@@ -15,8 +15,8 @@ typedef struct pixbuf_item{
 } pixbuf_item;
 
 typedef struct pixbuf_database{
-	GList *cache;
-	int cache_size; 
+	GList *glist;
+	int size; 
 } pixbuf_database;
 
 
