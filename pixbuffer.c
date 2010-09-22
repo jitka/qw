@@ -55,7 +55,6 @@ void pixbuf_render(pixbuf_database *cache,pixbuf_item *it){
 	if (tmp != NULL){
 		cache->glist = g_list_remove_link(cache->glist,tmp);
 		memcpy(it,tmp->data,sizeof(pixbuf_item));
-		printf("nalezeno\n");
 	} else {
 		pdf_render_page_to_pixbuf(
 			&it->pixbuf,

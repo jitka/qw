@@ -33,14 +33,9 @@ int minimum_height = 10;
 int max_size_of_cache = 2000000; //v poctu pixelu
 double zoom_speed = 1.5;
 int zoom_shift = 10; //o kolik posouvaji sipky
-//int start_window_maximalise = FALSE;
-//int start_window_fullscrean = FALSE;
-//pri pousteni prezentace nastavit fullscrean
-//na zacatku zarovnat
+int presentation_in_fullscreen = FALSE;
 
-//render veci co po reloudu zustavaji
 extern document_t *document;
-//extern document_t new_document;
 
 //file
 static char * file_path;
@@ -126,6 +121,8 @@ void key_quit(){
 
 void key_fullscreen(){
 	if (is_fullscreen){
+		if (presentation_in_fullscreen && mode==PRESENTATION)
+			return;
 		gdk_window_unfullscreen(window);
 		is_fullscreen = 0;
 	} else {
@@ -188,14 +185,14 @@ static gboolean timeout_callback (gpointer data){
 	return TRUE; //volat se znova
 }
 void key_presentation_mode(int time){ 
+	if (presentation_in_fullscreen && !is_fullscreen)
+		key_fullscreen();
 	timer_id = gdk_threads_add_timeout(
 			time*1000,
 			timeout_callback,
 			NULL
 	);
 	mode=PRESENTATION;
-	//render(document);
-	//expose();
 }
 
 void click_distance(int first_x, int first_y, int second_x, int second_y){
@@ -255,9 +252,6 @@ static void event_func(GdkEvent *ev, gpointer data) {
 		case GDK_KEY_PRESS:
 			handling_key(ev->key.keyval);
 			break;
-		case GDK_SCROLL:
-//			printf("SC\n");
-			break;
 		case GDK_BUTTON_PRESS:
 			if (ev->button.button == 1)
 				handling_click((int)ev->button.x,(int)ev->button.y);
@@ -286,10 +280,10 @@ static void event_func(GdkEvent *ev, gpointer data) {
 				break;
 			}
 		case GDK_EXPOSE:
-			//rekne mi kolik jich je ve fronte-> zabijeni zbytecnych rendrovani
+			//todo: rekne mi kolik jich je ve fronte-> zabijeni zbytecnych rendrovani
 			switch (mode) {
 				case START:
-					//jeste by se tu dal vlozit nejaky hezky obrazek
+					//todo: jeste by se tu dal vlozit nejaky hezky obrazek
 					mode = PAGE;
 					key_reload();
 				default:
@@ -312,7 +306,6 @@ int main(int argc, char * argv[]) {
 	const char *short_options = "hi:p:";
 	const struct option long_options[] = {
 		{ "help",    0, NULL, 'h' },
-		{ "info",   1, NULL, 'i' },
 		{ "page",   1, NULL, 'p' },
 		{ NULL,      0, NULL,  0  }
 	};
@@ -323,15 +316,37 @@ int main(int argc, char * argv[]) {
 		switch(next_option){
 			case 'h': 
 				printf(_("Nápověda qw: \n"
-					" šipečky posunuji, okynko se da zvětšit\n"
 					" -h 	-help 	nápověda\n"
 					" -p 	-page 	počáteční stránka\n"
-					" -i 	-info 	info dokumentu\n"));
-				return 0;
-			case 'i':
-				open_file(optarg);
-//				printf("Stran: %d\n",pdf_num_pages);
-//printf("Strana: %d sirka: %f cm vyska: %f cm\n",current_page,document->pages[current_page].width*0.035278,document->pages[current_page].height*0.035278);
+					" \n"
+					"Ovladání:\n"
+					" fungují běžné pohybové klávesy\n"
+					" 2p posune na stranu dvě\n"
+					" 3 + PageDown posune o dvě strany dál\n"
+					" 42o nastavi cislo aktualni stranky na 42 a ostatni podobne precisluje\n"
+					" r znovu nacte soubor\n"
+					" a otoci vsechny stranky o 90 stupňů\n"
+					" A otočí pouze aktuální stránku o 90 stupňů\n"
+					" f nebo F11 přepne na fullscrean\n"
+					" q ukončí program\n"
+					" \n"
+					"program má tři mody:\n"
+					"   tabulka:\n"
+					" 	je základní stav\n"
+					" 	2c nastavi dve strany vedle sebe\n"
+					" 	3l nastavi tri radky\n"
+					" 	d a dvě kliknutí změří vzdálenost\n"
+					" 	D a kliknutí napíše pozici\n"
+					" 	c ořeže okno na použitelnou velikost\n"
+					" 	z přepne do zoom modu\n"
+					" 	1e spusti mod prezentace s 1s intervalem\n"
+					"   prezentace:\n"
+					" 	vypada jako tabulka samy se posouvaji stranky\n"
+					" 	libovolnou klavesou jde vyskočit\n"
+					"   zoom:\n"
+					" 	+- přiblužuje\n"
+					" 	šipečky posouvaji stránku\n"
+					));
 				return 0;
 			case 'p':
 				current_page = atoi(optarg) - 1; //lide cisluji od 1
