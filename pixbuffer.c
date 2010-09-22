@@ -29,15 +29,11 @@ void pixbuf_delete_displayed(pixbuf_database *cache, pixbuf_item *arr, int lengt
 		cache->size += tmp->width * tmp->height;
 	}
 	while (cache->size > max_size_of_cache){
-	//	pixbuf_delete_database(cache);
-	//	cache=NULL;
-	//	g list neni tak hezky jak se zda tohle cele fuj jen maze prvni prvek
-		GList *fuj_fuj = g_list_first(cache->glist);
-		pixbuf_item *first = fuj_fuj->data;
-//		cache->cache_size -= first->width * first->height;
-		pixbuf_free(first,&cache->size);
-		cache->glist = g_list_remove_link(cache->glist,fuj_fuj);
-		g_list_free_1(fuj_fuj);
+		//smaze první polozku
+		GList *first = g_list_first(cache->glist);
+		cache->glist = g_list_remove_link(cache->glist,first);
+		pixbuf_free(first->data,&cache->size);
+		g_list_free_1(first);
 	}
 }
 
