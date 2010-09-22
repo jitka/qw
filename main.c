@@ -402,6 +402,7 @@ int main(int argc, char * argv[]) {
 	//titulek
 	gdk_window_set_title(window,"huiii");
 
+	//spusteni programu
 	gdk_window_show(window);
 	gdk_event_handler_set(event_func, NULL, NULL);
 	mainloop = g_main_loop_new(g_main_context_default(), FALSE);	

@@ -50,12 +50,11 @@ int compare(gconstpointer a, gconstpointer b){
 
 }
 void pixbuf_render(pixbuf_database *cache,pixbuf_item *it){
-//	kouknout do cache, vyndat/rendrovat
 	GList *tmp = g_list_find_custom(cache->glist,it,compare);
-	if (tmp != NULL){
+	if (tmp != NULL){ // pokud byla v cachy vynda se
 		cache->glist = g_list_remove_link(cache->glist,tmp);
 		memcpy(it,tmp->data,sizeof(pixbuf_item));
-	} else {
+	} else { // jinak se vykresli
 		pdf_render_page_to_pixbuf(
 			&it->pixbuf,
 			it->page_number,

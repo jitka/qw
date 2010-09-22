@@ -1,0 +1,47 @@
+Pragram slouží k zobrazování pdf.
+
+Na tvorbu okýnek používá GDK a na samotné vykreslení pdf knihovnu Poppler.
+Program začíná v main.c. Zpracuje parametry a pokud dostane funkční pdf 
+zobrazí okno a počká na první eventy.
+
+Nastavování chování je zatím požné pouze v proměných v main.c
+
+Struktury:
+Kromě spousty drobných proměných poměť zabýrají hlavně dvě věci. Document,
+což je struktura ve které jsou informace o samontém dokumentu a jeho zobrazení.
+Za zmínku stojí dvě položky. V pixbuf_displayed jsou ukazatelé na bitmapy 
+vykreslených stranek a jim příslušné vylikosti, pro zjednodušení vykreslení je tam
+i místo na strance. V pixbuf_cache jsou aktuálně nepoužívané, ale vykreslené bitmapy.
+Struktury najdete v render.h a pixbuf.h
+
+Cache:
+Cache je uvnitř obyčejný spoják (GList) a velikost. Velikost se měří jako šířka krát
+výška samotných pixbuferů, ostaní velikosti jsou zanedbatelné.
+Kdykoliv je treba znova vykreslit stranku, stare pixbufery se přesunou na konec cache.
+Je-li cache příliš obsazená, maže se od začátku. Když se má vykreslit nějaká stránka,
+vždy se projde celá cache a pokud tam je tak se z ní vyndá a předá se do pixbuf_displayed.
+Velikost cache jde nastavit v main.c. Většina věcí okolo cache bydlí v pixbuffer.c 
+
+Běh:
+Program reaguje pomocí evnt_func. Pokud dostane písmenko nebo kliknutí,
+zavolá funkce handler v inputs.c, tam to funguje jako jednoduchý automat. Má stavy
+a struktury kde je dvojici mod programu (funguji podobne jako mody ve vimu)
+a pismenu prirazena funce. Handler pak podle této struktury zavola funkce které 
+se mají vykonat. Většina z nich je v main.c.
+Pokud se změní velikost okna, či díky nějaké změně na přáni uživatele se zavolá
+render(document) který je v render.c, tento jen kresli do paměti.
+K projevení na obrazovce je potřeba zavolat expose, ktery se stará o vykreslení z 
+paměti do okna. Obojí se nacházi v render.c.
+
+Rendrování:
+V závislosti na modu vykreslí stránky a smaže bílé místo po předchozích. Klíčová je 
+funkce render_page, která dostane obdelník a stránku nechá vykreslit, tak aby byla co 
+největší a uprostřed. V page modu se podle velikosti tabulky vypocita velikost
+mista na jednu a zavola vykreslení do nich. Pokud už tam nevyjde strana, místo se začerní.
+V zoom modu se vykreslí vždy jen jedna strana podle speciálních zoomových promněných.
+Hojně se tam využívá toho že můžu kreslit i mimo okno.
+
+Poppler:
+Tato knihovna se volá co možná nejmíň často jednak protože je v C++ a druhak proto, že
+plánuji připsat podporu ps a to bude vyžadovat podobné funkce z jiných knihoven.
+Můj spojník s popplerem umí jen načít pdf zjistit nějaké informace o něm a vykreslit stránku.

@@ -1,0 +1,52 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2010-08-30 10:38+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: main.c:48
+#, c-format
+msgid "Nebylo zadáno jmeno souboru.\n"
+msgstr ""
+
+#: main.c:54
+#, c-format
+msgid "au getcwd \n"
+msgstr ""
+
+#: main.c:68
+#, c-format
+msgid "Chyba načtení: %s\n"
+msgstr ""
+
+#: main.c:121
+#, c-format
+msgid "hui %f %f %d %d - %d %d\n"
+msgstr ""
+
+#: main.c:124
+#, c-format
+msgid "hui %f %f %d %d\n"
+msgstr ""
+
+#: main.c:190
+#, c-format
+msgid ""
+"Nápověda qw: \n"
+" šipečky posunuji, okynko se da zvětšit\n"
+" -h \t-help \tnápověda\n"
+" -p \t-page \tpočáteční stránka\n"
+" -i \t-info \tinfo dokumentu\n"
+msgstr ""

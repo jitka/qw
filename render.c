@@ -68,7 +68,7 @@ void render_get_size(document_t * doc, int number_page, double *width, double *h
 
 void render_page(document_t * doc, int page_number, int space_width, int space_height, int space_shift_w, int space_shift_h){
 	//vyrendruje stranku doprosted krabicky
-	int black_w,black_h; //docasne
+	int black_w,black_h;
 	double page_width,page_height;
 	render_get_size(doc,page_number,&page_width,&page_height);
 	
@@ -102,7 +102,6 @@ void render_page(document_t * doc, int page_number, int space_width, int space_h
 	if (mode == ZOOM)
 		doc->scale = tmp->scale;
 
-
 	//cisteni
 	gdk_window_clear_area_e(
 			window,
@@ -116,6 +115,8 @@ void render_page(document_t * doc, int page_number, int space_width, int space_h
 }
 
 void compute_space(document_t *doc,int *space_width, int *space_height){
+	//spočítá velkosti prostoru na jednu stranu tak aby se vešlo vše do okna a poměr stran
+	//vyhovoval medánu z poměrů všech stran
 	int num_displayed = min(doc->columns * doc->rows, doc->number_pages-current_page);
 
 	//median pomeru stran
@@ -126,7 +127,7 @@ void compute_space(document_t *doc,int *space_width, int *space_height){
 		aspects[i] = a/b;
 	}
 	int unsorted = TRUE;
-	while (unsorted){ //tenhle bublesort by mel byt na normalnim pdf linearni
+	while (unsorted){ //tenhle bublesort by mel byt na prumernem pdf prumerne linearni
 		unsorted = FALSE;
 		for (int i=0; i<num_displayed-1; i++)
 			if (aspects[i]>aspects[i+1]){
@@ -205,11 +206,7 @@ void render_mode_page(document_t *doc){
 }
 
 void render_mode_zoom(document_t *doc){
-	//vykresli jednu stranku
-	//scale rotation posunuti z doc
-	//  nastavitelne mazani scale pri pagedown
 	if (doc->scale == UNKNOWN){
-		//zistakt optimalni!
 		render_page(doc, current_page, window_width, window_height, 0, 0);
 		doc->zoom_shift_w = doc->pixbufs_displayed[0].shift_width;
 		doc->zoom_shift_h = doc->pixbufs_displayed[0].shift_height;
@@ -247,6 +244,7 @@ void render(document_t *doc){
 }
 
 void key_crop(){
+	//oreze stranku na velikost zobrazene tabulky
   	if (is_fullscreen)
 		return;
 	int space_width,space_height;
@@ -261,6 +259,7 @@ void render_get_relative_position(
 		int *page,
 		int *relative_x, int *relative_y,
 		int *space_height, int *space_width){
+	//pouziva se pro měření
 	*page = -1;
 	for(int i=0; i<document->pixbufs_displayed_length; i++){
 		pixbuf_item *item = &(document->pixbufs_displayed[i]);
@@ -269,7 +268,7 @@ void render_get_relative_position(
 				item->shift_height < clicked_y &&
 				item->width + item->shift_width > clicked_x &&
 				item->height + item->shift_height > clicked_y
-		   ){
+		   ){ // pokud se kliklo do strány v item
 			*page = item->page_number;
 			*space_height = item->height;
 			*space_width = item->width;
@@ -308,7 +307,6 @@ void change_scale(double scale){
 		document->zoom_shift_w += (int)( floor(width*document->scale) - floor(width*scale))/2;
 		document->zoom_shift_h += (int)( floor(height*document->scale) - floor(height*scale))/2;
 		document->scale=scale;
-		//posouvat!
 		render(document);
 		expose();
 	}
