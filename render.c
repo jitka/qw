@@ -304,7 +304,7 @@ void change_scale(double scale){
 	if (
 			(floor(width*scale) > minimum_width) &&
 			(floor(height*scale) > minimum_height) &&
-			(floor(width*scale) * floor(height*scale) * 4 < max_size_of_cache) ){
+			(floor(width*scale) * floor(height*scale) < max_size_of_cache) ){
 		document->zoom_shift_w += (int)( floor(width*document->scale) - floor(width*scale))/2;
 		document->zoom_shift_h += (int)( floor(height*document->scale) - floor(height*scale))/2;
 		document->scale=scale;
