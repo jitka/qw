@@ -1,5 +1,6 @@
 rozdelane: cache s maximem
 zaokrouhlovaci chyba: videt je pri prepnuti na zoom
+otaceni v zoomu
 roztahovani okna resit
 rendrovat do neceho a na expoze kreslit jen kus
 	=vyresit kresleni mezer

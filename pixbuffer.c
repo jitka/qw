@@ -37,8 +37,23 @@ void pixbuf_delete_displayed(pixbuf_database *cache, pixbuf_item *arr, int lengt
 	}
 }
 
+int compare(gconstpointer a, gconstpointer b){
+	const pixbuf_item *x = a;
+	const pixbuf_item *y = b;
+	if ( 		(x->page_number == y->page_number) &&
+	 		(x->width == y->width) &&
+	 		(x->height == y->height) &&
+	 		(x->rotation == y->rotation)
+	   )
+		return 0;
+	else 	return 1;
+
+}
 void pixbuf_render(pixbuf_database *cache,pixbuf_item *it){
 //	kouknout do cache, vyndat/rendrovat
+	GList *tmp = g_list_find_custom(cache->glist,it,compare);
+	if (tmp != NULL)
+		printf("nalezeno\n");
 	pdf_render_page_to_pixbuf(
 			&it->pixbuf,
 			it->page_number,
