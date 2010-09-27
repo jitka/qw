@@ -66,12 +66,10 @@ void open_file(char *path){
 		exit(1);
 	}
 	char abs_path[strlen("file://")+strlen(path)+1+strlen(pwd)+1];
-	strcpy(abs_path,"file://");	
-	if (*path != '/'){
-		strcat(abs_path,pwd);	
-		strcat(abs_path,"/");	
-	}
-	strcat(abs_path,path);
+	if (*path != '/')
+		sprintf(abs_path,"file://%s/%s",pwd,path);
+	else
+		sprintf(abs_path,"file://%s",path);
 	//otevreni
 	char *err;
 	err = pdf_init(abs_path);
