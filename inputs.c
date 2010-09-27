@@ -50,6 +50,7 @@ static struct {
 	{ ~0, GDK_F11, key_fullscreen },
 	{ ~0, GDK_f, key_fullscreen },
 	{ ~0, GDK_r, key_reload },
+	{ ~0, GDK_c, key_center },
 	//klikaci pismenka budou vzdy
 	{ PAGE, GDK_d, wait_distance },
 	{ PAGE, GDK_D, wait_position },

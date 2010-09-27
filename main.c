@@ -112,10 +112,10 @@ void key_this_page_has_number(int printed_number){ 	page_number_shift = -printed
 void key_zoom_in(){ 	change_scale(document->scale*zoom_speed);}
 void key_zoom_out(){ 	change_scale(document->scale/zoom_speed);}
 
-void key_zoom_right(){ 	document->zoom_shift_w += zoom_shift; render(document); expose();}
-void key_zoom_left(){ 	document->zoom_shift_w -= zoom_shift; render(document); expose();}
-void key_zoom_down(){ 	document->zoom_shift_h += zoom_shift; render(document); expose();}
-void key_zoom_up(){ 	document->zoom_shift_h -= zoom_shift; render(document); expose();}
+void key_zoom_right(){ 	document->center_w += zoom_shift; render(document); expose();}
+void key_zoom_left(){ 	document->center_w -= zoom_shift; render(document); expose();}
+void key_zoom_down(){ 	document->center_h += zoom_shift; render(document); expose();}
+void key_zoom_up(){ 	document->center_h -= zoom_shift; render(document); expose();}
 
 void key_quit(){
 	gdk_event_put( gdk_event_new(GDK_DELETE));
@@ -132,6 +132,13 @@ void key_fullscreen(){
 		is_fullscreen = 1;
 	}
 }
+
+void key_center(){
+	document->center_h = window_height/2;
+	document->center_w = window_width/2;
+	render(document);
+	expose();
+}	
 
 void key_rotate(){ 
 	document->pages[current_page].rotation = (document->pages[current_page].rotation + 90) % 360;

@@ -17,8 +17,8 @@ document_t * document_create_databse(){
 	doc->columns = 1;
 	doc->rows = 1;
 	doc->scale = UNKNOWN;
-	doc->zoom_shift_h=0;
-	doc->zoom_shift_w=0;
+	doc->center_h = window_height/2;
+	doc->center_w = window_width/2;
 	pixbuf_create_database(&doc->cache);
 	pixbuf_create_database(&doc->displayed);
 	doc->pages = calloc(doc->number_pages, sizeof(page_t));
@@ -206,8 +206,8 @@ void render_mode_page(document_t *doc){
 void render_mode_zoom(document_t *doc){
 	if (doc->scale == UNKNOWN){
 		render_page(doc, current_page, window_width, window_height, 0, 0);
-		doc->zoom_shift_w = window_width;
-		doc->zoom_shift_h = window_height;
+		doc->center_w = window_width/2;
+		doc->center_h = window_height/2;
 	} else {
 		gdk_window_clear(window);
 		pixbuf_item *tmp = calloc(1,sizeof(pixbuf_item));
@@ -216,8 +216,8 @@ void render_mode_zoom(document_t *doc){
 		render_get_size(doc,current_page,&width,&height);
 		tmp->width=(int)floor(width*doc->scale),
 		tmp->height=(int)floor(height*doc->scale),
-		tmp->shift_width = document->zoom_shift_w;
-		tmp->shift_height = document->zoom_shift_h;
+		tmp->shift_width = document->center_w;
+		tmp->shift_height = document->center_h;
 		tmp->scale = doc->scale;
 		tmp->rotation = (doc->pages[current_page].rotation+doc->rotation) % 360;
 		pixbuf_render(&doc->cache,tmp);
@@ -305,8 +305,8 @@ void change_scale(double scale){
 			(floor(width*scale) > minimum_width) &&
 			(floor(height*scale) > minimum_height) &&
 			(floor(width*scale) * floor(height*scale) < cache_size) ){
-		document->zoom_shift_w += (int)( floor(width*document->scale) - floor(width*scale))/2;
-		document->zoom_shift_h += (int)( floor(height*document->scale) - floor(height*scale))/2;
+		document->center_w += (int)( floor(width*document->scale) - floor(width*scale))/2;
+		document->center_h += (int)( floor(height*document->scale) - floor(height*scale))/2;
 		document->scale=scale;
 		render(document);
 		expose();
