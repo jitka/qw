@@ -19,3 +19,5 @@ extern int max_size_of_cache;
 extern double zoom_speed;
 extern int zoom_shift;
 extern int presentation_in_fullscreen;
+extern int start_maximalized;
+extern int start_fullscreen;

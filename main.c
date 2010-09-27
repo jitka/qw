@@ -34,6 +34,8 @@ int max_size_of_cache = 2000000; //v poctu pixelu
 double zoom_speed = 1.5;
 int zoom_shift = 10; //o kolik posouvaji sipky
 int presentation_in_fullscreen = FALSE;
+int start_maximalized = FALSE;
+int start_fullscreen = FALSE;
 
 extern document_t *document;
 
@@ -286,6 +288,7 @@ static void event_func(GdkEvent *ev, gpointer data) {
 					//todo: jeste by se tu dal vlozit nejaky hezky obrazek
 					mode = PAGE;
 					key_reload();
+					break;
 				default:
 					expose();
 					break;
@@ -402,6 +405,10 @@ int main(int argc, char * argv[]) {
 	//titulek
 	gdk_window_set_title(window,"huiii");
 
+	if (start_maximalized)
+		gdk_window_maximize(window);
+	if (start_fullscreen)
+		gdk_window_fullscreen(window);
 	//spusteni programu
 	gdk_window_show(window);
 	gdk_event_handler_set(event_func, NULL, NULL);
