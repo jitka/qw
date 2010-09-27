@@ -87,7 +87,7 @@ void handling_key(guint keyval){
 				if (number_chars[i].pressed_char == keyval &&
 						(command_chars[i].mode_mask & mode) ) {
 					number_chars[i].function(number);
-					break;
+//					break;
 				}
 			state = BASIC;
 			return;
@@ -102,7 +102,7 @@ void handling_key(guint keyval){
 				if ( command_chars[i].pressed_char == keyval &&
 						(command_chars[i].mode_mask & mode) ) {
 					command_chars[i].function();
-					break;
+//					break;
 				}		
 			break;
 		default:

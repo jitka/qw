@@ -21,7 +21,7 @@ document_t * document_create_databse(){
 	doc->zoom_shift_w=0;
 	pixbuf_create_database(&doc->cache);
 	pixbuf_create_database(&doc->displayed);
-	doc->pages = calloc(doc->number_pages, sizeof(struct pdf_page));
+	doc->pages = calloc(doc->number_pages, sizeof(page_t));
 
 	if (current_page < 0) current_page = 0;
 	if (current_page >= doc->number_pages) current_page = doc->number_pages -1;

@@ -3,19 +3,19 @@
 #include "pixbuffer.h"
 #include <glib.h> //glist
 
-typedef struct pdf_page{
+typedef struct page_t{
 	double width;
 	double height;
 	int rotation;
 	enum {DONT_INIT=0,INITED} state;
-} pdf_page;
+} page_t;
 
 typedef struct document_t{
 	int number_pages;
 	int rotation;
 	pixbuf_database cache;
 	pixbuf_database displayed;
-	pdf_page * pages;
+	page_t * pages;
 	int columns;
 	int rows;
 	int max_columns;
