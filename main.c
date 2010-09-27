@@ -151,6 +151,8 @@ void key_rotate_document(){
 }
 
 void key_reload(){
+	if (mode == PRESENTATION)
+	 	g_source_remove (timer_id); //odstrani vlakno casovace	
 	document_t *new;
 	open_file(file_path);
 	new = document_create_databse();
@@ -164,15 +166,15 @@ void key_set_columns(int c){
 	if (c * document->rows >= maximum_displayed
 			|| c > document->max_columns)
 		return;
-	document->columns = c; 
-	render(document); expose(); 
+	document->columns = c;
+	key_center();
 }
 void key_set_rows(int r){
 	if (r * document->columns >= maximum_displayed
 			|| r > document->max_rows)
 		return;
 	document->rows = r; 
-	render(document); expose(); 
+	key_center();
 }
 void key_page_mode(){
 	if (mode == PRESENTATION)
@@ -180,17 +182,20 @@ void key_page_mode(){
 	if (!keep_scale) //v zoomu
 		document->scale = UNKNOWN;
 	mode=PAGE; 
-	render(document); expose();
+	key_center();
 }
 void key_zoom_mode(){//,posunuti	
 	if (mode == PRESENTATION)
 		 g_source_remove (timer_id);	
 	mode=ZOOM; 
-	render(document); expose();
+	key_center();
 }
 static gboolean timeout_callback (gpointer data){
 	data = NULL; //at mi to nehazi warningy
-	key_screan_down(); 
+	GdkEvent *tmp = gdk_event_new(GDK_CLIENT_EVENT);
+	//gdkclient je vazne moc moc divne
+	//nejak tam dopisu o co se jedna
+	gdk_event_put(tmp);
 	return TRUE; //volat se znova
 }
 void key_presentation_mode(int time){ 
@@ -265,6 +270,10 @@ static void event_func(GdkEvent *ev, gpointer data) {
 			if (ev->button.button == 1)
 				handle_click((int)ev->button.x,(int)ev->button.y);
 			break;
+		case GDK_CLIENT_EVENT:
+			//presentation
+			key_screan_down(); 
+			break;
 		case GDK_FOCUS_CHANGE:
 			{
 				struct stat s;
@@ -283,8 +292,7 @@ static void event_func(GdkEvent *ev, gpointer data) {
 					window_width = w_width;
 					window_height = w_height;
 					render_set_max_columns(document);
-					render(document);		
-					expose();
+					key_center(); //tam je i render
 				}
 				break;
 			}
