@@ -30,7 +30,7 @@ int start_window_height = 500;
 int maximum_displayed = 1000;
 int minimum_width = 10;
 int minimum_height = 10;
-int max_size_of_cache = 2000000; //v poctu pixelu
+int cache_size = 2000000; //v poctu pixelu
 double zoom_speed = 1.5;
 int zoom_shift = 10; //o kolik posouvaji sipky
 int presentation_in_fullscreen = FALSE;
@@ -252,11 +252,11 @@ static void event_func(GdkEvent *ev, gpointer data) {
 	data = NULL; //nemam rada warningy
 	switch(ev->type) {
 		case GDK_KEY_PRESS:
-			handling_key(ev->key.keyval);
+			handle_key(ev->key.keyval);
 			break;
 		case GDK_BUTTON_PRESS:
 			if (ev->button.button == 1)
-				handling_click((int)ev->button.x,(int)ev->button.y);
+				handle_click((int)ev->button.x,(int)ev->button.y);
 			break;
 		case GDK_FOCUS_CHANGE:
 			{

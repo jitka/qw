@@ -74,7 +74,7 @@ static struct {
 	{ ZOOM, GDK_Up, key_zoom_up },		
 };
 
-void handling_key(guint keyval){
+void handle_key(guint keyval){
 	if (mode == PRESENTATION)
 		key_page_mode();
 	switch(state){
@@ -112,7 +112,7 @@ void handling_key(guint keyval){
 	}
 }
 
-void handling_click(int x, int y){
+void handle_click(int x, int y){
 	switch(state){
 		case BASIC: case NUMBERS:
 			break;

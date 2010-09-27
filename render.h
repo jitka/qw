@@ -7,7 +7,7 @@ typedef struct page_t{
 	double width;
 	double height;
 	int rotation;
-	enum {DONT_INIT=0,INITED} state;
+	enum {UNINITIALIZED=0,INITIALIZED} state;
 } page_t;
 
 typedef struct document_t{

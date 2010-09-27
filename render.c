@@ -46,13 +46,13 @@ void render_get_size(document_t * doc, int number_page, double *width, double *h
 	//da spravne rezmery vcetne rotace
 	int rotation = (doc->pages[number_page].rotation+doc->rotation) % 360;
 	switch (doc->pages[number_page].state){
-		case DONT_INIT:
+		case UNINITIALIZED:
 			pdf_page_get_size(
 					number_page,
 					&doc->pages[number_page].width,
 					&doc->pages[number_page].height);
-			doc->pages[number_page].state = INITED;
-		case INITED: 
+			doc->pages[number_page].state = INITIALIZED;
+		case INITIALIZED: 
 			if (rotation%180 == 0){
 				*width = doc->pages[number_page].width;
 				*height = doc->pages[number_page].height;
@@ -95,7 +95,7 @@ void render_page(document_t * doc, int page_number, int space_width, int space_h
 	}
 
 	pixbuf_render(&doc->cache,tmp);
-	pixbuf_insert_to_database(&doc->displayed,tmp);
+	pixbuf_insert_into_database(&doc->displayed,tmp);
 
 	if (mode == ZOOM)
 		doc->scale = tmp->scale;
@@ -221,7 +221,7 @@ void render_mode_zoom(document_t *doc){
 		tmp->scale = doc->scale;
 		tmp->rotation = (doc->pages[current_page].rotation+doc->rotation) % 360;
 		pixbuf_render(&doc->cache,tmp);
-		pixbuf_insert_to_database(&doc->displayed,tmp);
+		pixbuf_insert_into_database(&doc->displayed,tmp);
 	}
 }
 
@@ -253,29 +253,29 @@ void key_crop(){
 
 
 void render_get_relative_position(
-		int clicked_x, int clicked_y,
+		int pointer_x, int pointer_y,
 		int *page,
 		int *relative_x, int *relative_y,
 		int *space_height, int *space_width){
 
 	gint  compare(gconstpointer a, gconstpointer b){
 		const pixbuf_item *item = a;
-		return !(item->shift_width < clicked_x &&
-			item->shift_height < clicked_y &&
-			item->width + item->shift_width > clicked_x &&
-			item->height + item->shift_height > clicked_y);
+		return !(item->shift_width < pointer_x &&
+			item->shift_height < pointer_y &&
+			item->width + item->shift_width > pointer_x &&
+			item->height + item->shift_height > pointer_y);
 		b = NULL;
 	}
-	GList *clicked = g_list_find_custom(document->displayed.glist,NULL,compare);
-	if (clicked == NULL){
+	GList *pointer = g_list_find_custom(document->displayed.glist,NULL,compare);
+	if (pointer == NULL){
 		*page = -1;
 	} else {
-		pixbuf_item *item = clicked->data;
+		pixbuf_item *item = pointer->data;
 		*page = item->page_number;
 		*space_height = item->height;
 		*space_width = item->width;
-		*relative_x = clicked_x - item->shift_width;
-		*relative_y = clicked_y - item->shift_height;
+		*relative_x = pointer_x - item->shift_width;
+		*relative_y = pointer_y - item->shift_height;
 	}
 }
 
@@ -304,7 +304,7 @@ void change_scale(double scale){
 	if (
 			(floor(width*scale) > minimum_width) &&
 			(floor(height*scale) > minimum_height) &&
-			(floor(width*scale) * floor(height*scale) < max_size_of_cache) ){
+			(floor(width*scale) * floor(height*scale) < cache_size) ){
 		document->zoom_shift_w += (int)( floor(width*document->scale) - floor(width*scale))/2;
 		document->zoom_shift_h += (int)( floor(height*document->scale) - floor(height*scale))/2;
 		document->scale=scale;

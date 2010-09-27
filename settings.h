@@ -15,7 +15,7 @@ extern int start_window_height;
 extern int maximum_displayed;
 extern int minimum_width;
 extern int minimum_height;
-extern int max_size_of_cache;
+extern int cache_size;
 extern double zoom_speed;
 extern int zoom_shift;
 extern int presentation_in_fullscreen;

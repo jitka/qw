@@ -23,7 +23,7 @@ typedef struct pixbuf_database{
 void pixbuf_create_database(pixbuf_database * database);
 void pixbuf_delete_database(pixbuf_database * old);
 void pixbuf_delete_displayed(pixbuf_database *cache, pixbuf_database *displayed);
-void pixbuf_insert_to_database(pixbuf_database *db, pixbuf_item *item);
+void pixbuf_insert_into_database(pixbuf_database *db, pixbuf_item *item);
 void pixbuf_render(pixbuf_database *cache, pixbuf_item *db);
 
 #endif

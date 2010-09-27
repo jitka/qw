@@ -1,2 +1,2 @@
-void handling_key(guint keyval);
-void handling_click(int x, int y);
+void handle_key(guint keyval);
+void handle_click(int x, int y);

@@ -26,7 +26,7 @@ void pixbuf_free_from_database(pixbuf_database *db,GList *old){
 	pixbuf_free(old->data,&db->size);
 	g_list_free_1(old);	
 }
-void pixbuf_insert_to_database(pixbuf_database *db, pixbuf_item *item){	
+void pixbuf_insert_into_database(pixbuf_database *db, pixbuf_item *item){	
 	db->glist = g_list_append(db->glist,item);
 	db->size += item->width * item->height;
 }
@@ -35,7 +35,7 @@ void pixbuf_delete_displayed(pixbuf_database *cache, pixbuf_database *displayed)
 	cache->glist = g_list_concat(cache->glist,displayed->glist);
 	cache->size += displayed->size;
 	pixbuf_create_database(displayed);
-	while (cache->size > max_size_of_cache){
+	while (cache->size > cache_size){
 		GList *first = g_list_first(cache->glist);
 		pixbuf_free_from_database(cache,first);
 	}
