@@ -12,7 +12,7 @@ void pixbuf_create_database(pixbuf_database * database){
 void pixbuf_free(gpointer data, gpointer size){
 	pixbuf_item *item = data;
 	*((int *) size) -= item->width * item->height;
-	if (item->pixbuf != NULL)
+	//if (item->pixbuf != NULL)
 		g_object_unref(item->pixbuf);
 	free(item);
 }
@@ -31,32 +31,26 @@ void pixbuf_insert_to_database(pixbuf_database *db, pixbuf_item *item){
 	db->size += item->width * item->height;
 }
 
-void pixbuf_delete_displayed(pixbuf_database *cache, pixbuf_item *arr, int length){
-	for(int i=0; i<length; i++){
-		pixbuf_item *tmp = malloc(sizeof(pixbuf_item));
-		memcpy(tmp,&arr[i],sizeof(pixbuf_item)); //kopiruje malou strukturu s ukazatelem na pixbuf
-		pixbuf_insert_to_database(cache,tmp);	
-	}
+void pixbuf_delete_displayed(pixbuf_database *cache, pixbuf_database *displayed){
+	cache->glist = g_list_concat(cache->glist,displayed->glist);
+	cache->size += displayed->size;
+	pixbuf_create_database(displayed);
 	while (cache->size > max_size_of_cache){
-		//smaze první polozku
 		GList *first = g_list_first(cache->glist);
 		pixbuf_free_from_database(cache,first);
 	}
 }
 
-int compare(gconstpointer a, gconstpointer b){
-	const pixbuf_item *x = a;
-	const pixbuf_item *y = b;
-	if ( 		(x->page_number == y->page_number) &&
-	 		(x->width == y->width) &&
-	 		(x->height == y->height) &&
-	 		(x->rotation == y->rotation)
-	   )
-		return 0;
-	else 	return 1;
 
-}
 void pixbuf_render(pixbuf_database *cache,pixbuf_item *it){
+	int compare(gconstpointer a, gconstpointer b){
+		const pixbuf_item *x = a;
+		const pixbuf_item *y = b;
+		return !((x->page_number == y->page_number) &&
+			 (x->width == y->width) &&
+			 (x->height == y->height) &&
+			 (x->rotation == y->rotation) );
+	}
 	GList *tmp = g_list_find_custom(cache->glist,it,compare);
 	if (tmp != NULL){ // pokud byla v cachy vynda se
 		cache->glist = g_list_remove_link(cache->glist,tmp);

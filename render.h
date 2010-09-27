@@ -14,8 +14,7 @@ typedef struct document_t{
 	int number_pages;
 	int rotation;
 	pixbuf_database cache;
-	pixbuf_item *pixbufs_displayed;
-	int pixbufs_displayed_length;
+	pixbuf_database displayed;
 	pdf_page * pages;
 	int columns;
 	int rows;

@@ -20,9 +20,8 @@ document_t * document_create_databse(){
 	doc->zoom_shift_h=0;
 	doc->zoom_shift_w=0;
 	pixbuf_create_database(&doc->cache);
+	pixbuf_create_database(&doc->displayed);
 	doc->pages = calloc(doc->number_pages, sizeof(struct pdf_page));
-	doc->pixbufs_displayed = calloc(maximum_displayed, sizeof(pixbuf_item));
-	doc->pixbufs_displayed_length = 0;
 
 	if (current_page < 0) current_page = 0;
 	if (current_page >= doc->number_pages) current_page = doc->number_pages -1;
@@ -36,9 +35,8 @@ void render_set_max_columns(document_t *doc){
 
 void document_delete_database(document_t *old){
 	if (old == NULL) return;
-	pixbuf_delete_displayed(&old->cache,old->pixbufs_displayed,old->pixbufs_displayed_length);
 	pixbuf_delete_database(&old->cache);
-	free(old->pixbufs_displayed);
+	pixbuf_delete_database(&old->displayed);
 	free(old->pages);
 	free(old);
 }
@@ -72,7 +70,7 @@ void render_page(document_t * doc, int page_number, int space_width, int space_h
 	double page_width,page_height;
 	render_get_size(doc,page_number,&page_width,&page_height);
 	
-	pixbuf_item *tmp = &(doc->pixbufs_displayed[doc->pixbufs_displayed_length]);
+	pixbuf_item *tmp = calloc(1,sizeof(pixbuf_item));
 
 	tmp->page_number = page_number;
 	tmp->rotation = (doc->pages[page_number].rotation+doc->rotation) % 360;
@@ -97,7 +95,7 @@ void render_page(document_t * doc, int page_number, int space_width, int space_h
 	}
 
 	pixbuf_render(&doc->cache,tmp);
-	doc->pixbufs_displayed_length++;
+	pixbuf_insert_to_database(&doc->displayed,tmp);
 
 	if (mode == ZOOM)
 		doc->scale = tmp->scale;
@@ -208,11 +206,11 @@ void render_mode_page(document_t *doc){
 void render_mode_zoom(document_t *doc){
 	if (doc->scale == UNKNOWN){
 		render_page(doc, current_page, window_width, window_height, 0, 0);
-		doc->zoom_shift_w = doc->pixbufs_displayed[0].shift_width;
-		doc->zoom_shift_h = doc->pixbufs_displayed[0].shift_height;
+		doc->zoom_shift_w = window_width;
+		doc->zoom_shift_h = window_height;
 	} else {
 		gdk_window_clear(window);
-		pixbuf_item *tmp = &(doc->pixbufs_displayed[0]);
+		pixbuf_item *tmp = calloc(1,sizeof(pixbuf_item));
 		tmp->page_number = current_page;
 		double width,height;
 		render_get_size(doc,current_page,&width,&height);
@@ -223,13 +221,12 @@ void render_mode_zoom(document_t *doc){
 		tmp->scale = doc->scale;
 		tmp->rotation = (doc->pages[current_page].rotation+doc->rotation) % 360;
 		pixbuf_render(&doc->cache,tmp);
-		doc->pixbufs_displayed_length = 1;
+		pixbuf_insert_to_database(&doc->displayed,tmp);
 	}
 }
 
 void render(document_t *doc){
-	pixbuf_delete_displayed(&doc->cache,doc->pixbufs_displayed,doc->pixbufs_displayed_length);
-	doc->pixbufs_displayed_length = 0;
+	pixbuf_delete_displayed(&doc->cache,&doc->displayed);
 	switch(mode){
 		case START:
 			break;
@@ -254,34 +251,38 @@ void key_crop(){
 			document->rows*space_height + (document->rows-1)*margin);
 }
 
+
 void render_get_relative_position(
 		int clicked_x, int clicked_y,
 		int *page,
 		int *relative_x, int *relative_y,
 		int *space_height, int *space_width){
-	//pouziva se pro měření
-	*page = -1;
-	for(int i=0; i<document->pixbufs_displayed_length; i++){
-		pixbuf_item *item = &(document->pixbufs_displayed[i]);
-		if (	
-				item->shift_width < clicked_x &&
-				item->shift_height < clicked_y &&
-				item->width + item->shift_width > clicked_x &&
-				item->height + item->shift_height > clicked_y
-		   ){ // pokud se kliklo do strány v item
-			*page = item->page_number;
-			*space_height = item->height;
-			*space_width = item->width;
-			*relative_x = clicked_x - item->shift_width;
-			*relative_y = clicked_y - item->shift_height;
-			break;
-		}
+
+	gint  compare(gconstpointer a, gconstpointer b){
+		const pixbuf_item *item = a;
+		return !(item->shift_width < clicked_x &&
+			item->shift_height < clicked_y &&
+			item->width + item->shift_width > clicked_x &&
+			item->height + item->shift_height > clicked_y);
+		b = NULL;
+	}
+	GList *clicked = g_list_find_custom(document->displayed.glist,NULL,compare);
+	if (clicked == NULL){
+		*page = -1;
+	} else {
+		pixbuf_item *item = clicked->data;
+		*page = item->page_number;
+		*space_height = item->height;
+		*space_width = item->width;
+		*relative_x = clicked_x - item->shift_width;
+		*relative_y = clicked_y - item->shift_height;
 	}
 }
 
 void expose(){
-	for(int i=0; i<document->pixbufs_displayed_length; i++){
-		pixbuf_item *item = &(document->pixbufs_displayed[i]);
+	void render(gpointer data, gpointer user_data){
+		pixbuf_item *item = data;
+		user_data = NULL;
 		gdk_pixbuf_render_to_drawable(
 				item->pixbuf,
 				window,//GdkDrawable *drawable,
@@ -293,8 +294,8 @@ void expose(){
 				item->height,
 				GDK_RGB_DITHER_NONE, //fujvec nechci
 				0,0);		
-
 	}
+	g_list_foreach(document->displayed.glist,render,NULL);
 }
 
 void change_scale(double scale){
