@@ -26,7 +26,6 @@ void pixbuf_free_from_database(pixbuf_database *db,GList *old){
 	pixbuf_free(old->data,&db->size);
 	g_list_free_1(old);	
 }
-
 void pixbuf_insert_to_database(pixbuf_database *db, pixbuf_item *item){	
 	db->glist = g_list_append(db->glist,item);
 	db->size += item->width * item->height;
@@ -37,8 +36,6 @@ void pixbuf_delete_displayed(pixbuf_database *cache, pixbuf_item *arr, int lengt
 		pixbuf_item *tmp = malloc(sizeof(pixbuf_item));
 		memcpy(tmp,&arr[i],sizeof(pixbuf_item)); //kopiruje malou strukturu s ukazatelem na pixbuf
 		pixbuf_insert_to_database(cache,tmp);	
-	//	cache->glist = g_list_append(cache->glist,tmp);
-	//	cache->size += tmp->width * tmp->height;
 	}
 	while (cache->size > max_size_of_cache){
 		//smaze první polozku
