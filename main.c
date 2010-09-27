@@ -9,7 +9,7 @@
 #include <gdk-pixbuf/gdk-pixbuf.h> //kvuli ikonce
 //#include <gdk/gdk.h> //okynka,poppler.h pixbuffer.h
 //#include <glib-2.0/glib.h>
-#include "poppler.h" //open_file
+#include "backend.h" //open_file
 #include "render.h" //render,expose
 #include "inputs.h" //vstup -> funkce
 #include "settings.h"
@@ -17,6 +17,7 @@
 
 //global
 view_mode_t mode = START;
+file_type_t file_type = PDF;
 int current_page = 0;
 static int page_number_shift = -1; //lide pocitaji od 1
 static guint timer_id;
@@ -72,7 +73,7 @@ void open_file(char *path){
 		sprintf(abs_path,"file://%s",path);
 	//otevreni
 	char *err;
-	err = pdf_init(abs_path);
+	err = doc_init(abs_path);
 	if (err != NULL){
 		fprintf(stderr,_("Chyba načtení: %s\n"),err);
 		exit(1);

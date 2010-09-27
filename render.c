@@ -2,7 +2,7 @@
 #include <stdlib.h> //calloc
 #include <string.h> //memcpy
 #include "window.h"
-#include "poppler.h"
+#include "backend.h"
 #include "render.h"
 #include "settings.h"
 #define min(A,B) ( (A) < (B) ? (A) : (B) )
@@ -13,7 +13,7 @@ document_t *document;
 document_t * document_create_databse(){
 	document_t * doc = calloc(1, sizeof(document_t));
 	doc->rotation = 0;
-	doc->number_pages = pdf_get_number_pages();
+	doc->number_pages = doc_get_number_pages();
 	doc->columns = 1;
 	doc->rows = 1;
 	doc->scale = UNKNOWN;
@@ -47,7 +47,7 @@ void render_get_size(document_t * doc, int number_page, double *width, double *h
 	int rotation = (doc->pages[number_page].rotation+doc->rotation) % 360;
 	switch (doc->pages[number_page].state){
 		case UNINITIALIZED:
-			pdf_page_get_size(
+			doc_page_get_size(
 					number_page,
 					&doc->pages[number_page].width,
 					&doc->pages[number_page].height);

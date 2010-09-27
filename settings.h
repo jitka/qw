@@ -5,7 +5,13 @@ typedef enum view_mode_t {
 	PRESENTATION=4,
 	ZOOM=8,
 } view_mode_t;
+typedef enum file_type_t{
+	PDF,
+	PS,
+} file_type_t;
+
 extern view_mode_t mode;
+extern file_type_t file_type;
 
 extern int key_cancel_waiting;
 extern int keep_scale;
