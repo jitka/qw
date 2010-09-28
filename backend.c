@@ -28,11 +28,10 @@ int doc_init(char *path){
 	return 0;
 }
 void doc_page_get_size(int n, double *width, double *height){
-	//tady sjednotit jednotky na centimetry
 	if (file_type == PDF)
 		pdf_page_get_size(n,width,height);
 	if (file_type == PS)
-		ps_page_get_size(width,height);
+		ps_page_get_size(n,width,height);
 }
 int doc_get_number_pages(){
 	if (file_type == PDF)

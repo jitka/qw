@@ -1,8 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h> //open_file
 #include <sys/stat.h> //hlidani zmen v souboru
-#include <unistd.h> //cwd
 #include <getopt.h> //parametry
 #include <libintl.h> //preklady
 #include <math.h> //sqrt
@@ -14,6 +12,8 @@
 #include "inputs.h" //vstup -> funkce
 #include "settings.h"
 #define _(X) gettext(X)
+#define IN_CENTIMETRES *2159/61200
+//spectre, poppler meri v 72tiny palce / pspoint
 
 //global
 view_mode_t mode = START;
@@ -211,12 +211,12 @@ void click_distance(int first_x, int first_y, int second_x, int second_y){
 			"vzdalenot %lf cm %lf pixelu\n\n"),
 			page_1+1,
 			page_1-page_number_shift,
-			document->pages[page_1].width*0.035278,
-			document->pages[page_1].height*0.035278,
+			document->pages[page_1].width IN_CENTIMETRES,
+			document->pages[page_1].height IN_CENTIMETRES,
 			width,
 			height,
 			//x1,y1,x2,y2,
-			sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2)) / width * document->pages[page_1].width*0.035278,
+			sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2)) / width*document->pages[page_1].width IN_CENTIMETRES,
 			sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2))
 			);
 }
@@ -234,12 +234,12 @@ void click_position(int click_x, int click_y){
 			"kliknuti: %lf,%lf cm %d,%d pixelu \n\n"),
 			page+1,
 			page-page_number_shift,
-			document->pages[page].width*0.035278,
-			document->pages[page].height*0.035278,
+			document->pages[page].width IN_CENTIMETRES,
+			document->pages[page].height IN_CENTIMETRES,
 			width,
 			height,
-			(double) x / width * document->pages[page].width*0.035278,
-			(double) y / height * document->pages[page].height*0.035278,
+			(double) x / width * document->pages[page].width IN_CENTIMETRES,
+			(double) y / height * document->pages[page].height IN_CENTIMETRES,
 			x,y
 			);
 }
@@ -368,7 +368,7 @@ int main(int argc, char * argv[]) {
 	printf("%d\n",file_type);
 	double w,h;
 	doc_page_get_size(0,&w,&h);
-	printf("stran %d, %lfx%lf\n",doc_get_number_pages(),w,h);
+	printf("stran %d, %lfx%lfcm\n",doc_get_number_pages(),w IN_CENTIMETRES,h IN_CENTIMETRES);
 	//vytvoreni okna
 /*	gdk_init(NULL,NULL);
 

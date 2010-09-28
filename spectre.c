@@ -21,14 +21,28 @@ int ps_get_number_pages(){
 }
 
 
-void ps_page_get_size(double *width, double *height){
+void ps_page_get_size(int num_page, double *width, double *height){
+	SpectrePage *page = spectre_document_get_page(doc, num_page);
 	int w,h;
-	spectre_document_get_page_size(doc,&w,&h);
+	spectre_page_get_size(page,&w,&h);
 	*width = (double) w;
 	*height = (double) h;
+	spectre_page_free(page);
 }
 
 void ps_render_page_to_pixbuf(GdkPixbuf **pixbuf, int num_page, int width, int height, double scale, int rotation){
 	SpectrePage *page = spectre_document_get_page(doc, num_page);
+	SpectreRenderContext *rc = spectre_render_context_new ();
+	unsigned char * data;
+	int row_length;
+	spectre_page_render(page, rc, &data, &row_length);
+	spectre_render_context_free (rc);
 	spectre_page_free(page);
+
+
+	cairo_surface_t *surface = cairo_image_surface_create_for_data(
+			data,
+			CAIRO_FORMAT_RGB24,
+			200, 200, 
+			row_length);
 }

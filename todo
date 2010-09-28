@@ -1,4 +1,3 @@
-sjednotit jednotky na centimetry
 spectre title do okna title nebo nazev souboru?
 chytat vsechny chyby spectre a popplera
 chytrejsi openfile
@@ -6,10 +5,7 @@ specrte pise divne -21
 vlakna
 zaokrouhlovaci chyba: videt je pri prepnuti na zoom
 predelat posunuti zoomu na stred, otaceni v zoomu
-zobrazene pixbufery na glist
 roztahovani okna resit
-rendrovat do neceho a na expoze kreslit jen kus
-	=vyresit kresleni mezer
 +renderovani paralelne pres eventy kontrolovat poradi/aktualnost
 nenechat si posilat eventy, ktere nepotrebuji
 pořádek v includech
