@@ -10,8 +10,7 @@ extern "C" {
 }
 
 
-PopplerDocument * doc;
-PopplerPage * page;
+static PopplerDocument * doc;
 
 char * pdf_init( char* filePath) {
 	GError * err;
@@ -31,13 +30,13 @@ int pdf_get_number_pages(){
 }
 
 void pdf_page_get_size(int n, double *width, double *height){
-	page = poppler_document_get_page (doc, n);
+	PopplerPage *page = poppler_document_get_page (doc, n);
 	poppler_page_get_size(page, width, height);
 	g_object_unref(page);
 }
 
 void pdf_render_page_to_pixbuf(GdkPixbuf **pixbuf,int num_page, int width, int height, double scale, int rotation) {
-	page = poppler_document_get_page (doc, num_page);
+	PopplerPage *page = poppler_document_get_page (doc, num_page);
 	*pixbuf = gdk_pixbuf_new(
 		GDK_COLORSPACE_RGB,
 		FALSE,	//gboolean has_alpha,

@@ -17,7 +17,7 @@
 
 //global
 view_mode_t mode = START;
-file_type_t file_type = PDF;
+file_type_t file_type = PS;
 int current_page = 0;
 static int page_number_shift = -1; //lide pocitaji od 1
 static guint timer_id;
@@ -68,16 +68,19 @@ void open_file(char *path){
 	}
 	char abs_path[strlen("file://")+strlen(path)+1+strlen(pwd)+1];
 	if (*path != '/')
-		sprintf(abs_path,"file://%s/%s",pwd,path);
+		//sprintf(abs_path,"file://%s/%s",pwd,path);
+		sprintf(abs_path,"%s/%s",pwd,path);
 	else
-		sprintf(abs_path,"file://%s",path);
+		//sprintf(abs_path,"file://%s",path);
+		sprintf(abs_path,"%s",path);
 	//otevreni
 	char *err;
 	err = doc_init(abs_path);
 	if (err != NULL){
 		fprintf(stderr,_("Chyba načtení: %s\n"),err);
 		exit(1);
-	}				
+	}
+	//cas posledni zmeny	
 	struct stat s;
 	if (stat(file_path, &s) != -1){
 		modification_time = s.st_mtime;
@@ -379,8 +382,11 @@ int main(int argc, char * argv[]) {
 
 	open_file(file_path); //ověří, jestli soubor je skutečně pdf
 
+	double w,h;
+	doc_page_get_size(0,&w,&h);
+	printf("stran %d, %lfx%lf\n",doc_get_number_pages(),w,h);
 	//vytvoreni okna
-	gdk_init(NULL,NULL);
+/*	gdk_init(NULL,NULL);
 
 	GdkVisual *visual = gdk_visual_get_system();
 	GdkColormap *colormap = gdk_colormap_new(visual,TRUE);
@@ -429,6 +435,6 @@ int main(int argc, char * argv[]) {
 	mainloop = g_main_loop_new(g_main_context_default(), FALSE);	
 	g_main_loop_run(mainloop);
 	gdk_window_destroy(window); 
-
+*/
 	return 0;
 }

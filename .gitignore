@@ -4,4 +4,5 @@ qw
 *.o
 *.d
 *.pdf
+*.ps
 vim.sh

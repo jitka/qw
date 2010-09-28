@@ -1,13 +1,13 @@
-PKGS=poppler-glib
+PKGS=poppler-glib libspectre
 CFL:=$(shell pkg-config --cflags $(PKGS))
 LFL:=$(shell pkg-config --libs $(PKGS))
 
-CFLAGS=-g -DDEBUG -Wall -W -std=gnu99 $(CFL)
+CFLAGS=-g -Wall -W -std=gnu99 $(CFL)
 CPPFLAGS=-g -Wall -W  $(CFL)
 LDFLAGS=$(LFL)
 
 
-sources=inputs main pixbuffer render backend
+sources=inputs main pixbuffer render backend spectre
 
 qw: poppler.o $(addsuffix .o,$(sources))
 	@echo LD $@
