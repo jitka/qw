@@ -17,7 +17,7 @@
 
 //global
 view_mode_t mode = START;
-file_type_t file_type = PS;
+file_type_t file_type;
 int current_page = 0;
 static int page_number_shift = -1; //lide pocitaji od 1
 static guint timer_id;
@@ -60,29 +60,13 @@ void open_file(char *path){
 		fprintf(stderr,_("Nebylo zadáno jmeno souboru.\n"));
 		exit(1);
 	}
-	//absoulutni adresa
-	char pwd[1024];
-	if (!getcwd(pwd, sizeof(pwd))) {
-		fprintf(stderr,_("au getcwd \n"));
-		exit(1);
-	}
-	char abs_path[strlen("file://")+strlen(path)+1+strlen(pwd)+1];
-	if (*path != '/')
-		//sprintf(abs_path,"file://%s/%s",pwd,path);
-		sprintf(abs_path,"%s/%s",pwd,path);
-	else
-		//sprintf(abs_path,"file://%s",path);
-		sprintf(abs_path,"%s",path);
-	//otevreni
-	char *err;
-	err = doc_init(abs_path);
-	if (err != NULL){
-		fprintf(stderr,_("Chyba načtení: %s\n"),err);
+	if (!doc_init(path)){
+		fprintf(stderr,_("Load error\n"));
 		exit(1);
 	}
 	//cas posledni zmeny	
 	struct stat s;
-	if (stat(file_path, &s) != -1){
+	if (stat(path, &s) != -1){
 		modification_time = s.st_mtime;
 	}
 }
@@ -381,7 +365,7 @@ int main(int argc, char * argv[]) {
 	file_path = argv[optind]; //vim ze tohle obecne nefunguje, ale tady to staci
 
 	open_file(file_path); //ověří, jestli soubor je skutečně pdf
-
+	printf("%d\n",file_type);
 	double w,h;
 	doc_page_get_size(0,&w,&h);
 	printf("stran %d, %lfx%lf\n",doc_get_number_pages(),w,h);

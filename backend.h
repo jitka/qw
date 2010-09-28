@@ -1,5 +1,5 @@
 #include <gdk/gdk.h>
-char * doc_init(char *fileName);
+int doc_init(char *path);
 void doc_close();
 void doc_page_get_size(int n, double *width, double *height); //moc nepouzivat
 int doc_get_number_pages(); //taky
