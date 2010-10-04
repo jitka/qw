@@ -11,7 +11,7 @@ int doc_init(char *path){
 //	close(2); open("/dev/null", O_RDWR);
 	char pwd[1024];
 	if (!getcwd(pwd, sizeof(pwd)))
-		return 0;
+		return 1;
 	char abs_path[strlen("file://")+strlen(path)+1+strlen(pwd)+1];
 	if (*path == '/')
 		sprintf(abs_path,"file://%s",path);
@@ -19,15 +19,15 @@ int doc_init(char *path){
 		sprintf(abs_path,"file://%s/%s",pwd,path);
 	if (!pdf_init(abs_path)){
 		file_type = PDF;
-		return 1;
+		return 0;
 	}
 	//ps
 /*	if (ps_init(path) == NULL){
 		file_type = PS;
 		return 1;
 	}
-	return 0;
-*/
+*/	return 1;
+
 }
 void doc_page_get_size(int n, double *width, double *height){
 	if (file_type == PDF)

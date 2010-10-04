@@ -20,10 +20,9 @@ int pdf_init( char* filePath) {
 	doc = poppler_document_new_from_file(filePath,0,&err); //0->nema heslo
 		//vrati-li NULL -> ma chybu
 	if (err != 0){
-		printf("au\n");
-		return 1;
+		return 0;
 	}
-	return 0;
+	return 1;
 }
 
 int pdf_get_number_pages(){

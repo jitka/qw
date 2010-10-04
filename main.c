@@ -4,6 +4,7 @@
 #include <getopt.h> //parametry
 #include <libintl.h> //preklady
 #include <math.h> //sqrt
+#include <fcntl.h> //presmerovani chyboveho vystupu
 #include <gdk-pixbuf/gdk-pixbuf.h> //kvuli ikonce
 //#include <gdk/gdk.h> //okynka,poppler.h pixbuffer.h
 //#include <glib-2.0/glib.h>
@@ -57,11 +58,11 @@ int window_height;
 	
 void open_file(char *path){
 	if (path == NULL){
-		fprintf(stderr,_("Nebylo zadáno jmeno souboru.\n"));
+		printf(_("Nebylo zadáno jmeno souboru.\n"));
 		exit(1);
 	}
 	if (!doc_init(path)){
-		fprintf(stderr,_("Load error\n"));
+		printf(_("Load error\n"));
 		exit(1);
 	}
 	//cas posledni zmeny	
@@ -305,7 +306,11 @@ static void event_func(GdkEvent *ev, gpointer data) {
 
 int main(int argc, char * argv[]) {
 
+
+	close(2); 
+	open("/dev/null", O_RDWR);
 	g_type_init();
+
 	//zpracovani parametru
 	const char *short_options = "hi:p:";
 	const struct option long_options[] = {
