@@ -12,10 +12,10 @@ typedef struct page_t{
 
 typedef struct document_t{
 	int number_pages;
-	int rotation;
 	pixbuf_database cache;
 	pixbuf_database displayed;
 	page_t * pages;
+	int rotation;
 	int columns;
 	int rows;
 	int max_columns;

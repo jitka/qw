@@ -143,7 +143,6 @@ void key_reload(){
 	document_t *new;
 	open_file(file_path);
 	new = document_create_databse();
-	render_set_max_columns(new);
 	render(new);
 	document_delete_database(document);
 	document=new;
@@ -151,14 +150,16 @@ void key_reload(){
 
 void key_set_columns(int c){
 	if (c * document->rows >= maximum_displayed
-			|| c > document->max_columns)
+			|| c > document->max_columns
+			|| c < 1)
 		return;
 	document->columns = c;
 	key_center();
 }
 void key_set_rows(int r){
 	if (r * document->columns >= maximum_displayed
-			|| r > document->max_rows)
+			|| r > document->max_rows
+			|| r < 1)
 		return;
 	document->rows = r; 
 	key_center();

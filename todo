@@ -1,20 +1,16 @@
-pada na  3. strane O:-|
 http://library.gnome.org/devel/glib/stable/glib-Key-value-file-parser.html#g-key-file-get-keys
+nefunguje cisteni v rendre_page
+nekreslit co nemusim
 ctrl
 zmenit ikonku pri mereni
 spectre title do okna title nebo nazev souboru?
 chytat vsechny chyby spectre a popplera
 chytrejsi openfile
-specrte pise divne -21
-vlakna
-zaokrouhlovaci chyba: videt je pri prepnuti na zoom
-predelat posunuti zoomu na stred, otaceni v zoomu
+vlakna nove reseni
+udelat jeden mode
 roztahovani okna resit
-+renderovani paralelne pres eventy kontrolovat poradi/aktualnost
 nenechat si posilat eventy, ktere nepotrebuji
 pořádek v includech
 intuitivnejsi pismenka
 -h -i?
-+pixfufery dopredu paralene pres eventy
-+zvetsit stare driv nez krestlit nove
-+pouzitat cairo misto pixbuferu
+lepsi mazani..

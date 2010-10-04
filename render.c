@@ -12,18 +12,19 @@ document_t *document;
 
 document_t * document_create_databse(){
 	document_t * doc = calloc(1, sizeof(document_t));
-	doc->rotation = 0;
 	doc->number_pages = doc_get_number_pages();
+	pixbuf_create_database(&doc->cache);
+	pixbuf_create_database(&doc->displayed);
+	doc->pages = calloc(doc->number_pages, sizeof(page_t));
+	doc->rotation = 0;
 	doc->columns = 1;
 	doc->rows = 1;
+	render_set_max_columns(doc);
 	doc->scale = UNKNOWN;
 	doc->table_h = 0;
 	doc->table_w = 0;
 	doc->center_h = window_height/2;
 	doc->center_w = window_width/2;
-	pixbuf_create_database(&doc->cache);
-	pixbuf_create_database(&doc->displayed);
-	doc->pages = calloc(doc->number_pages, sizeof(page_t));
 
 	if (current_page < 0) current_page = 0;
 	if (current_page >= doc->number_pages) current_page = doc->number_pages -1;
@@ -103,6 +104,7 @@ void render_page(document_t * doc, int page_number, int space_width, int space_h
 		doc->scale = tmp->scale;
 
 	//cisteni
+	//nefunguje man neuplne souradnice
 	gdk_window_clear_area_e(
 			window,
 			space_shift_w,space_shift_h,
@@ -115,6 +117,7 @@ void render_page(document_t * doc, int page_number, int space_width, int space_h
 }
 
 void compute_space(document_t *doc,int *space_width, int *space_height){
+	// toto pocita s vejitim celeho jeste bude na vysku na sirku a o neco vic/min + osetreni velikosti
 	//spočítá velkosti prostoru na jednu stranu tak aby se vešlo vše do okna a poměr stran
 	//vyhovoval medánu z poměrů všech stran
 	int num_displayed = min(doc->columns * doc->rows, doc->number_pages-current_page);
@@ -162,8 +165,11 @@ void render_mode_page(document_t *doc){
 	 */	
 	int space_width,space_height;
 	compute_space(doc,&space_width,&space_height);
-	int ulc_shift_width = (window_width - space_width*doc->columns - margin*(doc->columns-1) +1) / 2;
-	int ulc_shift_height = (window_height - space_height*doc->rows - margin*(doc->rows-1) +1) / 2;
+	doc->table_w = space_width*doc->columns + margin*(doc->columns-1);
+	doc->table_h = space_height*doc->rows + margin*(doc->rows-1);
+//	printf("%d %d %d\n",space_width,doc->center_w,doc->table_w/2);
+	int ulc_shift_w = doc->center_w - doc->table_w/2;
+	int ulc_shift_h = doc->center_h - doc->table_h/2;
 	//vykresleni jednotlivych ramecku		
 	for (int j=0; j < doc->rows; j++){
 		for (int i=0; i < doc->columns; i++){
@@ -173,34 +179,34 @@ void render_mode_page(document_t *doc){
 						doc,//document_t * doc,
 						current_page+i+j*doc->columns,//int page_number,	
 						space_width,space_height,//int space_width, int space_height
-						ulc_shift_width + i * (space_width + margin),
-						ulc_shift_height + j * (space_height + margin));//int space_shift_w, int space_shift_h)
+						i * (space_width + margin),
+						j * (space_height + margin));//int space_shift_w, int space_shift_h)
 			} else {
 				//mazat
 				gdk_window_clear_area_e(
 						window,
-						ulc_shift_width + i * (space_width + margin),
-						ulc_shift_height + j * (space_height + margin),
+						i * (space_width + margin),
+						j * (space_height + margin),
 						space_width,space_height);
 			}
 		}
 	}
 	//mazani okraju + mezer/margin
-	gdk_window_clear_area_e(window,0,0,window_width,ulc_shift_height);
-	gdk_window_clear_area_e(window,0,window_height-ulc_shift_height,window_width,ulc_shift_height);
-	gdk_window_clear_area_e(window,0,0,ulc_shift_width,window_height);
-	gdk_window_clear_area_e(window,window_width-ulc_shift_width,0,ulc_shift_width,window_height);
+	gdk_window_clear_area_e(window,0,0,window_width,ulc_shift_h);
+	gdk_window_clear_area_e(window,0,doc->table_h+ulc_shift_h,window_width,window_height-doc->table_h-ulc_shift_h);
+	gdk_window_clear_area_e(window,0,0,ulc_shift_w,window_height);
+	gdk_window_clear_area_e(window,doc->table_w+ulc_shift_w,0,window_width-doc->table_w-ulc_shift_w,window_height);
 	for (int i=0; i < doc->rows-1; i++){
 			gdk_window_clear_area_e(
 				window,
-				0, ulc_shift_height + (i+1) * space_height + i * margin,
+				0, ulc_shift_h + (i+1) * space_height + i * margin,
 				window_width, margin);
 			}
 	for (int i=0; i < doc->columns-1; i++){
 			gdk_window_clear_area_e(
 				window,
-				ulc_shift_width + (i+1) * space_width + i * margin, 0,
-				margin,window_height);
+				ulc_shift_w + (i+1) * space_width + i * margin, 0,
+				margin, window_height);
 			}
 
 }
@@ -268,6 +274,10 @@ void render_get_relative_position(
 			item->height + item->shift_height > pointer_y);
 		b = NULL;
 	}
+	
+	//prevedu na relativni vuci ulc tabulky
+	pointer_x -= document->center_w - document->table_w/2;
+	pointer_y -= document->center_h - document->table_h/2;
 	GList *pointer = g_list_find_custom(document->displayed.glist,NULL,compare);
 	if (pointer == NULL){
 		*page = -1;
@@ -290,8 +300,8 @@ void expose(){
 				window,//GdkDrawable *drawable,
 				gdkGC, //GdkGC *gc,
 				0,0, //vykreslit cely pixbuf
-				item->shift_width,
-				item->shift_height, //posunuti
+				document->center_w-document->table_w/2 + item->shift_width,
+				document->center_h - document->table_h/2 + item->shift_height, //posunuti
 				item->width, //rozmery
 				item->height,
 				GDK_RGB_DITHER_NONE, //fujvec nechci

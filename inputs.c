@@ -55,10 +55,10 @@ static struct {
 	{ PAGE, GDK_d, wait_distance },
 	{ PAGE, GDK_D, wait_position },
 	//tabulka
-	{ PAGE|PRESENTATION, GDK_Right, key_down }, 		// dolu o 1 stranku
-	{ PAGE|PRESENTATION, GDK_Left, key_up },		// nahoru o 1 stranku
-	{ PAGE|PRESENTATION, GDK_Down, key_row_down },		// dolu o 1 radu
-	{ PAGE|PRESENTATION, GDK_Up, key_row_up },		// nahoru o radu
+//	{ PAGE|PRESENTATION, GDK_Right, key_down }, 		// dolu o 1 stranku
+//	{ PAGE|PRESENTATION, GDK_Left, key_up },		// nahoru o 1 stranku
+//	{ PAGE|PRESENTATION, GDK_Down, key_row_down },		// dolu o 1 radu
+//	{ PAGE|PRESENTATION, GDK_Up, key_row_up },		// nahoru o radu
 	{ PAGE|PRESENTATION, GDK_Page_Down, key_screan_down },	// dolu o tabulku
 	{ PAGE|PRESENTATION, GDK_Page_Up, key_screan_up },	// nahoru o tabulku
 	{ PAGE|PRESENTATION, GDK_z, key_zoom_mode },
@@ -69,10 +69,10 @@ static struct {
 	{ ZOOM, GDK_KP_Add, key_zoom_in },
 	{ ZOOM, GDK_minus, key_zoom_out },
 	{ ZOOM, GDK_KP_Subtract, key_zoom_out },
-	{ ZOOM, GDK_Right, key_zoom_right },	
-	{ ZOOM, GDK_Left, key_zoom_left },		
-	{ ZOOM, GDK_Down, key_zoom_down },		
-	{ ZOOM, GDK_Up, key_zoom_up },		
+	{ ~0, GDK_Right, key_zoom_right },	
+	{ ~0, GDK_Left, key_zoom_left },		
+	{ ~0, GDK_Down, key_zoom_down },		
+	{ ~0, GDK_Up, key_zoom_up },		
 };
 
 void handle_key(guint keyval){
