@@ -365,12 +365,12 @@ int main(int argc, char * argv[]) {
 	file_path = argv[optind]; //vim ze tohle obecne nefunguje, ale tady to staci
 
 	open_file(file_path); //ověří, jestli soubor je skutečně pdf
-	printf("%d\n",file_type);
-	double w,h;
-	doc_page_get_size(0,&w,&h);
-	printf("stran %d, %lfx%lfcm\n",doc_get_number_pages(),w IN_CENTIMETRES,h IN_CENTIMETRES);
+//	printf("%d\n",file_type);
+//	double w,h;
+//	doc_page_get_size(0,&w,&h);
+//	printf("stran %d, %lfx%lfcm\n",doc_get_number_pages(),w IN_CENTIMETRES,h IN_CENTIMETRES);
 	//vytvoreni okna
-/*	gdk_init(NULL,NULL);
+	gdk_init(NULL,NULL);
 
 	GdkVisual *visual = gdk_visual_get_system();
 	GdkColormap *colormap = gdk_colormap_new(visual,TRUE);
@@ -419,6 +419,6 @@ int main(int argc, char * argv[]) {
 	mainloop = g_main_loop_new(g_main_context_default(), FALSE);	
 	g_main_loop_run(mainloop);
 	gdk_window_destroy(window); 
-*/
+
 	return 0;
 }

@@ -8,6 +8,7 @@
 
 int doc_init(char *path){
 	//pdf
+//	close(2); open("/dev/null", O_RDWR);
 	char pwd[1024];
 	if (!getcwd(pwd, sizeof(pwd)))
 		return 0;
@@ -21,11 +22,12 @@ int doc_init(char *path){
 		return 1;
 	}
 	//ps
-	if (ps_init(path) == NULL){
+/*	if (ps_init(path) == NULL){
 		file_type = PS;
 		return 1;
 	}
 	return 0;
+*/
 }
 void doc_page_get_size(int n, double *width, double *height){
 	if (file_type == PDF)

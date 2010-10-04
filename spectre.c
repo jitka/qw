@@ -45,4 +45,8 @@ void ps_render_page_to_pixbuf(GdkPixbuf **pixbuf, int num_page, int width, int h
 			CAIRO_FORMAT_RGB24,
 			200, 200, 
 			row_length);
+	GdkPixmap* pixmap = gdk_pixmap_new(NULL,
+			200,200,
+			4);
+	cairo_t * cairo = gdk_cairo_create(pixmap);
 }
