@@ -2,6 +2,8 @@
 ps
 	jednoduché 'neokýnko' bez lištičky, tlačítek
 víc jazyků
+zapnuti na sirku, 1strana, podle velikosti
+velikost okna podle minule
 vykresleni par stranek dopredu - je-li potreba
 	nastavitelna uvodni velikost okna
 	velikosti obrázků nebo s černým rámečkem
@@ -18,7 +20,8 @@ záložky
 	cela obrazovka
 	-tabulka
 z poklepani otevrit stranku
-zoom
+najit nejvetsi scale a zachovat poměri velikosti stran
+novy zoom
 -i
 sipky, mys, skrolovatko
 	-prezentace

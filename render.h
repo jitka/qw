@@ -20,9 +20,12 @@ typedef struct document_t{
 	int rows;
 	int max_columns;
 	int max_rows;
-	double scale;
+	double scale; //docasne
+	//zobrazeny kus
 	int center_h;
 	int center_w;
+	int table_h;
+	int table_w;
 } document_t;
 
 document_t * document_create_databse();

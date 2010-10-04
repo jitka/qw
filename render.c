@@ -17,8 +17,10 @@ document_t * document_create_databse(){
 	doc->columns = 1;
 	doc->rows = 1;
 	doc->scale = UNKNOWN;
-	doc->center_h = window_height/2;
-	doc->center_w = window_width/2;
+	doc->table_h = 0;
+	doc->table_w = 0;
+	doc->table_center_h = window_height/2;
+	doc->table_center_w = window_width/2;
 	pixbuf_create_database(&doc->cache);
 	pixbuf_create_database(&doc->displayed);
 	doc->pages = calloc(doc->number_pages, sizeof(page_t));
