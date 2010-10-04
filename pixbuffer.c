@@ -4,6 +4,7 @@
 #include "backend.h"
 #include "settings.h"
 
+#include "poppler.h" //fuj
 void pixbuf_create_database(pixbuf_database * database){
 	database->glist = NULL;
 	database->size = 0;
@@ -56,7 +57,7 @@ void pixbuf_render(pixbuf_database *cache,pixbuf_item *it){
 		cache->glist = g_list_remove_link(cache->glist,tmp);
 		memcpy(it,tmp->data,sizeof(pixbuf_item));
 	} else { // jinak se vykresli
-		doc_render_page_to_pixbuf(
+		pdf_render_page_to_pixbuf(
 			&it->pixbuf,
 			it->page_number,
 			it->width, it->height,
