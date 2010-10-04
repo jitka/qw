@@ -12,17 +12,18 @@ extern "C" {
 
 static PopplerDocument * doc;
 
-char * pdf_init( char* filePath) {
+int pdf_init( char* filePath) {
 	GError * err;
 	if (mode != START) g_object_unref(doc);
 
 	err = (GError *) 0;
 	doc = poppler_document_new_from_file(filePath,0,&err); //0->nema heslo
 		//vrati-li NULL -> ma chybu
-	if (err != 0)
-		return err->message;
-	//kontrolovat nulovy pocet stran!!!!!!!!
-	return NULL;
+	if (err != 0){
+		printf("au\n");
+		return 1;
+	}
+	return 0;
 }
 
 int pdf_get_number_pages(){

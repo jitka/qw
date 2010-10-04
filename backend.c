@@ -17,7 +17,7 @@ int doc_init(char *path){
 		sprintf(abs_path,"file://%s",path);
 	else
 		sprintf(abs_path,"file://%s/%s",pwd,path);
-	if (pdf_init(abs_path) == NULL){
+	if (!pdf_init(abs_path)){
 		file_type = PDF;
 		return 1;
 	}
