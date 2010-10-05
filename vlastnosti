@@ -22,7 +22,6 @@ záložky
 	-tabulka
 z poklepani otevrit stranku
 najit nejvetsi scale a zachovat poměri velikosti stran
-novy zoom
 -i
 sipky, mys, skrolovatko
 	-prezentace
@@ -34,3 +33,8 @@ výběr textu
 hypertextové odkazy
 hledání
 horni listiska - nechci radsi psat pres pdf
+zoom pamatovat mnozsti+-
+1.vypocitat space jako tabulku jako roztahnout do sirky/vysky
+2.vynasobit priblizenim
+3.pro vsechny viditelne vykreslit
+	neni-li videt current_page, posounout na nejnizsi vyssi co videt je

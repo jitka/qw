@@ -68,7 +68,7 @@ void render_get_size(document_t * doc, int number_page, double *width, double *h
 }
 
 void render_page(document_t * doc, int page_number, int space_width, int space_height, int space_shift_w, int space_shift_h){
-	//vyrendruje stranku doprosted krabicky
+	//vymysli presnou pozitci a detaily doprosted krabicky
 	int black_w,black_h;
 	double page_width,page_height;
 	render_get_size(doc,page_number,&page_width,&page_height);
@@ -97,7 +97,6 @@ void render_page(document_t * doc, int page_number, int space_width, int space_h
 		tmp->scale = space_height/page_height;
 	}
 
-	pixbuf_render(&doc->cache,tmp);
 	pixbuf_insert_into_database(&doc->displayed,tmp);
 
 	if (mode == ZOOM)
@@ -159,6 +158,37 @@ void compute_space(document_t *doc,int *space_width, int *space_height){
 
 }
 
+void render_displayed_pixbuf(document_t *doc){
+	void render(gpointer data, gpointer user_data){
+		pixbuf_item *item = data;
+		pixbuf_render(&doc->cache,item);
+	}
+	g_list_foreach(doc->displayed.glist,render,NULL);
+}
+
+void clean_window(document_t *doc, int space_width, int space_height){
+	int ulc_shift_w = doc->center_w - doc->table_w/2;
+	int ulc_shift_h = doc->center_h - doc->table_h/2;
+	gdk_window_clear_area_e(window,0,0,window_width,ulc_shift_h);
+	gdk_window_clear_area_e(window,0,doc->table_h+ulc_shift_h,window_width,window_height-doc->table_h-ulc_shift_h);
+	gdk_window_clear_area_e(window,0,0,ulc_shift_w,window_height);
+	gdk_window_clear_area_e(window,doc->table_w+ulc_shift_w,0,window_width-doc->table_w-ulc_shift_w,window_height);
+	for (int i=0; i < doc->rows-1; i++){
+			gdk_window_clear_area_e(
+				window,
+				0, ulc_shift_h + (i+1) * space_height + i * margin,
+				window_width, margin);
+			}
+	for (int i=0; i < doc->columns-1; i++){
+			gdk_window_clear_area_e(
+				window,
+				ulc_shift_w + (i+1) * space_width + i * margin, 0,
+				margin, window_height);
+			}
+
+
+}
+
 void render_mode_page(document_t *doc){
 	/* podle tabulky rozdelim
 	 * na casti (space) a do tech vlozim stranky
@@ -168,9 +198,7 @@ void render_mode_page(document_t *doc){
 	doc->table_w = space_width*doc->columns + margin*(doc->columns-1);
 	doc->table_h = space_height*doc->rows + margin*(doc->rows-1);
 //	printf("%d %d %d\n",space_width,doc->center_w,doc->table_w/2);
-	int ulc_shift_w = doc->center_w - doc->table_w/2;
-	int ulc_shift_h = doc->center_h - doc->table_h/2;
-	//vykresleni jednotlivych ramecku		
+	//privaveni displayed
 	for (int j=0; j < doc->rows; j++){
 		for (int i=0; i < doc->columns; i++){
 			if ((current_page+i+j*doc->columns < doc->number_pages) &&
@@ -192,23 +220,7 @@ void render_mode_page(document_t *doc){
 		}
 	}
 	//mazani okraju + mezer/margin
-	gdk_window_clear_area_e(window,0,0,window_width,ulc_shift_h);
-	gdk_window_clear_area_e(window,0,doc->table_h+ulc_shift_h,window_width,window_height-doc->table_h-ulc_shift_h);
-	gdk_window_clear_area_e(window,0,0,ulc_shift_w,window_height);
-	gdk_window_clear_area_e(window,doc->table_w+ulc_shift_w,0,window_width-doc->table_w-ulc_shift_w,window_height);
-	for (int i=0; i < doc->rows-1; i++){
-			gdk_window_clear_area_e(
-				window,
-				0, ulc_shift_h + (i+1) * space_height + i * margin,
-				window_width, margin);
-			}
-	for (int i=0; i < doc->columns-1; i++){
-			gdk_window_clear_area_e(
-				window,
-				ulc_shift_w + (i+1) * space_width + i * margin, 0,
-				margin, window_height);
-			}
-
+	clean_window(doc,space_width,space_height);
 }
 
 void render_mode_zoom(document_t *doc){
@@ -228,7 +240,6 @@ void render_mode_zoom(document_t *doc){
 		tmp->shift_height = document->center_h;
 		tmp->scale = doc->scale;
 		tmp->rotation = (doc->pages[current_page].rotation+doc->rotation) % 360;
-		pixbuf_render(&doc->cache,tmp);
 		pixbuf_insert_into_database(&doc->displayed,tmp);
 	}
 }
@@ -245,7 +256,7 @@ void render(document_t *doc){
 			render_mode_zoom(doc);
 			break;
 	}
-	
+	render_displayed_pixbuf(doc);
 }
 
 void key_crop(){

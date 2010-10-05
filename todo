@@ -1,3 +1,6 @@
+podbarveni aktualni stranky
+nejdriv pripravit na vykresleni, az pak vykreslit
+specialni fce na mazani
 http://library.gnome.org/devel/glib/stable/glib-Key-value-file-parser.html#g-key-file-get-keys
 nefunguje cisteni v rendre_page
 nekreslit co nemusim

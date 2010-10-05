@@ -308,8 +308,8 @@ static void event_func(GdkEvent *ev, gpointer data) {
 int main(int argc, char * argv[]) {
 
 
-	close(2); 
-	open("/dev/null", O_RDWR);
+//	close(2); 
+//	open("/dev/null", O_RDWR);
 	g_type_init();
 
 	//zpracovani parametru
