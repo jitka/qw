@@ -24,7 +24,9 @@ typedef struct document_t{
 	//zobrazeny kus
 	int center_h;
 	int center_w;
-	int table_h;
+	int space_h;
+	int space_w;
+	int table_h; //space_h +margin 
 	int table_w;
 } document_t;
 

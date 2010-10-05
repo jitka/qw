@@ -23,6 +23,8 @@ document_t * document_create_databse(){
 	doc->scale = UNKNOWN;
 	doc->table_h = 0;
 	doc->table_w = 0;
+	doc->space_h = 0;
+	doc->space_w = 0;
 	doc->center_h = window_height/2;
 	doc->center_w = window_width/2;
 
@@ -67,7 +69,7 @@ void render_get_size(document_t * doc, int number_page, double *width, double *h
 	
 }
 
-void render_page(document_t * doc, int page_number, int space_width, int space_height, int space_shift_w, int space_shift_h){
+void render_page(document_t * doc, int page_number, int space_shift_w, int space_shift_h){
 	//vymysli presnou pozitci a detaily doprosted krabicky
 	double page_width,page_height;
 	render_get_size(doc,page_number,&page_width,&page_height);
@@ -78,20 +80,20 @@ void render_page(document_t * doc, int page_number, int space_width, int space_h
 	tmp->rotation = (doc->pages[page_number].rotation+doc->rotation) % 360;
 	tmp->space_shift_w = space_shift_w;
 	tmp->space_shift_h = space_shift_h;
-	if (space_width*page_height < page_width*space_height){
+	if (doc->space_w*page_height < page_width*doc->space_h){
 		//šířka /width je stejná
-		tmp->width = space_width;
-		tmp->height = ceil(space_width*page_height/page_width);
+		tmp->width = doc->space_w;
+		tmp->height = ceil(doc->space_w*page_height/page_width);
 		tmp->shift_w = 0;
-		tmp->shift_h = (space_height - tmp->height) / 2;
-		tmp->scale = space_width/page_width;
+		tmp->shift_h = (doc->space_h - tmp->height) / 2;
+		tmp->scale = doc->space_w/page_width;
 	} else {
 		//výška/height je stejná
-		tmp->width = ceil(space_height*(page_width/page_height));
-		tmp->height = space_height;
-		tmp->shift_w = (space_width - tmp->width) / 2;
+		tmp->width = ceil(doc->space_h*(page_width/page_height));
+		tmp->height = doc->space_h;
+		tmp->shift_w = (doc->space_w - tmp->width) / 2;
 		tmp->shift_h = 0;
-		tmp->scale = space_height/page_height;
+		tmp->scale = doc->space_h/page_height;
 	}
 
 	pixbuf_insert_into_database(&doc->displayed,tmp);
@@ -101,7 +103,7 @@ void render_page(document_t * doc, int page_number, int space_width, int space_h
 
 }
 
-void compute_space(document_t *doc,int *space_width, int *space_height){
+void compute_space(document_t *doc){
 	// toto pocita s vejitim celeho jeste bude na vysku na sirku a o neco vic/min + osetreni velikosti
 	//spočítá velkosti prostoru na jednu stranu tak aby se vešlo vše do okna a poměr stran
 	//vyhovoval medánu z poměrů všech stran
@@ -134,14 +136,13 @@ void compute_space(document_t *doc,int *space_width, int *space_height){
 	   	/doc->rows)
 	   > aspect){
 		//vyska je stejna
-		*space_height = ( window_height - (doc->rows-1)*margin ) / doc->rows;
-		*space_width = floor(*space_height*aspect);
+		doc->space_h = ( window_height - (doc->rows-1)*margin ) / doc->rows;
+		doc->space_w = floor(doc->space_h*aspect);
 	} else {
 		//sirka je stejna
-		*space_width = ( window_width-(doc->columns-1)*margin ) / doc->columns;
-		*space_height = floor(*space_width/aspect);
+		doc->space_w = ( window_width-(doc->columns-1)*margin ) / doc->columns;
+		doc->space_h = floor(doc->space_w/aspect);
 	}
-
 }
 
 void render_displayed_pixbuf(document_t *doc){
@@ -154,8 +155,6 @@ void render_displayed_pixbuf(document_t *doc){
 }
 
 void clean_window(document_t *doc){
-	int space_width = ( doc->table_w - margin*(doc->columns-1) ) / doc->columns;
-	int space_height = ( doc->table_h - margin*(doc->rows-1) ) / doc->rows;
 	int ulc_shift_w = doc->center_w - doc->table_w/2;
 	int ulc_shift_h = doc->center_h - doc->table_h/2;
 	//okraje tabukly
@@ -167,13 +166,13 @@ void clean_window(document_t *doc){
 	for (int i=0; i < doc->rows-1; i++){
 			gdk_window_clear_area_e(
 				window,
-				0, ulc_shift_h + (i+1) * space_height + i * margin,
+				0, ulc_shift_h + (i+1) * doc->space_h + i * margin,
 				window_width, margin);
 			}
 	for (int i=0; i < doc->columns-1; i++){
 			gdk_window_clear_area_e(
 				window,
-				ulc_shift_w + (i+1) * space_width + i * margin, 0,
+				ulc_shift_w + (i+1) * doc->space_w + i * margin, 0,
 				margin, window_height);
 			}
 	//zbytky v bunkach
@@ -183,39 +182,42 @@ void clean_window(document_t *doc){
 				window,
 				ulc_shift_w + item->space_shift_w,
 				ulc_shift_h + item->space_shift_h,
-				space_width,
+				doc->space_w,
 				item->shift_h);
 		gdk_window_clear_area_e(
 				window,
 				ulc_shift_w + item->space_shift_w,
 				ulc_shift_h + item->space_shift_h,
 				item->shift_w,
-				space_height);
+				doc->space_h);
 		gdk_window_clear_area_e(
 				window,
 				ulc_shift_w + item->space_shift_w,
-				ulc_shift_h + item->space_shift_h + space_height - item->shift_h,
-				space_width,
+				ulc_shift_h + item->space_shift_h + doc->space_h - item->shift_h,
+				doc->space_w,
 				item->shift_h);
 		gdk_window_clear_area_e(
 				window,
-				ulc_shift_w + item->space_shift_w + space_width - item->shift_w,
+				ulc_shift_w + item->space_shift_w + doc->space_w - item->shift_w,
 				ulc_shift_h + item->space_shift_h,
 				item->shift_w,
-				space_height);
+				doc->space_h);
+		user_data=NULL;
 	}
 	g_list_foreach(doc->displayed.glist,clean,NULL);
 
 }
 
-void render_mode_page(document_t *doc){
+void render(document_t *doc){
 	/* podle tabulky rozdelim
 	 * na casti (space) a do tech vlozim stranky
 	 */	
-	int space_width,space_height;
-	compute_space(doc,&space_width,&space_height);
-	doc->table_w = space_width*doc->columns + margin*(doc->columns-1);
-	doc->table_h = space_height*doc->rows + margin*(doc->rows-1);
+	pixbuf_delete_displayed(&doc->cache,&doc->displayed);
+	
+	compute_space(doc);
+
+	doc->table_w = doc->space_w*doc->columns + margin*(doc->columns-1);
+	doc->table_h = doc->space_h*doc->rows + margin*(doc->rows-1);
 //	printf("%d %d %d\n",space_width,doc->center_w,doc->table_w/2);
 	//privaveni displayed
 	for (int j=0; j < doc->rows; j++){
@@ -225,68 +227,30 @@ void render_mode_page(document_t *doc){
 				render_page(
 						doc,//document_t * doc,
 						current_page+i+j*doc->columns,//int page_number,	
-						space_width,space_height,//int space_width, int space_height
-						i * (space_width + margin),
-						j * (space_height + margin));//int space_shift_w, int space_shift_h)
+						i * (doc->space_w + margin),
+						j * (doc->space_h + margin));//int space_shift_w, int space_shift_h)
 			} else {
 				//mazat
 				gdk_window_clear_area_e(
 						window,
-						i * (space_width + margin),
-						j * (space_height + margin),
-						space_width,space_height);
+						i * (doc->space_w + margin),
+						j * (doc->space_h + margin),
+						doc->space_w,doc->space_h);
 			}
 		}
-	}
-	//mazani okraju + mezer/margin
-}
-
-void render_mode_zoom(document_t *doc){
-	if (doc->scale == UNKNOWN){
-		render_page(doc, current_page, window_width, window_height, 0, 0);
-		doc->center_w = window_width/2;
-		doc->center_h = window_height/2;
-	} else {
-		gdk_window_clear(window);
-		pixbuf_item *tmp = calloc(1,sizeof(pixbuf_item));
-		tmp->page_number = current_page;
-		double width,height;
-		render_get_size(doc,current_page,&width,&height);
-		tmp->width=(int)floor(width*doc->scale),
-		tmp->height=(int)floor(height*doc->scale),
-		tmp->shift_w = document->center_w;
-		tmp->shift_h = document->center_h;
-		tmp->scale = doc->scale;
-		tmp->rotation = (doc->pages[current_page].rotation+doc->rotation) % 360;
-		pixbuf_insert_into_database(&doc->displayed,tmp);
-	}
-}
-
-void render(document_t *doc){
-	pixbuf_delete_displayed(&doc->cache,&doc->displayed);
-	switch(mode){
-		case START:
-			break;
-		case PAGE: case PRESENTATION:
-			render_mode_page(doc);
-			break;
-		case ZOOM:
-			render_mode_zoom(doc);
-			break;
 	}
 	render_displayed_pixbuf(doc);
 	clean_window(doc);
 }
 
+
 void key_crop(){
 	//oreze stranku na velikost zobrazene tabulky
   	if (is_fullscreen)
 		return;
-	int space_width,space_height;
-	compute_space(document,&space_width,&space_height);
 	gdk_window_resize(window,
-			document->columns*space_width + (document->columns-1)*margin,
-			document->rows*space_height + (document->rows-1)*margin);
+			document->columns*document->space_w + (document->columns-1)*margin,
+			document->rows*document->space_h + (document->rows-1)*margin);
 }
 
 
@@ -342,8 +306,6 @@ void expose(){
 				0,0);		
 	}
 	g_list_foreach(document->displayed.glist,render,NULL);
-//	printf("neco\n");
-//clean_window(document); //toto tady testovaci
 }
 
 void change_scale(double scale){
