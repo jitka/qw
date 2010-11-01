@@ -2,15 +2,18 @@
 #include <gdk/gdkkeysyms.h>
 #include "input_functions.h"
 #include "settings.h"
+//todo: prelozit PREPINAC
 
 enum {
-	BASIC,
-	NUMBERS,
-	DISTANCE_1,
+	BASIC, //ceka
+	NUMBERS, //ceka na cisla 
+	DISTANCE_1, //ceka na kliknuti
 	DISTANCE_2,
-	POSITION
+	POSITION, 
+	PREPINAC, //je aktualne zmackle ctrl
 } state=BASIC;
 int number;
+int number_is_negativ;
 int click_x;
 int click_y;
 
@@ -76,6 +79,7 @@ static struct {
 };
 
 void handle_key(guint keyval){
+	printf ("keyval %x\n",keyval);
 	if (mode == PRESENTATION)
 		key_page_mode();
 	switch(state){
@@ -83,21 +87,39 @@ void handle_key(guint keyval){
 			if ((keyval >= GDK_0) && (keyval <= GDK_9)){
 				number = number*10 + keyval - GDK_0;
 				return;
-			}
-			for (unsigned int i=0; i < sizeof(number_chars) / sizeof(number_chars[0]); i++)
-				if (number_chars[i].pressed_char == keyval &&
-						(command_chars[i].mode_mask & mode) ) {
-					number_chars[i].function(number);
-//					break;
-				}
-			state = BASIC;
-			return;
-		case BASIC:	
-			if ((keyval >= GDK_0) && (keyval <= GDK_9)){
-				state = NUMBERS;
-				number = keyval - GDK_0;
+			} else if ((keyval >= GDK_KP_0) && (keyval <= GDK_KP_9)){
+				number = number*10 + keyval - GDK_KP_0;
 				return;
+			} else {
+				if (number_is_negativ)
+					number *= -1;
+				for (unsigned int i=0; i < sizeof(number_chars) / sizeof(number_chars[0]); i++)
+					if (number_chars[i].pressed_char == keyval &&
+							(command_chars[i].mode_mask & mode) ) {
+						number_chars[i].function(number);
+					}
+				state = BASIC;
 			}
+			break;
+		case BASIC:
+
+			// kdyby zacaly chodit cisla
+			state = NUMBERS;
+			number = 0;
+			number_is_negativ = 0;
+			if (keyval == GDK_plus || keyval == GDK_KP_Add){
+			printf("tu plus%d\n",number_is_negativ);
+			} else if (keyval == GDK_minus || keyval == GDK_KP_Subtract){
+				number_is_negativ = 42;
+			printf("tu minus%d\n",number_is_negativ);
+			} else if ((keyval >= GDK_0) && (keyval <= GDK_9)){
+				number = keyval - GDK_0;
+			} else if ((keyval >= GDK_KP_0) && (keyval <= GDK_KP_9)){
+				number = keyval - GDK_KP_0;
+			} else { //nezacaly chodit cisla...
+				state = BASIC;
+			}
+//			printf(" %d\n",number_is_negativ);
 
 			for (unsigned int i=0; i < sizeof(command_chars)/sizeof(command_chars[0]); i++)
 				if ( command_chars[i].pressed_char == keyval &&
@@ -115,8 +137,6 @@ void handle_key(guint keyval){
 
 void handle_click(int x, int y){
 	switch(state){
-		case BASIC: case NUMBERS:
-			break;
 		case DISTANCE_1:
 			click_x=x;
 			click_y=y;
@@ -129,6 +149,8 @@ void handle_click(int x, int y){
 		case POSITION:
 			click_position(x,y);
 			state=BASIC;
+			break;
+		default: 
 			break;
 	}
 }

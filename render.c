@@ -72,6 +72,7 @@ void render_get_size(document_t * doc, int number_page, double *width, double *h
 
 void render_page(document_t * doc, int page_number, int space_shift_w, int space_shift_h){
 	//vymysli presnou pozitci a detaily doprosted krabicky
+	//todo: co takhle zachovavat pomery mezi velikostmi ruznych stran?
 	double page_width,page_height;
 	render_get_size(doc,page_number,&page_width,&page_height);
 	
@@ -115,8 +116,7 @@ void render_page_black(document_t * doc, int space_shift_w, int space_shift_h){
 }
 
 void compute_space(document_t *doc){
-	// toto pocita s vejitim celeho jeste bude na vysku na sirku a o neco vic/min + osetreni velikosti
-	//spočítá velkosti prostoru na jednu stranu tak aby se vešlo vše do okna a poměr stran
+	//spočítá velkosti prostoru na jednu stranku tak aby se vešlo vše do okna a poměr stran
 	//vyhovoval medánu z poměrů všech stran
 	int num_displayed = min(doc->columns * doc->rows, doc->number_pages-current_page);
 
@@ -161,10 +161,8 @@ void render_displayed_pixbuf(document_t *doc){
 		pixbuf_item *item = data;
 		pixbuf_render(&doc->cache,item);
 		user_data = NULL;
-//		printf("%d ",item->page_number);
 	}
 	g_list_foreach(doc->displayed.glist,render,NULL);
-//	printf("rendrovani\n");
 }
 
 void clean_window(document_t *doc){
@@ -228,36 +226,28 @@ void render(document_t *doc){
 	pixbuf_delete_displayed(&doc->cache,&doc->displayed);
 	
 	compute_space(doc);
-
 	doc->table_w = doc->space_w*doc->columns + margin*(doc->columns-1);
 	doc->table_h = doc->space_h*doc->rows + margin*(doc->rows-1);
-//	printf("%d %d %d\n",space_width,doc->center_w,doc->table_w/2);
+	
 	//privaveni displayed
 	for (int j=0; j < doc->rows; j++){
 		for (int i=0; i < doc->columns; i++){
 			if ((current_page+i+j*doc->columns < doc->number_pages) &&
 					(current_page+i+j*doc->columns >= 0)){
-			//	printf("%d ",current_page+i+j*doc->columns);
 				render_page(
 						doc,//document_t * doc,
 						current_page+i+j*doc->columns,//int page_number,	
 						i * (doc->space_w + margin),
 						j * (doc->space_h + margin));//int space_shift_w, int space_shift_h)
 			} else {
-				render_page_black(
+				render_page_black( //na tento space nezbyla zadna strana
 						doc,//document_t * doc,
 						i * (doc->space_w + margin),
 						j * (doc->space_h + margin));//int space_shift_w, int space_shift_h)
-/*				gdk_window_clear_area_e(
-						window,
-						i * (doc->space_w + margin),
-						j * (doc->space_h + margin),
-						doc->space_w,doc->space_h);
-*/			}
+			}
 		}
 	}
-//	printf("priprava\n");
-	need_render = TRUE;	
+	//need_render = TRUE;	
 	render_displayed_pixbuf(doc);
 	clean_window(doc);
 }
@@ -278,7 +268,9 @@ void render_get_relative_position(
 		int *page,
 		int *relative_x, int *relative_y,
 		int *space_height, int *space_width){
-
+	//pouziva se pri mereni
+	//da souradnice kliknuti vzhledem k jedne strance
+	
 	gint  compare(gconstpointer a, gconstpointer b){
 		const pixbuf_item *item = a;
 		int shift_w = item->space_shift_w + item->shift_w;
@@ -289,14 +281,15 @@ void render_get_relative_position(
 			item->height + shift_h > pointer_y);
 		b = NULL;
 	}
-	
 	//prevedu na relativni vuci ulc tabulky
 	pointer_x -= document->center_w - document->table_w/2;
 	pointer_y -= document->center_h - document->table_h/2;
+	//najdu stranku do ktere se kliklo
 	GList *pointer = g_list_find_custom(document->displayed.glist,NULL,compare);
 	if (pointer == NULL){
 		*page = -1;
 	} else {
+		//zjistim relativni souradnice
 		pixbuf_item *item = pointer->data;
 		*page = item->page_number;
 		*space_height = item->height;
