@@ -1,7 +1,10 @@
 zatim nemam konfigurak
 par drobnosti jde nastavit promenyma na zacatku main.c
 co se zmackne na ktere pismeno je v inputs.c
-dalsi nazvy pismenek jsou v gdkkeysyms.h
-pokud se vam to nechce sekvencne prochazet, 
-tak si tam odkomentujte radek printf("keyval.. a mackejte ;-)
-a ono vam to vypise to cislo co je v tom gdkkeysyms
+nejdriv je maska (seznam dulezitych je pod tim)
+dalsi nazvy pismenek (jsou v gdkkeysyms.h)
+ pokud se vam to nechce sekvencne prochazet, 
+ tak si tam odkomentujte radek printf("keyval.. a mackejte ;-)
+ a ono vam to vypise to cislo co je v tom gdkkeysyms
+a pak ta samotna funkce funkce muze vyvolana vice klavesy
+a naopak klavesa muze vyvolat vic funkci

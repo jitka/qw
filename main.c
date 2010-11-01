@@ -35,7 +35,7 @@ int minimum_width = 10;
 int minimum_height = 10;
 int cache_size = 2000000; //v poctu pixelu
 double zoom_speed = 1.5;
-int zoom_shift = 10; //o kolik posouvaji sipky
+int move_shift = 10; //o kolik posouvaji sipky
 int presentation_in_fullscreen = FALSE;
 int start_maximalized = FALSE;
 int start_fullscreen = FALSE;
@@ -100,10 +100,10 @@ void key_this_page_has_number(int printed_number){ 	page_number_shift = -printed
 void key_zoom_in(){ 	change_scale(document->scale*zoom_speed);}
 void key_zoom_out(){ 	change_scale(document->scale/zoom_speed);}
 
-void key_zoom_right(){ 	document->center_w += zoom_shift; render(document); expose();}
-void key_zoom_left(){ 	document->center_w -= zoom_shift; render(document); expose();}
-void key_zoom_down(){ 	document->center_h += zoom_shift; render(document); expose();}
-void key_zoom_up(){ 	document->center_h -= zoom_shift; render(document); expose();}
+void key_move_right(){ 	document->center_w += move_shift; render(document); expose();}
+void key_move_left(){ 	document->center_w -= move_shift; render(document); expose();}
+void key_move_down(){ 	document->center_h += move_shift; render(document); expose();}
+void key_move_up(){ 	document->center_h -= move_shift; render(document); expose();}
 
 void key_quit(){
 	gdk_event_put( gdk_event_new(GDK_DELETE));
@@ -125,14 +125,11 @@ void key_center(){
 	document->center_h = window_height/2;
 	document->center_w = window_width/2;
 	render(document);
-//	expose();
 }	
-
 void key_rotate(){ 
 	document->pages[current_page].rotation = (document->pages[current_page].rotation + 90) % 360;
 	render(document); expose();
 }
-
 void key_rotate_document(){
 	document->rotation = (document->rotation+90)%360; 
 	render(document); expose();
@@ -173,12 +170,6 @@ void key_page_mode(){
 	if (!keep_scale) //v zoomu
 		document->scale = UNKNOWN;
 	mode=PAGE; 
-	key_center();
-}
-void key_zoom_mode(){//,posunuti	
-	if (mode == PRESENTATION)
-		 g_source_remove (timer_id);	
-	mode=ZOOM; 
 	key_center();
 }
 static gboolean timeout_callback (gpointer data){
@@ -256,7 +247,7 @@ static void event_func(GdkEvent *ev, gpointer data) {
 //	printf("%d\n",ev->type);
 	switch(ev->type) {
 		case GDK_KEY_PRESS:
-			handle_key(ev->key.keyval);
+			handle_key(ev->key.keyval,ev->key.state);
 			break;
 		case GDK_BUTTON_PRESS:
 			if (ev->button.button == 1)
