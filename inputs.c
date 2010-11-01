@@ -40,8 +40,8 @@ static struct {
 	void (*function)(void);
 } command_chars[] = {
 	//vzdy
-	{ 0, GDK_space, key_down }, 		// dolu o 1 stranku
-	{ 0, GDK_BackSpace, key_down },	// nahoru o 1 stranku
+	{ 0, GDK_space, key_next_screan }, 		// dolu o 1 stranku
+	{ 0, GDK_BackSpace, key_prev_screan },	// nahoru o 1 stranku
 	{ 0, GDK_Home, key_home },
 	{ 0, GDK_End, key_end },
 	{ 0, GDK_a, key_rotate },
@@ -50,17 +50,17 @@ static struct {
 	{ 0, GDK_F11, key_fullscreen },
 	{ 0, GDK_f, key_fullscreen },
 	{ 0, GDK_r, key_reload },
-	{ 0, GDK_c, key_center },
+	{ GDK_CONTROL_MASK|GDK_MOD1_MASK, GDK_space, key_center },
 	//klikaci pismenka budou vzdy
 //	{ PAGE, GDK_d, wait_distance },
 //	{ PAGE, GDK_D, wait_position },
 	//tabulka
-	{ GDK_MOD1_MASK, GDK_Right, key_down }, 		// dolu o 1 stranku
-//	{ PAGE|PRESENTATION, GDK_Left, key_up },		// nahoru o 1 stranku
-//	{ PAGE|PRESENTATION, GDK_Down, key_row_down },		// dolu o 1 radu
-//	{ PAGE|PRESENTATION, GDK_Up, key_row_up },		// nahoru o radu
-	{ 0, GDK_Page_Down, key_screan_down },	// dolu o tabulku
-	{ 0, GDK_Page_Up, key_screan_up },	// nahoru o tabulku
+	{ GDK_MOD1_MASK, GDK_Right, key_next_page }, 		// dolu o 1 stranku
+	{ GDK_MOD1_MASK, GDK_Left, key_prev_page },		// nahoru o 1 stranku
+//	{ PAGE|PRESENTATION, GDK_Down, key_next_down },		// dolu o 1 radu
+//	{ PAGE|PRESENTATION, GDK_Up, key_prev_row },		// nahoru o radu
+	{ 0, GDK_Page_Down, key_next_screan },	// dolu o tabulku
+	{ 0, GDK_Page_Up, key_prev_screan },	// nahoru o tabulku
 //	{ PAGE|PRESENTATION, GDK_z, key_zoom_mode },
 //	{ PAGE|PRESENTATION, GDK_u, key_crop},
 	//zoom

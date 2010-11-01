@@ -1,10 +1,10 @@
 
-void key_up();
-void key_down();
-void key_row_up();
-void key_row_down();
-void key_screan_up();
-void key_screan_down();
+void key_prev_page();
+void key_next_page();
+void key_prev_row();
+void key_next_row();
+void key_prev_screan();
+void key_next_screan();
 void key_home();
 void key_end();
 void key_rotate();
