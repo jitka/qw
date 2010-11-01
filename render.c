@@ -8,6 +8,7 @@
 #define min(A,B) ( (A) < (B) ? (A) : (B) )
 
 extern int current_page;
+extern int need_render;
 document_t *document;
 
 document_t * document_create_databse(){
@@ -103,6 +104,16 @@ void render_page(document_t * doc, int page_number, int space_shift_w, int space
 
 }
 
+void render_page_black(document_t * doc, int space_shift_w, int space_shift_h){
+	pixbuf_item *tmp = calloc(1,sizeof(pixbuf_item));
+	tmp->page_number = -1;
+	tmp->space_shift_w = space_shift_w;
+	tmp->space_shift_h = space_shift_h;
+	tmp->width = doc->space_w;
+	tmp->height = doc->space_h;
+	pixbuf_insert_into_database(&doc->displayed,tmp);
+}
+
 void compute_space(document_t *doc){
 	// toto pocita s vejitim celeho jeste bude na vysku na sirku a o neco vic/min + osetreni velikosti
 	//spočítá velkosti prostoru na jednu stranu tak aby se vešlo vše do okna a poměr stran
@@ -150,8 +161,10 @@ void render_displayed_pixbuf(document_t *doc){
 		pixbuf_item *item = data;
 		pixbuf_render(&doc->cache,item);
 		user_data = NULL;
+//		printf("%d ",item->page_number);
 	}
 	g_list_foreach(doc->displayed.glist,render,NULL);
+//	printf("rendrovani\n");
 }
 
 void clean_window(document_t *doc){
@@ -224,21 +237,27 @@ void render(document_t *doc){
 		for (int i=0; i < doc->columns; i++){
 			if ((current_page+i+j*doc->columns < doc->number_pages) &&
 					(current_page+i+j*doc->columns >= 0)){
+			//	printf("%d ",current_page+i+j*doc->columns);
 				render_page(
 						doc,//document_t * doc,
 						current_page+i+j*doc->columns,//int page_number,	
 						i * (doc->space_w + margin),
 						j * (doc->space_h + margin));//int space_shift_w, int space_shift_h)
 			} else {
-				//mazat
-				gdk_window_clear_area_e(
+				render_page_black(
+						doc,//document_t * doc,
+						i * (doc->space_w + margin),
+						j * (doc->space_h + margin));//int space_shift_w, int space_shift_h)
+/*				gdk_window_clear_area_e(
 						window,
 						i * (doc->space_w + margin),
 						j * (doc->space_h + margin),
 						doc->space_w,doc->space_h);
-			}
+*/			}
 		}
 	}
+//	printf("priprava\n");
+	need_render = TRUE;	
 	render_displayed_pixbuf(doc);
 	clean_window(doc);
 }
@@ -297,13 +316,13 @@ void expose(){
 				gdkGC, //GdkGC *gc,
 				0,0, //vykreslit cely pixbuf
 				document->center_w - document->table_w/2 
-					+ item->space_shift_w + item->shift_w,
+				+ item->space_shift_w + item->shift_w,
 				document->center_h - document->table_h/2 
-					+ item->space_shift_h + item->shift_h,
+				+ item->space_shift_h + item->shift_h,
 				item->width, //rozmery
 				item->height,
 				GDK_RGB_DITHER_NONE, //fujvec nechci
-				0,0);		
+				0,0);
 	}
 	g_list_foreach(document->displayed.glist,render,NULL);
 }

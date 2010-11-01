@@ -3,6 +3,7 @@
 #include "pixbuffer.h"
 #include "backend.h"
 #include "settings.h"
+#include "window.h" //fuj - vizual
 
 #include "poppler.h" //fuj
 void pixbuf_create_database(pixbuf_database * database){
@@ -52,6 +53,20 @@ void pixbuf_render(pixbuf_database *cache,pixbuf_item *it){
 			 (x->height == y->height) &&
 			 (x->rotation == y->rotation) );
 	}
+
+	if (it->page_number == -1) { //nic tam neni
+		it->pixbuf = gdk_pixbuf_get_from_image(
+				NULL,
+				gdk_image_new(GDK_IMAGE_FASTEST,//GdkImageType type,
+					gdk_drawable_get_visual(window),//GdkVisual *visual,
+					it->width,it->height),//gint width,gint height);
+				gdk_drawable_get_colormap(window),
+				0,0,
+				0,0,
+				it->width,it->height);
+		return;
+	}
+
 	GList *tmp = g_list_find_custom(cache->glist,it,compare);
 	if (tmp != NULL){ // pokud byla v cachy vynda se
 		cache->glist = g_list_remove_link(cache->glist,tmp);

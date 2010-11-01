@@ -20,6 +20,7 @@
 view_mode_t mode = START;
 file_type_t file_type;
 int current_page = 0;
+int need_render = FALSE;
 static int page_number_shift = -1; //lide pocitaji od 1
 static guint timer_id;
 
@@ -124,7 +125,7 @@ void key_center(){
 	document->center_h = window_height/2;
 	document->center_w = window_width/2;
 	render(document);
-	expose();
+//	expose();
 }	
 
 void key_rotate(){ 
@@ -144,6 +145,8 @@ void key_reload(){
 	open_file(file_path);
 	new = document_create_databse();
 	render(new);
+//	render_displayed_pixbuf(new);
+//	clean_window(new);
 	document_delete_database(document);
 	document=new;
 }
@@ -250,6 +253,7 @@ void click_position(int click_x, int click_y){
 
 static void event_func(GdkEvent *ev, gpointer data) {
 	data = NULL; //nemam rada warningy
+//	printf("%d\n",ev->type);
 	switch(ev->type) {
 		case GDK_KEY_PRESS:
 			handle_key(ev->key.keyval);
@@ -296,6 +300,15 @@ static void event_func(GdkEvent *ev, gpointer data) {
 					expose();
 					break;
 			}
+			break;
+		case GDK_NOTHING:
+//			printf("nothing\n");
+			if (need_render){
+//				render_displayed_pixbuf(document);
+//				clean_window(document);
+//				printf("rendering\n");
+//				need_render = FALSE;
+			} //tady by se dalo vykrestlovat dopredu
 			break;
 		case GDK_DELETE:
 			g_main_loop_quit(mainloop);
