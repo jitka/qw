@@ -125,13 +125,22 @@ void key_center(){
 	document->center_h = window_height/2;
 	document->center_w = window_width/2;
 	render(document);
-}	
-void key_rotate(){ 
+}
+
+void key_rotate_document_right(){
+	document->rotation = (document->rotation+90)%360; 
+	render(document); expose();
+}
+void key_rotate_document_left(){
+	document->rotation = (document->rotation-90)%360; 
+	render(document); expose();
+}
+void key_rotate_page_right(){
 	document->pages[current_page].rotation = (document->pages[current_page].rotation + 90) % 360;
 	render(document); expose();
 }
-void key_rotate_document(){
-	document->rotation = (document->rotation+90)%360; 
+void key_rotate_page_left(){
+	document->pages[current_page].rotation = (document->pages[current_page].rotation - 90) % 360;
 	render(document); expose();
 }
 

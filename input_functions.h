@@ -7,20 +7,26 @@ void key_prev_screan();
 void key_next_screan();
 void key_home();
 void key_end();
-void key_rotate();
-void key_rotate_document();
+
+void key_rotate_document_right();
+void key_rotate_document_left();
+void key_rotate_page_right();
+void key_rotate_page_left();
+
 void key_quit();
 void key_fullscreen();
 void key_reload();
-void key_page_mode();
-void key_zoom_mode();
 void key_crop();
+void key_page_mode();
+//void key_zoom_mode();
+
 void key_zoom_in();
 void key_zoom_out();
 void key_move_right();
 void key_move_left();
 void key_move_down();		
 void key_move_up();
+
 void key_center();
 
 void key_jump(int);

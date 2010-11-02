@@ -21,7 +21,7 @@ document_t * document_create_databse(){
 	doc->columns = 1;
 	doc->rows = 1;
 	render_set_max_columns(doc);
-	doc->scale = UNKNOWN;
+	doc->scale = UNKNOWN; //???????????????
 	doc->table_h = 0;
 	doc->table_w = 0;
 	doc->space_h = 0;
@@ -100,6 +100,7 @@ void render_page(document_t * doc, int page_number, int space_shift_w, int space
 
 	pixbuf_insert_into_database(&doc->displayed,tmp);
 
+	//???
 	if (mode == ZOOM)
 		doc->scale = tmp->scale;
 
@@ -232,11 +233,12 @@ void render(document_t *doc){
 	//privaveni displayed
 	for (int j=0; j < doc->rows; j++){
 		for (int i=0; i < doc->columns; i++){
-			if ((current_page+i+j*doc->columns < doc->number_pages) &&
-					(current_page+i+j*doc->columns >= 0)){
+			int this_page = current_page + j*doc->columns + i;
+			//printf("th %d ",this_page);
+			if ((this_page < doc->number_pages) && (this_page >= 0)){
 				render_page(
 						doc,//document_t * doc,
-						current_page+i+j*doc->columns,//int page_number,	
+						this_page,//int page_number,	
 						i * (doc->space_w + margin),
 						j * (doc->space_h + margin));//int space_shift_w, int space_shift_h)
 			} else {
@@ -248,6 +250,7 @@ void render(document_t *doc){
 		}
 	}
 	//need_render = TRUE;	
+	//printf("cur %d\n",current_page);
 	render_displayed_pixbuf(doc);
 	clean_window(doc);
 }
@@ -309,15 +312,17 @@ void expose(){
 				gdkGC, //GdkGC *gc,
 				0,0, //vykreslit cely pixbuf
 				document->center_w - document->table_w/2 
-				+ item->space_shift_w + item->shift_w,
+					+ item->space_shift_w + item->shift_w,
 				document->center_h - document->table_h/2 
-				+ item->space_shift_h + item->shift_h,
+					+ item->space_shift_h + item->shift_h,
 				item->width, //rozmery
 				item->height,
 				GDK_RGB_DITHER_NONE, //fujvec nechci
 				0,0);
+		//printf("pix %d (%d,%d) ",document->center_w - document->table_w/2 + item->space_shift_w + item->shift_w, item->space_shift_w, item->shift_w);
 	}
 	g_list_foreach(document->displayed.glist,render,NULL);
+	//printf("\n");
 }
 
 void change_scale(double scale){

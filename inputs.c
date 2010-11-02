@@ -23,15 +23,14 @@ static struct {
 	unsigned int mode_mask;
 	guint pressed_char;
 	void (*function)(int);
-} number_chars[] = {
-	{ 0, GDK_p, key_jump },
-	{ 0, GDK_P, key_jump },
+} number_chars[] = { //pozor zmacknuti modifikacni klavesy zastavi brani cisla
+	{ 0, GDK_g, key_jump },
 	{ 0, GDK_Page_Down, key_jump_down },
 	{ 0, GDK_Page_Up, key_jump_up },
         { 0, GDK_o, key_this_page_has_number },
 	{ 0, GDK_c, key_set_columns},
-	{ 0, GDK_l, key_set_rows},
-	{ 0, GDK_e, key_presentation_mode },
+	{ 0, GDK_r, key_set_rows},
+	{ 0, GDK_F5, key_presentation_mode },
 };
 
 static struct {
@@ -39,40 +38,41 @@ static struct {
 	guint pressed_char;
 	void (*function)(void);
 } command_chars[] = {
-	//vzdy
-	{ 0, GDK_space, key_next_screan }, 		// dolu o 1 stranku
-	{ 0, GDK_BackSpace, key_prev_screan },	// nahoru o 1 stranku
+	//pohyb
 	{ 0, GDK_Home, key_home },
 	{ 0, GDK_End, key_end },
-	{ 0, GDK_a, key_rotate },
-	{ 0, GDK_A, key_rotate_document },
+	{ 0, GDK_space, key_next_screan },
+	{ 0, GDK_BackSpace, key_prev_screan },
+	{ 0, GDK_Page_Down, key_next_screan },
+	{ 0, GDK_Page_Up, key_prev_screan },
+	{ 0, GDK_Down, key_next_row },
+	{ 0, GDK_Up, key_prev_row },
+	{ 0, GDK_Right, key_next_page },
+	{ 0, GDK_Left, key_prev_page },
+	//otaceni
+	{ GDK_CONTROL_MASK, GDK_Left, key_rotate_page_left },
+	{ GDK_CONTROL_MASK, GDK_Right, key_rotate_page_right },
+	{ GDK_MOD1_MASK, GDK_Left, key_rotate_document_left },
+	{ GDK_MOD1_MASK, GDK_Right, key_rotate_document_right },
+	//okynkove
 	{ 0, GDK_q, key_quit },
 	{ 0, GDK_F11, key_fullscreen },
 	{ 0, GDK_f, key_fullscreen },
-	{ 0, GDK_r, key_reload },
+	{ GDK_CONTROL_MASK, GDK_r, key_reload },
+	{ GDK_SHIFT_MASK, GDK_C, key_crop},
+	//zobrazeni
 	{ GDK_CONTROL_MASK|GDK_MOD1_MASK, GDK_space, key_center },
-	//klikaci pismenka budou vzdy
-//	{ PAGE, GDK_d, wait_distance },
-//	{ PAGE, GDK_D, wait_position },
-	//tabulka
-	{ GDK_MOD1_MASK, GDK_Right, key_next_page }, 		// dolu o 1 stranku
-	{ GDK_MOD1_MASK, GDK_Left, key_prev_page },		// nahoru o 1 stranku
-//	{ PAGE|PRESENTATION, GDK_Down, key_next_down },		// dolu o 1 radu
-//	{ PAGE|PRESENTATION, GDK_Up, key_prev_row },		// nahoru o radu
-	{ 0, GDK_Page_Down, key_next_screan },	// dolu o tabulku
-	{ 0, GDK_Page_Up, key_prev_screan },	// nahoru o tabulku
-//	{ PAGE|PRESENTATION, GDK_z, key_zoom_mode },
-//	{ PAGE|PRESENTATION, GDK_u, key_crop},
-	//zoom
-//	{ ZOOM, GDK_Escape, key_page_mode },
+	{ GDK_SHIFT_MASK, GDK_Right, key_move_right },
+	{ GDK_SHIFT_MASK, GDK_Left, key_move_left },
+	{ GDK_SHIFT_MASK, GDK_Down, key_move_down },
+	{ GDK_SHIFT_MASK, GDK_Up, key_move_up },
 //	{ ZOOM, GDK_plus, key_zoom_in },
 //	{ ZOOM, GDK_KP_Add, key_zoom_in },
 //	{ ZOOM, GDK_minus, key_zoom_out },
 //	{ ZOOM, GDK_KP_Subtract, key_zoom_out },
-	{ 0, GDK_Right, key_move_right },	
-	{ 0, GDK_Left, key_move_left },		
-	{ 0, GDK_Down, key_move_down },		
-	{ 0, GDK_Up, key_move_up },		
+	//klikaci pismenka budou vzdy
+//	{ PAGE, GDK_d, wait_distance },
+//	{ PAGE, GDK_D, wait_position },
 };
 
 void handle_key(guint keyval, guint modifier){
