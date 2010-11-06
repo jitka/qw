@@ -70,9 +70,9 @@ static struct {
 //	{ ZOOM, GDK_KP_Add, key_zoom_in },
 //	{ ZOOM, GDK_minus, key_zoom_out },
 //	{ ZOOM, GDK_KP_Subtract, key_zoom_out },
-	//klikaci pismenka budou vzdy
-//	{ PAGE, GDK_d, wait_distance },
-//	{ PAGE, GDK_D, wait_position },
+	//klikaci
+	{ GDK_SHIFT_MASK, GDK_M, wait_distance },
+	{ 0, GDK_m, wait_position },
 };
 
 void handle_key(guint keyval, guint modifier){
