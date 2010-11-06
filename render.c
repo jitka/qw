@@ -99,11 +99,6 @@ void render_page(document_t * doc, int page_number, int space_shift_w, int space
 	}
 
 	pixbuf_insert_into_database(&doc->displayed,tmp);
-
-	//???
-	if (mode == ZOOM)
-		doc->scale = tmp->scale;
-
 }
 
 void render_page_black(document_t * doc, int space_shift_w, int space_shift_h){

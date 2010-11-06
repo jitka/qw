@@ -3,7 +3,6 @@ typedef enum view_mode_t {
 	START=1,
 	PAGE=2,
 	PRESENTATION=4,
-	ZOOM=8,
 } view_mode_t;
 typedef enum file_type_t{
 	PDF,
