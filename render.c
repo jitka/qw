@@ -1,6 +1,7 @@
 #include <math.h> //ceil
 #include <stdlib.h> //calloc
 #include <string.h> //memcpy
+#include <gdk/gdk.h> //rectange
 #include "window.h"
 #include "backend.h"
 #include "render.h"
@@ -169,65 +170,6 @@ void render_displayed_pixbuf(document_t *doc){
 	g_list_foreach(doc->displayed.glist,render,NULL);
 }
 
-void clean_window(document_t *doc){
-	//pozor vola moc expoze
-	if (doc->rows > 0) {
-		int ulc_shift_w = doc->center_w - doc->table_w/2;
-		int ulc_shift_h = doc->center_h - doc->table_h/2;
-		//okraje tabukly
-		gdk_window_clear_area_e(window,0,0,window_width,ulc_shift_h);
-		gdk_window_clear_area_e(window,0,doc->table_h+ulc_shift_h,window_width,window_height-doc->table_h-ulc_shift_h);
-		gdk_window_clear_area_e(window,0,0,ulc_shift_w,window_height);
-		gdk_window_clear_area_e(window,doc->table_w+ulc_shift_w,0,window_width-doc->table_w-ulc_shift_w,window_height);
-		//mezery mezi bunkami
-		for (int i=0; i < doc->rows-1; i++){
-			gdk_window_clear_area_e(
-					window,
-					0, ulc_shift_h + (i+1) * doc->space_h + i * margin,
-					window_width, margin);
-		}
-		for (int i=0; i < doc->columns-1; i++){
-			gdk_window_clear_area_e(
-					window,
-					ulc_shift_w + (i+1) * doc->space_w + i * margin, 0,
-					margin, window_height);
-		}
-		//zbytky v bunkach
-		void clean(gpointer data, gpointer user_data){
-			pixbuf_item *item = data;
-			gdk_window_clear_area_e(
-					window,
-					ulc_shift_w + item->space_shift_w,
-					ulc_shift_h + item->space_shift_h,
-					doc->space_w,
-					item->shift_h);
-			gdk_window_clear_area_e(
-					window,
-					ulc_shift_w + item->space_shift_w,
-					ulc_shift_h + item->space_shift_h,
-					item->shift_w,
-					doc->space_h);
-			gdk_window_clear_area_e(
-					window,
-					ulc_shift_w + item->space_shift_w,
-					ulc_shift_h + item->space_shift_h + doc->space_h - item->shift_h,
-					doc->space_w,
-					item->shift_h);
-			gdk_window_clear_area_e(
-					window,
-					ulc_shift_w + item->space_shift_w + doc->space_w - item->shift_w,
-					ulc_shift_h + item->space_shift_h,
-					item->shift_w,
-					doc->space_h);
-			user_data=NULL;
-		}
-		g_list_foreach(doc->displayed.glist,clean,NULL);
-	} else {
-		//zatim asi nemazat
-	}
-
-}
-
 void render(document_t *doc){
 	/* podle tabulky rozdelim
 	 * na casti (space) a do tech vlozim stranky
@@ -259,7 +201,6 @@ void render(document_t *doc){
 	}
 	//need_render = TRUE;	
 	render_displayed_pixbuf(doc);
-	clean_window(doc);
 }
 
 
@@ -327,7 +268,12 @@ void expose(){
 				GDK_RGB_DITHER_NONE, //fujvec nechci
 				0,0);
 	}
+	GdkRectangle rec = {0,0,window_width,window_height};
+	GdkRegion *  reg = gdk_region_rectangle(&rec);
+	gdk_window_begin_paint_region(window,reg);
 	g_list_foreach(document->displayed.glist,render,NULL);
+	gdk_window_end_paint(window);
+	gdk_region_destroy(reg);
 }
 
 void change_scale(double scale){

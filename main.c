@@ -79,6 +79,7 @@ void key_center(){
 	document->center_w = window_width/2;
 	compute_space_center(document);
 	render(document);
+	expose();
 }
 
 void change_page(int new){
@@ -109,8 +110,16 @@ void key_this_page_has_number(int printed_number){ 	page_number_shift = -printed
 //pozor na 0 rows
 void key_move_right(){ 	document->center_w += move_shift; render(document); expose();}
 void key_move_left(){ 	document->center_w -= move_shift; render(document); expose();}
-void key_move_down(){ 	document->center_h -= move_shift; render(document); expose();}
-void key_move_up(){ 	document->center_h += move_shift; render(document); expose();}
+void key_move_down(){ 	
+	if (document->rows > 0)
+		document->center_h -= move_shift; 
+	render(document); expose();
+}
+void key_move_up(){ 	
+	if (document->rows > 0)
+		document->center_h += move_shift; 
+	render(document); expose();
+}
 void move(int x, int y){ document->center_w +=x; document->center_h += y; render(document); expose();}
 
 void key_quit(){
@@ -156,6 +165,7 @@ void key_reload(){
 	render(new);
 	document_delete_database(document);
 	document=new;
+	expose();
 }
 
 void key_set_columns(int c){
@@ -165,7 +175,7 @@ void key_set_columns(int c){
 	key_center();
 }
 void key_set_rows(int r){
-	if (r > document->max_rows || r < 1)
+	if (r > document->max_rows || r < 0)
 		return;
 	document->rows = r; 
 	key_center();
@@ -366,32 +376,8 @@ int main(int argc, char * argv[]) {
 					" -p 	-page 	počáteční stránka\n"
 					" \n"
 					"Ovladání:\n"
-					" fungují běžné pohybové klávesy\n"
-					" 2p posune na stranu dvě\n"
-					" 3 + PageDown posune o dvě strany dál\n"
-					" 42o nastavi cislo aktualni stranky na 42 a ostatni podobne precisluje\n"
-					" r znovu nacte soubor\n"
-					" a otoci vsechny stranky o 90 stupňů\n"
-					" A otočí pouze aktuální stránku o 90 stupňů\n"
-					" f nebo F11 přepne na fullscrean\n"
-					" q ukončí program\n"
-					" \n"
-					"program má tři mody:\n"
-					"   tabulka:\n"
-					" 	je základní stav\n"
-					" 	2c nastavi dve strany vedle sebe\n"
-					" 	3l nastavi tri radky\n"
-					" 	d a dvě kliknutí změří vzdálenost\n"
-					" 	D a kliknutí napíše pozici\n"
-					" 	c ořeže okno na použitelnou velikost\n"
-					" 	z přepne do zoom modu\n"
-					" 	1e spusti mod prezentace s 1s intervalem\n"
-					"   prezentace:\n"
-					" 	vypada jako tabulka samy se posouvaji stranky\n"
-					" 	libovolnou klavesou jde vyskočit\n"
-					"   zoom:\n"
-					" 	+- přiblužuje\n"
-					" 	šipečky posouvaji stránku\n"
+					" hoho by bavilo porad to upravovat... \n"
+					" zkus intuici.. \n"
 					));
 				return 0;
 			case 'p':
@@ -444,10 +430,10 @@ int main(int argc, char * argv[]) {
 	window_height = start_window_height;
 
 	//ikona
-	GdkPixbuf * icon_pixbuf = gdk_pixbuf_new_from_file("icon.png",NULL);
+/*	GdkPixbuf * icon_pixbuf = gdk_pixbuf_new_from_file("icon.png",NULL);
 	GList* icons = g_list_append(NULL,icon_pixbuf);	
 	gdk_window_set_icon_list(window,icons);
-
+*/
 	//titulek
 	gdk_window_set_title(window,"huiii");
 

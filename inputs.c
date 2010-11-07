@@ -2,6 +2,7 @@
 #include <gdk/gdkkeysyms.h>
 #include "input_functions.h"
 #include "settings.h"
+#include "render.h" //fuj document_t
 
 enum {
 	BASIC, //ceka
@@ -16,8 +17,11 @@ int number_is_negativ;
 int click_x; //kde bylo naposledy zmacknuto prave tlacitka mysi
 int click_y;
 
+extern document_t *document;
+
 void wait_distance(){ 	state = DISTANCE_1;}
 void wait_position(){ 	state = POSITION;}
+
 
 static struct {
 	unsigned int mode_mask;
@@ -175,13 +179,17 @@ void handle_click(int x, int y){
 }
 
 void handle_motion(int x, int y){
-	move(x-click_x,y-click_y);
-	click_x=x;
-	click_y=y;
+	if (document->rows > 0){
+		move(x-click_x,y-click_y);
+		click_x=x;
+		click_y=y;
+	}
 }
 
 void handle_motion2(int x, int y){
-	move(0,y-click_y);
-	click_x=x;
-	click_y=y;
+	if (document->rows > 0){
+		move(0,y-click_y);
+		click_x=x;
+		click_y=y;
+	}
 }
