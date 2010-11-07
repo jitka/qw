@@ -6,6 +6,7 @@
 #include <math.h> //sqrt
 #include <fcntl.h> //presmerovani chyboveho vystupu
 #include <gdk-pixbuf/gdk-pixbuf.h> //kvuli ikonce
+#include <gdk/gdkkeysyms.h> //prepinace
 //#include <gdk/gdk.h> //okynka,poppler.h pixbuffer.h
 //#include <glib-2.0/glib.h>
 #include "backend.h" //open_file
@@ -30,7 +31,6 @@ int keep_scale = FALSE;
 int margin = 5; //sirka mezery v pixelech
 int start_window_width = 400;
 int start_window_height = 500;
-int maximum_displayed = 1000;
 int minimum_width = 10;
 int minimum_height = 10;
 int cache_size = 2000000; //v poctu pixelu
@@ -110,6 +110,7 @@ void key_move_right(){ 	document->center_w += move_shift; render(document); expo
 void key_move_left(){ 	document->center_w -= move_shift; render(document); expose();}
 void key_move_down(){ 	document->center_h += move_shift; render(document); expose();}
 void key_move_up(){ 	document->center_h -= move_shift; render(document); expose();}
+void move(int x, int y){ document->center_w +=x; document->center_h += y; render(document); expose();}
 
 void key_quit(){
 	gdk_event_put( gdk_event_new(GDK_DELETE));
@@ -157,17 +158,13 @@ void key_reload(){
 }
 
 void key_set_columns(int c){
-	if (c * document->rows >= maximum_displayed
-			|| c > document->max_columns
-			|| c < 1)
+	if (c > document->max_columns || c < 1)
 		return;
 	document->columns = c;
 	key_center();
 }
 void key_set_rows(int r){
-	if (r * document->columns >= maximum_displayed
-			|| r > document->max_rows
-			|| r < 1)
+	if (r > document->max_rows || r < 1)
 		return;
 	document->rows = r; 
 	key_center();
@@ -257,8 +254,18 @@ static void event_func(GdkEvent *ev, gpointer data) {
 			handle_key(ev->key.keyval,ev->key.state);
 			break;
 		case GDK_BUTTON_PRESS:
-			if (ev->button.button == 1)
+			if (ev->button.button == 1 || ev->button.button == 3)
 				handle_click((int)ev->button.x,(int)ev->button.y);
+			break;
+		case GDK_MOTION_NOTIFY:
+			if (ev->motion.state & GDK_BUTTON1_MASK){
+				handle_motion((int)ev->motion.x,(int)ev->motion.y);
+				gdk_event_request_motions(&ev->motion);
+			}
+			if (ev->motion.state & GDK_BUTTON3_MASK){
+				handle_motion2((int)ev->motion.x,(int)ev->motion.y);
+				gdk_event_request_motions(&ev->motion);
+			}
 			break;
 		case GDK_CLIENT_EVENT:
 			//presentation
@@ -295,6 +302,7 @@ static void event_func(GdkEvent *ev, gpointer data) {
 					key_reload();
 					break;
 				default:
+//					printf("expose: %dx%d\n",ev->expose.area.width,ev->expose.area.height);
 					expose();
 					break;
 			}
@@ -394,7 +402,7 @@ int main(int argc, char * argv[]) {
 
 	GdkWindowAttr attr = {
 		NULL, //gchar *title; //nefunguje
-		0x3FFFFE, //gint event_mask; all events mask
+		GDK_ALL_EVENTS_MASK, //gint event_mask;
 		100,0, //gint x, y;
 		start_window_width,start_window_height,
 	 	GDK_INPUT_OUTPUT, //GdkWindowClass wclass;

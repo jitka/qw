@@ -17,7 +17,6 @@ extern int keep_scale;
 extern int margin; //sirka mezery v pixelech
 extern int start_window_width;
 extern int start_window_height;
-extern int maximum_displayed;
 extern int minimum_width;
 extern int minimum_height;
 extern int cache_size;

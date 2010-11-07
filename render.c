@@ -113,45 +113,51 @@ void render_page_black(document_t * doc, int space_shift_w, int space_shift_h){
 void compute_space_center(document_t *doc){
 	//spočítá velkosti prostoru na jednu stranku tak aby se vešlo vše do okna a poměr stran
 	//vyhovoval medánu z poměrů všech stran
-	int num_displayed = min(doc->columns * doc->rows, doc->number_pages-current_page);
+	if (doc->rows > 0){
+		int num_displayed = min(doc->columns * doc->rows, doc->number_pages-current_page);
 
-	//median pomeru stran
-	double aspects[num_displayed];
-	for (int i=0; i<num_displayed; i++){
-		double a,b;
-		render_get_size(doc,current_page+i,&a,&b);
-		aspects[i] = a/b;
-	}
-	int unsorted = TRUE;
-	while (unsorted){ //tenhle bublesort by mel byt na prumernem pdf prumerne linearni
-		unsorted = FALSE;
-		for (int i=0; i<num_displayed-1; i++)
-			if (aspects[i]>aspects[i+1]){
-				double tmp = aspects[i];
-				aspects[i] = aspects[i+1];
-				aspects[i+1] = tmp;
-				unsorted = TRUE;
-			}
-	}
-	double aspect = aspects[num_displayed/2];
+		//median pomeru stran
+		double aspects[num_displayed];
+		for (int i=0; i<num_displayed; i++){
+			double a,b;
+			render_get_size(doc,current_page+i,&a,&b);
+			aspects[i] = a/b;
+		}
+		int unsorted = TRUE;
+		while (unsorted){ //tenhle bublesort by mel byt na prumernem pdf prumerne linearni
+			unsorted = FALSE;
+			for (int i=0; i<num_displayed-1; i++)
+				if (aspects[i]>aspects[i+1]){
+					double tmp = aspects[i];
+					aspects[i] = aspects[i+1];
+					aspects[i+1] = tmp;
+					unsorted = TRUE;
+				}
+		}
+		double aspect = aspects[num_displayed/2];
 
-	//velikost okynka na vykresleni jedne stranky
-	if ( (double) ((window_width-(doc->columns-1)*margin) //pouzitlna sirka
-		/doc->columns) //na jeden ramecek
-	   / (double) ((window_height-(doc->rows-1)*margin)
-	   	/doc->rows)
-	   > aspect){
-		//vyska je stejna
-		doc->space_h = ( window_height - (doc->rows-1)*margin ) / doc->rows;
-		doc->space_w = floor(doc->space_h*aspect);
+		//velikost okynka na vykresleni jedne stranky
+		if ( (double) ((window_width-(doc->columns-1)*margin) //pouzitlna sirka
+					/doc->columns) //na jeden ramecek
+				/ (double) ((window_height-(doc->rows-1)*margin)
+					/doc->rows)
+				> aspect){
+			//vyska je stejna
+			doc->space_h = ( window_height - (doc->rows-1)*margin ) / doc->rows;
+			doc->space_w = floor(doc->space_h*aspect);
+		} else {
+			//sirka je stejna
+			doc->space_w = ( window_width-(doc->columns-1)*margin ) / doc->columns;
+			doc->space_h = floor(doc->space_w/aspect);
+		}
+
+		doc->table_w = doc->space_w*doc->columns + margin*(doc->columns-1);
+		doc->table_h = doc->space_h*doc->rows + margin*(doc->rows-1);
 	} else {
-		//sirka je stejna
-		doc->space_w = ( window_width-(doc->columns-1)*margin ) / doc->columns;
-		doc->space_h = floor(doc->space_w/aspect);
+		//n je pocetet sloupcu
+		//vezmu vysku z prvnich n pokud je to min nez vyska stranky
+		//pridam dalsich n a prepocitam vysku 
 	}
-
-	doc->table_w = doc->space_w*doc->columns + margin*(doc->columns-1);
-	doc->table_h = doc->space_h*doc->rows + margin*(doc->rows-1);
 }
 
 void render_displayed_pixbuf(document_t *doc){
@@ -164,56 +170,61 @@ void render_displayed_pixbuf(document_t *doc){
 }
 
 void clean_window(document_t *doc){
-	int ulc_shift_w = doc->center_w - doc->table_w/2;
-	int ulc_shift_h = doc->center_h - doc->table_h/2;
-	//okraje tabukly
-	gdk_window_clear_area_e(window,0,0,window_width,ulc_shift_h);
-	gdk_window_clear_area_e(window,0,doc->table_h+ulc_shift_h,window_width,window_height-doc->table_h-ulc_shift_h);
-	gdk_window_clear_area_e(window,0,0,ulc_shift_w,window_height);
-	gdk_window_clear_area_e(window,doc->table_w+ulc_shift_w,0,window_width-doc->table_w-ulc_shift_w,window_height);
-	//mezery mezi bunkami
-	for (int i=0; i < doc->rows-1; i++){
+	//pozor vola moc expoze
+	if (doc->rows > 0) {
+		int ulc_shift_w = doc->center_w - doc->table_w/2;
+		int ulc_shift_h = doc->center_h - doc->table_h/2;
+		//okraje tabukly
+		gdk_window_clear_area_e(window,0,0,window_width,ulc_shift_h);
+		gdk_window_clear_area_e(window,0,doc->table_h+ulc_shift_h,window_width,window_height-doc->table_h-ulc_shift_h);
+		gdk_window_clear_area_e(window,0,0,ulc_shift_w,window_height);
+		gdk_window_clear_area_e(window,doc->table_w+ulc_shift_w,0,window_width-doc->table_w-ulc_shift_w,window_height);
+		//mezery mezi bunkami
+		for (int i=0; i < doc->rows-1; i++){
 			gdk_window_clear_area_e(
-				window,
-				0, ulc_shift_h + (i+1) * doc->space_h + i * margin,
-				window_width, margin);
-			}
-	for (int i=0; i < doc->columns-1; i++){
+					window,
+					0, ulc_shift_h + (i+1) * doc->space_h + i * margin,
+					window_width, margin);
+		}
+		for (int i=0; i < doc->columns-1; i++){
 			gdk_window_clear_area_e(
-				window,
-				ulc_shift_w + (i+1) * doc->space_w + i * margin, 0,
-				margin, window_height);
-			}
-	//zbytky v bunkach
-	void clean(gpointer data, gpointer user_data){
-		pixbuf_item *item = data;
-		gdk_window_clear_area_e(
-				window,
-				ulc_shift_w + item->space_shift_w,
-				ulc_shift_h + item->space_shift_h,
-				doc->space_w,
-				item->shift_h);
-		gdk_window_clear_area_e(
-				window,
-				ulc_shift_w + item->space_shift_w,
-				ulc_shift_h + item->space_shift_h,
-				item->shift_w,
-				doc->space_h);
-		gdk_window_clear_area_e(
-				window,
-				ulc_shift_w + item->space_shift_w,
-				ulc_shift_h + item->space_shift_h + doc->space_h - item->shift_h,
-				doc->space_w,
-				item->shift_h);
-		gdk_window_clear_area_e(
-				window,
-				ulc_shift_w + item->space_shift_w + doc->space_w - item->shift_w,
-				ulc_shift_h + item->space_shift_h,
-				item->shift_w,
-				doc->space_h);
-		user_data=NULL;
+					window,
+					ulc_shift_w + (i+1) * doc->space_w + i * margin, 0,
+					margin, window_height);
+		}
+		//zbytky v bunkach
+		void clean(gpointer data, gpointer user_data){
+			pixbuf_item *item = data;
+			gdk_window_clear_area_e(
+					window,
+					ulc_shift_w + item->space_shift_w,
+					ulc_shift_h + item->space_shift_h,
+					doc->space_w,
+					item->shift_h);
+			gdk_window_clear_area_e(
+					window,
+					ulc_shift_w + item->space_shift_w,
+					ulc_shift_h + item->space_shift_h,
+					item->shift_w,
+					doc->space_h);
+			gdk_window_clear_area_e(
+					window,
+					ulc_shift_w + item->space_shift_w,
+					ulc_shift_h + item->space_shift_h + doc->space_h - item->shift_h,
+					doc->space_w,
+					item->shift_h);
+			gdk_window_clear_area_e(
+					window,
+					ulc_shift_w + item->space_shift_w + doc->space_w - item->shift_w,
+					ulc_shift_h + item->space_shift_h,
+					item->shift_w,
+					doc->space_h);
+			user_data=NULL;
+		}
+		g_list_foreach(doc->displayed.glist,clean,NULL);
+	} else {
+		//zatim asi nemazat
 	}
-	g_list_foreach(doc->displayed.glist,clean,NULL);
 
 }
 
@@ -223,24 +234,28 @@ void render(document_t *doc){
 	 */	
 	pixbuf_delete_displayed(&doc->cache,&doc->displayed);
 	
+	if (doc->rows > 0){
 	//privaveni displayed
-	for (int j=0; j < doc->rows; j++){
-		for (int i=0; i < doc->columns; i++){
-			int this_page = current_page + j*doc->columns + i;
-			//printf("th %d ",this_page);
-			if ((this_page < doc->number_pages) && (this_page >= 0)){
-				render_page(
-						doc,//document_t * doc,
-						this_page,//int page_number,	
-						i * (doc->space_w + margin),
-						j * (doc->space_h + margin));//int space_shift_w, int space_shift_h)
-			} else {
-				render_page_black( //na tento space nezbyla zadna strana
-						doc,//document_t * doc,
-						i * (doc->space_w + margin),
-						j * (doc->space_h + margin));//int space_shift_w, int space_shift_h)
+		for (int j=0; j < doc->rows; j++){
+			for (int i=0; i < doc->columns; i++){
+				int this_page = current_page + j*doc->columns + i;
+				//printf("th %d ",this_page);
+				if ((this_page < doc->number_pages) && (this_page >= 0)){
+					render_page(
+							doc,//document_t * doc,
+							this_page,//int page_number,	
+							i * (doc->space_w + margin),
+							j * (doc->space_h + margin));//int space_shift_w, int space_shift_h)
+				} else {
+					render_page_black( //na tento space nezbyla zadna strana
+							doc,//document_t * doc,
+							i * (doc->space_w + margin),
+							j * (doc->space_h + margin));//int space_shift_w, int space_shift_h)
+				}
 			}
 		}
+	} else {
+		//vykleslit to co pujde videt
 	}
 	//need_render = TRUE;	
 	render_displayed_pixbuf(doc);
@@ -311,10 +326,8 @@ void expose(){
 				item->height,
 				GDK_RGB_DITHER_NONE, //fujvec nechci
 				0,0);
-		//printf("pix %d (%d,%d) ",document->center_w - document->table_w/2 + item->space_shift_w + item->shift_w, item->space_shift_w, item->shift_w);
 	}
 	g_list_foreach(document->displayed.glist,render,NULL);
-	//printf("\n");
 }
 
 void change_scale(double scale){

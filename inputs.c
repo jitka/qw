@@ -13,7 +13,7 @@ enum {
 } state=BASIC;
 int number;
 int number_is_negativ;
-int click_x;
+int click_x; //kde bylo naposledy zmacknuto prave tlacitka mysi
 int click_y;
 
 void wait_distance(){ 	state = DISTANCE_1;}
@@ -157,8 +157,6 @@ void handle_key(guint keyval, guint modifier){
 void handle_click(int x, int y){
 	switch(state){
 		case DISTANCE_1:
-			click_x=x;
-			click_y=y;
 			state=DISTANCE_2;
 			break;
 		case DISTANCE_2:
@@ -169,7 +167,21 @@ void handle_click(int x, int y){
 			click_position(x,y);
 			state=BASIC;
 			break;
-		default: 
+		default:
+		        click_x=x;
+			click_y=y;	
 			break;
 	}
+}
+
+void handle_motion(int x, int y){
+	move(x-click_x,y-click_y);
+	click_x=x;
+	click_y=y;
+}
+
+void handle_motion2(int x, int y){
+	move(0,y-click_y);
+	click_x=x;
+	click_y=y;
 }

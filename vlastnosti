@@ -2,7 +2,7 @@
 ps
 	jednoduché 'neokýnko' bez lištičky, tlačítek
 víc jazyků
-pretitani stranek dolu
+pretikani stranek dolu
 zapnuti na sirku, 1strana, podle velikosti
 velikost okna podle minule
 vykresleni par stranek dopredu - je-li potreba
@@ -23,18 +23,19 @@ záložky
 z poklepani otevrit stranku
 najit nejvetsi scale a zachovat poměri velikosti stran
 -i
-sipky, mys, skrolovatko
+	sipky, 
+	mys, 
+skrolovatko
 	-prezentace
 	mereni
 ukazovat co pisu
-	mit ikonku
+mit ikonku
 	rotace-cely dokument i jen stranka
 výběr textu
 hypertextové odkazy
 hledání
 horni listiska - nechci radsi psat pres pdf
-zoom pamatovat mnozsti+-
 1.vypocitat space jako tabulku jako roztahnout do sirky/vysky
 2.vynasobit priblizenim
 3.pro vsechny viditelne vykreslit
-	neni-li videt current_page, posounout na nejnizsi vyssi co videt je
+neni-li videt current_page, posounout na nejnizsi vyssi co videt je
