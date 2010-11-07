@@ -13,6 +13,7 @@
 #include "render.h" //render,expose
 #include "inputs.h" //vstup -> funkce
 #include "settings.h"
+#include "window.h"
 #define _(X) gettext(X)
 #define IN_CENTIMETRES *2159/61200
 //spectre, poppler meri v 72tiny palce / pspoint
@@ -53,7 +54,9 @@ GdkGC *gdkGC;
 int is_fullscreen = FALSE;
 int window_width;
 int window_height;
-
+GdkCursor* cursor_basic;
+GdkCursor* cursor_move;
+GdkCursor* cursor_mesure;
 
 /////////////////////////////////////////////////////////////////
 	
@@ -400,6 +403,12 @@ int main(int argc, char * argv[]) {
 	//vytvoreni okna
 	gdk_init(NULL,NULL);
 
+
+	GdkDisplay *display = gdk_display_get_default();
+	cursor_basic = gdk_cursor_new_for_display(display,GDK_X_CURSOR);
+	cursor_mesure = gdk_cursor_new_for_display(display,GDK_CROSSHAIR);
+	cursor_move = gdk_cursor_new_for_display(display,GDK_FLEUR);
+
 	GdkVisual *visual = gdk_visual_get_system();
 	GdkColormap *colormap = gdk_colormap_new(visual,TRUE);
 
@@ -412,7 +421,7 @@ int main(int argc, char * argv[]) {
 		visual, //GdkVisual *visual;
 		colormap, //GdkColormap *colormap;
 		GDK_WINDOW_TOPLEVEL, //GdkWindowType window_type;
-		GDK_X_CURSOR, //GdkCursor *cursor;
+		cursor_mesure, //GdkCursor *cursor;
 		NULL, //gchar *wmclass_name;
 		NULL, //gchar *wmclass_class;
 		TRUE, //gboolean override_redirect; ???

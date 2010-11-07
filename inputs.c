@@ -3,6 +3,7 @@
 #include "input_functions.h"
 #include "settings.h"
 #include "render.h" //fuj document_t
+#include "window.h" //zmeneni kurzoru
 
 enum {
 	BASIC, //ceka
@@ -19,7 +20,10 @@ int click_y;
 
 extern document_t *document;
 
-void wait_distance(){ 	state = DISTANCE_1;}
+void wait_distance(){ 	
+	state = DISTANCE_1;
+	gdk_window_set_cursor(window,cursor_move);
+}
 void wait_position(){ 	state = POSITION;}
 
 
@@ -179,7 +183,7 @@ void handle_click(int x, int y){
 }
 
 void handle_motion(int x, int y){
-	if (document->rows > 0){
+	if (document->rows > 0 && state == BASIC){
 		move(x-click_x,y-click_y);
 		click_x=x;
 		click_y=y;
@@ -187,7 +191,7 @@ void handle_motion(int x, int y){
 }
 
 void handle_motion2(int x, int y){
-	if (document->rows > 0){
+	if (document->rows > 0 && state == BASIC){
 		move(0,y-click_y);
 		click_x=x;
 		click_y=y;
