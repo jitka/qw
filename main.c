@@ -106,10 +106,11 @@ void key_jump_up(int diff){ 	change_page(current_page - diff);}
 void key_jump_down(int diff){ 	change_page(current_page + diff);}
 void key_this_page_has_number(int printed_number){ 	page_number_shift = -printed_number+current_page;}
 
+//pozor na 0 rows
 void key_move_right(){ 	document->center_w += move_shift; render(document); expose();}
 void key_move_left(){ 	document->center_w -= move_shift; render(document); expose();}
-void key_move_down(){ 	document->center_h += move_shift; render(document); expose();}
-void key_move_up(){ 	document->center_h -= move_shift; render(document); expose();}
+void key_move_down(){ 	document->center_h -= move_shift; render(document); expose();}
+void key_move_up(){ 	document->center_h += move_shift; render(document); expose();}
 void move(int x, int y){ document->center_w +=x; document->center_h += y; render(document); expose();}
 
 void key_quit(){
@@ -265,6 +266,22 @@ static void event_func(GdkEvent *ev, gpointer data) {
 			if (ev->motion.state & GDK_BUTTON3_MASK){
 				handle_motion2((int)ev->motion.x,(int)ev->motion.y);
 				gdk_event_request_motions(&ev->motion);
+			}
+			break;
+		case GDK_SCROLL:
+			switch (ev->scroll.direction){
+				case GDK_SCROLL_UP:
+					key_move_up();
+					break;	
+				case GDK_SCROLL_DOWN:
+					key_move_down();
+					break;
+				case GDK_SCROLL_LEFT:
+					key_move_left();
+					break;
+				case GDK_SCROLL_RIGHT:
+					key_move_right();
+					break;
 			}
 			break;
 		case GDK_CLIENT_EVENT:
