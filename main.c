@@ -73,14 +73,24 @@ void open_file(char *path){
 	}
 }
 
+
+void key_center(){
+	document->center_h = window_height/2;
+	document->center_w = window_width/2;
+	compute_space_center(document);
+	render(document);
+}
+
 void change_page(int new){
 	if (new <0 || new >= document->number_pages)
 		return;
 	current_page=new;
 	if (!keep_scale)
-		document->scale = UNKNOWN;
-	render(document);
-	expose();
+		key_center();
+	else {
+		render(document);
+		expose();
+	}
 }
 
 void key_prev_page(){ 		change_page(current_page-1);}
@@ -95,10 +105,6 @@ void key_jump(int num_page){ 	change_page(num_page+page_number_shift);}
 void key_jump_up(int diff){ 	change_page(current_page - diff);}
 void key_jump_down(int diff){ 	change_page(current_page + diff);}
 void key_this_page_has_number(int printed_number){ 	page_number_shift = -printed_number+current_page;}
-
-
-void key_zoom_in(){ 	change_scale(document->scale*zoom_speed);}
-void key_zoom_out(){ 	change_scale(document->scale/zoom_speed);}
 
 void key_move_right(){ 	document->center_w += move_shift; render(document); expose();}
 void key_move_left(){ 	document->center_w -= move_shift; render(document); expose();}
@@ -119,12 +125,6 @@ void key_fullscreen(){
 		gdk_window_fullscreen(window);
 		is_fullscreen = 1;
 	}
-}
-
-void key_center(){
-	document->center_h = window_height/2;
-	document->center_w = window_width/2;
-	render(document);
 }
 
 void key_rotate_document_right(){
@@ -150,9 +150,8 @@ void key_reload(){
 	document_t *new;
 	open_file(file_path);
 	new = document_create_databse();
+	compute_space_center(new);
 	render(new);
-//	render_displayed_pixbuf(new);
-//	clean_window(new);
 	document_delete_database(document);
 	document=new;
 }
@@ -176,8 +175,6 @@ void key_set_rows(int r){
 void key_page_mode(){
 	if (mode == PRESENTATION)
 		 g_source_remove (timer_id); //odstrani vlakno casovace	
-	if (!keep_scale) //v zoomu
-		document->scale = UNKNOWN;
 	mode=PAGE; 
 	key_center();
 }
@@ -192,6 +189,7 @@ static gboolean timeout_callback (gpointer data){
 void key_presentation_mode(int time){ 
 	if (presentation_in_fullscreen && !is_fullscreen)
 		key_fullscreen();
+	key_center();
 	timer_id = gdk_threads_add_timeout(
 			time*1000,
 			timeout_callback,

@@ -50,8 +50,8 @@ static struct {
 	{ 0, GDK_Right, key_next_page },
 	{ 0, GDK_Left, key_prev_page },
 	//otaceni
-	{ GDK_CONTROL_MASK, GDK_Left, key_rotate_page_left },
-	{ GDK_CONTROL_MASK, GDK_Right, key_rotate_page_right },
+	{ GDK_SHIFT_MASK, GDK_Left, key_rotate_page_left },
+	{ GDK_SHIFT_MASK, GDK_Right, key_rotate_page_right },
 	{ GDK_MOD1_MASK, GDK_Left, key_rotate_document_left },
 	{ GDK_MOD1_MASK, GDK_Right, key_rotate_document_right },
 	//okynkove
@@ -62,14 +62,15 @@ static struct {
 	{ GDK_SHIFT_MASK, GDK_C, key_crop},
 	//zobrazeni
 	{ GDK_CONTROL_MASK|GDK_MOD1_MASK, GDK_space, key_center },
-	{ GDK_SHIFT_MASK, GDK_Right, key_move_right },
-	{ GDK_SHIFT_MASK, GDK_Left, key_move_left },
-	{ GDK_SHIFT_MASK, GDK_Down, key_move_down },
-	{ GDK_SHIFT_MASK, GDK_Up, key_move_up },
-//	{ ZOOM, GDK_plus, key_zoom_in },
-//	{ ZOOM, GDK_KP_Add, key_zoom_in },
-//	{ ZOOM, GDK_minus, key_zoom_out },
-//	{ ZOOM, GDK_KP_Subtract, key_zoom_out },
+	{ GDK_CONTROL_MASK, GDK_Right, key_move_right },
+	{ GDK_CONTROL_MASK, GDK_Left, key_move_left },
+	{ GDK_CONTROL_MASK, GDK_Down, key_move_down },
+	{ GDK_CONTROL_MASK, GDK_Up, key_move_up },
+	{ GDK_CONTROL_MASK|GDK_SHIFT_MASK, GDK_plus, key_zoom_in },
+	{ GDK_CONTROL_MASK, GDK_plus, key_zoom_in },
+	{ GDK_CONTROL_MASK, GDK_KP_Add, key_zoom_in },
+	{ GDK_CONTROL_MASK, GDK_minus, key_zoom_out },
+	{ GDK_CONTROL_MASK, GDK_KP_Subtract, key_zoom_out },
 	//klikaci
 	{ GDK_SHIFT_MASK, GDK_M, wait_distance },
 	{ 0, GDK_m, wait_position },
@@ -95,12 +96,14 @@ void handle_key(guint keyval, guint modifier){
 //		GDK_META_MASK |
 //		GDK_RELEASE_MASK;
 
-//	printf ("keyval %x prepinace %d\n",keyval,modifier);
+//	printf ("keyval %x prepinace %d state %d\n",keyval,modifier,state);
 
 	if (mode == PRESENTATION)
 		key_page_mode();
 	switch(state){
 		case NUMBERS:
+			if ((modifier & (~GDK_SHIFT_MASK)) != 0) //pokud byl zmacknut prepinac mimo shift
+				break;
 			if ((keyval >= GDK_0) && (keyval <= GDK_9)){
 				number = number*10 + keyval - GDK_0;
 				return;
@@ -121,22 +124,21 @@ void handle_key(guint keyval, guint modifier){
 		case BASIC:
 
 			// kdyby zacaly chodit cisla
-			state = NUMBERS;
-			number = 0;
-			number_is_negativ = 0;
-			if (keyval == GDK_plus || keyval == GDK_KP_Add){
-			printf("tu plus%d\n",number_is_negativ);
-			} else if (keyval == GDK_minus || keyval == GDK_KP_Subtract){
-				number_is_negativ = 42;
-			printf("tu minus%d\n",number_is_negativ);
-			} else if ((keyval >= GDK_0) && (keyval <= GDK_9)){
-				number = keyval - GDK_0;
-			} else if ((keyval >= GDK_KP_0) && (keyval <= GDK_KP_9)){
-				number = keyval - GDK_KP_0;
-			} else { //nezacaly chodit cisla...
-				state = BASIC;
+			if ((modifier & (~GDK_SHIFT_MASK)) == 0){
+				state = NUMBERS;
+				number = 0;
+				number_is_negativ = 0;
+				if (keyval == GDK_plus || keyval == GDK_KP_Add){
+				} else if (keyval == GDK_minus || keyval == GDK_KP_Subtract){
+					number_is_negativ = 42;
+				} else if ((keyval >= GDK_0) && (keyval <= GDK_9)){
+					number = keyval - GDK_0;
+				} else if ((keyval >= GDK_KP_0) && (keyval <= GDK_KP_9)){
+					number = keyval - GDK_KP_0;
+				} else { //nezacaly chodit cisla...
+					state = BASIC;
+				}
 			}
-//			printf(" %d\n",number_is_negativ);
 
 			for (unsigned int i=0; i < sizeof(command_chars)/sizeof(command_chars[0]); i++)
 				if ( command_chars[i].pressed_char == keyval &&

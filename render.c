@@ -21,7 +21,6 @@ document_t * document_create_databse(){
 	doc->columns = 1;
 	doc->rows = 1;
 	render_set_max_columns(doc);
-	doc->scale = UNKNOWN; //???????????????
 	doc->table_h = 0;
 	doc->table_w = 0;
 	doc->space_h = 0;
@@ -111,7 +110,7 @@ void render_page_black(document_t * doc, int space_shift_w, int space_shift_h){
 	pixbuf_insert_into_database(&doc->displayed,tmp);
 }
 
-void compute_space(document_t *doc){
+void compute_space_center(document_t *doc){
 	//spočítá velkosti prostoru na jednu stranku tak aby se vešlo vše do okna a poměr stran
 	//vyhovoval medánu z poměrů všech stran
 	int num_displayed = min(doc->columns * doc->rows, doc->number_pages-current_page);
@@ -150,6 +149,9 @@ void compute_space(document_t *doc){
 		doc->space_w = ( window_width-(doc->columns-1)*margin ) / doc->columns;
 		doc->space_h = floor(doc->space_w/aspect);
 	}
+
+	doc->table_w = doc->space_w*doc->columns + margin*(doc->columns-1);
+	doc->table_h = doc->space_h*doc->rows + margin*(doc->rows-1);
 }
 
 void render_displayed_pixbuf(document_t *doc){
@@ -221,10 +223,6 @@ void render(document_t *doc){
 	 */	
 	pixbuf_delete_displayed(&doc->cache,&doc->displayed);
 	
-	compute_space(doc);
-	doc->table_w = doc->space_w*doc->columns + margin*(doc->columns-1);
-	doc->table_h = doc->space_h*doc->rows + margin*(doc->rows-1);
-	
 	//privaveni displayed
 	for (int j=0; j < doc->rows; j++){
 		for (int i=0; i < doc->columns; i++){
@@ -245,7 +243,6 @@ void render(document_t *doc){
 		}
 	}
 	//need_render = TRUE;	
-	//printf("cur %d\n",current_page);
 	render_displayed_pixbuf(doc);
 	clean_window(doc);
 }
@@ -321,16 +318,24 @@ void expose(){
 }
 
 void change_scale(double scale){
-	double width,height;
-	render_get_size(document,current_page,&width,&height);
-	if (
-			(floor(width*scale) > minimum_width) &&
-			(floor(height*scale) > minimum_height) &&
-			(floor(width*scale) * floor(height*scale) < cache_size) ){
-		document->center_w += (int)( floor(width*document->scale) - floor(width*scale))/2;
-		document->center_h += (int)( floor(height*document->scale) - floor(height*scale))/2;
-		document->scale=scale;
-		render(document);
-		expose();
-	}
+	document->space_h *= scale;
+	document->space_w *= scale;
+	document->table_h = document->rows * (document->space_h + margin) - margin;
+	document->table_w = document->columns * (document->space_w + margin) - margin;
+	render(document);
+	expose();
+
 }
+
+
+void key_zoom_in(){ 	
+	change_scale(zoom_speed);
+}
+void key_zoom_out(){
+	if (document->space_h / zoom_speed > minimum_height &&
+			document->space_w / zoom_speed > minimum_width)
+		change_scale(1/zoom_speed);
+
+}
+
+

@@ -1,10 +1,10 @@
 #include <stdlib.h> //free
 #include <string.h> //memcpy
 #include "pixbuffer.h"
-#include "backend.h"
+//#include "backend.h"
 #include "settings.h"
 
-#include "window.h" //fuj - vizual
+#include "window.h" //fuj - vizual, kresleni cerneho
 #include "poppler.h" //fuj
 
 void pixbuf_free(gpointer data, gpointer user_data){
