@@ -156,22 +156,26 @@ void rotate(int rotation, int all){
 	if (all)
 		document->pages[current_page].rotation = rotation;
 	else
-		document->rotation = rotation; 
+		document->rotation = rotation;
+	document->ulc_w += document->table_w/2;	
+	document->ulc_h += document->table_h/2;	
 	compute_space_center(document);
 	render(document);
+	document->ulc_w -= document->table_w/2;	
+	document->ulc_h -= document->table_h/2;	
 	expose();	
 }
 void key_rotate_document_right(){
-	rotate((document->rotation+90)%360,TRUE); 
+	rotate((document->rotation+90)%360,FALSE); 
 }
 void key_rotate_document_left(){
-	rotate((document->rotation-90)%360,TRUE); 
+	rotate((document->rotation-90)%360,FALSE); 
 }
 void key_rotate_page_right(){
-	rotate((document->pages[current_page].rotation+90)%360,FALSE);
+	rotate((document->pages[current_page].rotation+90)%360,TRUE);
 }
 void key_rotate_page_left(){
-	rotate((document->pages[current_page].rotation-90)%360,FALSE);
+	rotate((document->pages[current_page].rotation-90)%360,TRUE);
 }
 
 void key_reload(){
