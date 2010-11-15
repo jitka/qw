@@ -73,10 +73,10 @@ void render_get_size(document_t * doc, int number_page, double *width, double *h
 void render_page(document_t * doc, int page_number, int space_shift_w, int space_shift_h){
 	//vymysli presnou pozitci a detaily doprosted krabicky
 	//todo: co takhle zachovavat pomery mezi velikostmi ruznych stran?
-	if ( 		space_shift_w > window_width ||
-			space_shift_h > window_height ||
-			space_shift_w + doc->space_w < 0 ||
-			space_shift_h + doc->space_h < 0
+	if ( 		doc->center_w - doc-> table_w + space_shift_w > window_width ||
+			doc->top_h + space_shift_h > window_height ||
+			doc->center_w - doc->table_w + space_shift_w + doc->space_w < 0 ||
+			doc->top_h + space_shift_h + doc->space_h < 0
 	   )
 		return; //neni videt ;-)	
 	
