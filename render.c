@@ -111,31 +111,37 @@ void render_page_black(document_t * doc, int space_shift_w, int space_shift_h){
 	pixbuf_insert_into_database(&doc->displayed,tmp);
 }
 
+double median_aspect(document_t *doc, int num_displayed){
+
+	//median pomeru stran
+	double aspects[num_displayed];
+	for (int i=0; i<num_displayed; i++){
+		double a,b;
+		render_get_size(doc,current_page+i,&a,&b);
+		aspects[i] = a/b;
+	}
+	int unsorted = TRUE;
+	while (unsorted){ //tenhle bublesort by mel byt na prumernem pdf prumerne linearni
+		unsorted = FALSE;
+		for (int i=0; i<num_displayed-1; i++)
+			if (aspects[i]>aspects[i+1]){
+				double tmp = aspects[i];
+				aspects[i] = aspects[i+1];
+				aspects[i+1] = tmp;
+				unsorted = TRUE;
+			}
+	}
+	return aspects[num_displayed/2];
+}
+	
+
 void compute_space_center(document_t *doc){
 	//spočítá velkosti prostoru na jednu stranku tak aby se vešlo vše do okna a poměr stran
 	//vyhovoval medánu z poměrů všech stran
 	if (doc->rows > 0){
 		int num_displayed = min(doc->columns * doc->rows, doc->number_pages-current_page);
 
-		//median pomeru stran
-		double aspects[num_displayed];
-		for (int i=0; i<num_displayed; i++){
-			double a,b;
-			render_get_size(doc,current_page+i,&a,&b);
-			aspects[i] = a/b;
-		}
-		int unsorted = TRUE;
-		while (unsorted){ //tenhle bublesort by mel byt na prumernem pdf prumerne linearni
-			unsorted = FALSE;
-			for (int i=0; i<num_displayed-1; i++)
-				if (aspects[i]>aspects[i+1]){
-					double tmp = aspects[i];
-					aspects[i] = aspects[i+1];
-					aspects[i+1] = tmp;
-					unsorted = TRUE;
-				}
-		}
-		double aspect = aspects[num_displayed/2];
+		double aspect = median_aspect(doc,num_displayed);
 
 		//velikost okynka na vykresleni jedne stranky
 		if ( (double) ((window_width-(doc->columns-1)*margin) //pouzitlna sirka
@@ -157,7 +163,16 @@ void compute_space_center(document_t *doc){
 	} else {
 		//n je pocetet sloupcu
 		//vezmu vysku z prvnich n pokud je to min nez vyska stranky
-		//pridam dalsich n a prepocitam vysku 
+		//pridam dalsich n a prepocitam vysku
+		double aspect;
+		int i=0;
+		doc->space_w = ( window_width-(doc->columns-1)*margin ) / doc->columns;
+		do {
+			i++;
+			aspect = median_aspect(doc,min(doc->columns*i, doc->number_pages-current_page));
+			doc->space_h = floor(doc->space_w/aspect);
+		} while ((doc->space_h+margin)*i-margin < window_height); //celkova hlouba je mensi nez vyska stranky
+		printf("%d\n",doc->space_h);
 	}
 }
 
