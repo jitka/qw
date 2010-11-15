@@ -197,7 +197,9 @@ void render(document_t *doc){
 	} else {
 		//vykleslit to co pujde videt
 		int row=0;
-		while (doc->top_h + (doc->space_h+margin)*(row+1)-margin < 0) //neni videt
+		while (doc->top_h + (doc->space_h+margin)*row-margin > 0) //top_h je dole
+			row--;
+		while (doc->top_h + (doc->space_h+margin)*(row+1)-margin < 0) //neni videt je nahore
 			row++;
 		while (doc->top_h + (doc->space_h+margin)*row-margin < window_height){ //je videt
 			for (int i=0; i<doc->columns; i++)
