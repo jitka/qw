@@ -78,9 +78,9 @@ void open_file(char *path){
 
 
 void key_center(){
-	document->center_h = window_height/2;
-	document->center_w = window_width/2;
 	compute_space_center(document);
+	document->top_h = window_height/2 - document->table_h/2;
+	document->center_w = window_width/2;
 	render(document);
 	expose();
 }
@@ -113,17 +113,9 @@ void key_this_page_has_number(int printed_number){ 	page_number_shift = -printed
 //pozor na 0 rows
 void key_move_right(){ 	document->center_w += move_shift; render(document); expose();}
 void key_move_left(){ 	document->center_w -= move_shift; render(document); expose();}
-void key_move_down(){ 	
-	if (document->rows > 0)
-		document->center_h -= move_shift; 
-	render(document); expose();
-}
-void key_move_up(){ 	
-	if (document->rows > 0)
-		document->center_h += move_shift; 
-	render(document); expose();
-}
-void move(int x, int y){ document->center_w +=x; document->center_h += y; render(document); expose();}
+void key_move_down(){ 	document->top_h -= move_shift; render(document); expose();}
+void key_move_up(){ 	document->top_h += move_shift; render(document); expose();}
+void move(int x, int y){ document->center_w +=x; document->top_h += y; render(document); expose();}
 
 void key_quit(){
 	gdk_event_put( gdk_event_new(GDK_DELETE));

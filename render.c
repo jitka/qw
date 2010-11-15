@@ -26,7 +26,7 @@ document_t * document_create_databse(){
 	doc->table_w = 0;
 	doc->space_h = 0;
 	doc->space_w = 0;
-	doc->center_h = window_height/2;
+	doc->top_h = 0;
 	doc->center_w = window_width/2;
 
 	if (current_page < 0) current_page = 0;
@@ -157,9 +157,6 @@ void compute_space_center(document_t *doc){
 			doc->space_w = ( window_width-(doc->columns-1)*margin ) / doc->columns;
 			doc->space_h = floor(doc->space_w/aspect);
 		}
-
-		doc->table_w = doc->space_w*doc->columns + margin*(doc->columns-1);
-		doc->table_h = doc->space_h*doc->rows + margin*(doc->rows-1);
 	} else {
 		//n je pocetet sloupcu
 		//vezmu vysku z prvnich n pokud je to min nez vyska stranky
@@ -172,8 +169,10 @@ void compute_space_center(document_t *doc){
 			aspect = median_aspect(doc,min(doc->columns*i, doc->number_pages-current_page));
 			doc->space_h = floor(doc->space_w/aspect);
 		} while ((doc->space_h+margin)*i-margin < window_height); //celkova hlouba je mensi nez vyska stranky
-		printf("%d\n",doc->space_h);
+		//printf("%d\n",doc->space_h);
 	}
+	doc->table_w = doc->space_w*doc->columns + margin*(doc->columns-1);
+	doc->table_h = doc->space_h*doc->rows + margin*(doc->rows-1);
 }
 
 void render_displayed_pixbuf(document_t *doc){
@@ -213,6 +212,14 @@ void render(document_t *doc){
 		}
 	} else {
 		//vykleslit to co pujde videt
+	//	int row=0;
+	//	while (doc->current_h) //neni videt
+	//		row++;
+		/*for (;je videt;row++){
+			for (int i=0; i<doc->columns; i++)
+				int this_page 
+				if
+		}*/
 	}
 	//need_render = TRUE;	
 	render_displayed_pixbuf(doc);
@@ -249,7 +256,7 @@ void render_get_relative_position(
 	}
 	//prevedu na relativni vuci ulc tabulky
 	pointer_x -= document->center_w - document->table_w/2;
-	pointer_y -= document->center_h - document->table_h/2;
+	pointer_y -= document->top_h;
 	//najdu stranku do ktere se kliklo
 	GList *pointer = g_list_find_custom(document->displayed.glist,NULL,compare);
 	if (pointer == NULL){
@@ -276,7 +283,7 @@ void expose(){
 				0,0, //vykreslit cely pixbuf
 				document->center_w - document->table_w/2 
 					+ item->space_shift_w + item->shift_w,
-				document->center_h - document->table_h/2 
+				document->top_h 
 					+ item->space_shift_h + item->shift_h,
 				item->width, //rozmery
 				item->height,
