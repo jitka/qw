@@ -89,7 +89,6 @@ void key_center(){
 }
 
 void change_page(int new){
-	printf("neco\n");
 	if (new <0 || new >= document->number_pages)
 		return;
 	current_page=new;

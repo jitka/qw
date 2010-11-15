@@ -196,19 +196,21 @@ void render(document_t *doc){
 						j * (doc->space_h + margin));//int space_shift_w, int space_shift_h)
 	} else {
 		//vykleslit to co pujde videt
-		int row=0;
-		while (doc->top_h + (doc->space_h+margin)*row-margin > 0) //top_h je dole
-			row--;
-		while (doc->top_h + (doc->space_h+margin)*(row+1)-margin < 0) //neni videt je nahore
-			row++;
-		while (doc->top_h + (doc->space_h+margin)*row-margin < window_height){ //je videt
+		while (doc->top_h > margin){ //nad current je zbytek jine
+			current_page -= document->columns;
+			doc->top_h -= doc->space_h + margin;
+		}
+		while (doc->top_h + doc->space_h < 0){ //neni videt je nahore
+			current_page += document->columns;
+			doc->top_h += doc->space_h + margin;
+		}
+		for (int j = 0; doc->top_h + (doc->space_h+margin)*j-margin < window_height; j++){ //je videt
 			for (int i=0; i<doc->columns; i++)
 				render_page(
 						doc,//document_t * doc,
-						current_page + row*doc->columns + i,//int page_number,	
+						current_page + j*doc->columns + i,//int page_number,	
 						i * (doc->space_w + margin),
-						row * (doc->space_h + margin));//int space_shift_w, int space_shift_h)
-			row++;
+						j * (doc->space_h + margin));//int space_shift_w, int space_shift_h)
 		}
 	}
 	//need_render = TRUE;	
