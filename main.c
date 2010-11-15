@@ -392,6 +392,8 @@ int main(int argc, char * argv[]) {
 					"Ovladání:\n"
 					" hoho by bavilo porad to upravovat... \n"
 					" zkus intuici.. \n"
+					" nebo se podivej do inputs.c \n"
+					" doporucuji vyzkouset 0r \n"
 					));
 				return 0;
 			case 'p':

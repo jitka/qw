@@ -1,11 +1,9 @@
 predelat help
-moznost 0 radku - pretekani
 zobrazovat v titulku cislo stranky
 zapnaut na pozadi...
 podbarveni aktualni stranky
 kreslit az mam cas
 http://library.gnome.org/devel/glib/stable/glib-Key-value-file-parser.html#g-key-file-get-keys
-nekreslit co nemusim
 zmenit ikonku pri mereni
 spectre title do okna title nebo nazev souboru?
 chytat vsechny chyby spectre a popplera
