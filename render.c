@@ -26,8 +26,8 @@ document_t * document_create_databse(){
 	doc->table_w = 0;
 	doc->space_h = 0;
 	doc->space_w = 0;
-	doc->top_h = 0;
-	doc->center_w = window_width/2;
+	doc->ulc_h = 0;
+	doc->ulc_w = 0;
 
 	if (current_page < 0) current_page = 0;
 	if (current_page >= doc->number_pages) current_page = doc->number_pages -1;
@@ -73,10 +73,10 @@ void render_get_size(document_t * doc, int number_page, double *width, double *h
 void render_page(document_t * doc, int page_number, int space_shift_w, int space_shift_h){
 	//vymysli presnou pozitci a detaily doprosted krabicky
 	//todo: co takhle zachovavat pomery mezi velikostmi ruznych stran?
-	if ( 		doc->center_w - doc-> table_w + space_shift_w > window_width ||
-			doc->top_h + space_shift_h > window_height ||
-			doc->center_w - doc->table_w + space_shift_w + doc->space_w < 0 ||
-			doc->top_h + space_shift_h + doc->space_h < 0
+	if ( 		doc->ulc_w + space_shift_w > window_width ||
+			doc->ulc_h + space_shift_h > window_height ||
+			doc->ulc_w + space_shift_w + doc->space_w < 0 ||
+			doc->ulc_h + space_shift_h + doc->space_h < 0
 	   )
 		return; //neni videt ;-)	
 	
@@ -203,15 +203,15 @@ void render(document_t *doc){
 						j * (doc->space_h + margin));//int space_shift_w, int space_shift_h)
 	} else {
 		//vykleslit to co pujde videt
-		while (doc->top_h > margin){ //nad current je zbytek jine
+		while (doc->ulc_h > margin){ //nad current je zbytek jine
 			current_page -= document->columns;
-			doc->top_h -= doc->space_h + margin;
+			doc->ulc_h -= doc->space_h + margin;
 		}
-		while (doc->top_h + doc->space_h < 0){ //neni videt je nahore
+		while (doc->ulc_h + doc->space_h < 0){ //neni videt je nahore
 			current_page += document->columns;
-			doc->top_h += doc->space_h + margin;
+			doc->ulc_h += doc->space_h + margin;
 		}
-		for (int j = 0; doc->top_h + (doc->space_h+margin)*j-margin < window_height; j++){ //je videt
+		for (int j = 0; doc->ulc_h + (doc->space_h+margin)*j-margin < window_height; j++){ //je videt
 			for (int i=0; i<doc->columns; i++)
 				render_page(
 						doc,//document_t * doc,
@@ -254,8 +254,8 @@ void render_get_relative_position(
 		b = NULL;
 	}
 	//prevedu na relativni vuci ulc tabulky
-	pointer_x -= document->center_w - document->table_w/2;
-	pointer_y -= document->top_h;
+	pointer_x -= document->ulc_w;
+	pointer_y -= document->ulc_h;
 	//najdu stranku do ktere se kliklo
 	GList *pointer = g_list_find_custom(document->displayed.glist,NULL,compare);
 	if (pointer == NULL){
@@ -280,10 +280,8 @@ void expose(){
 				window,//GdkDrawable *drawable,
 				gdkGC, //GdkGC *gc,
 				0,0, //vykreslit cely pixbuf
-				document->center_w - document->table_w/2 
-					+ item->space_shift_w + item->shift_w,
-				document->top_h 
-					+ item->space_shift_h + item->shift_h,
+				document->ulc_w + item->space_shift_w + item->shift_w,
+				document->ulc_h + item->space_shift_h + item->shift_h,
 				item->width, //rozmery
 				item->height,
 				GDK_RGB_DITHER_NONE, //fujvec nechci

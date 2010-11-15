@@ -80,10 +80,10 @@ void open_file(char *path){
 void key_center(){
 	compute_space_center(document);
 	if (document->rows == 0)
-		document->top_h = 0;
+		document->ulc_h = 0;
 	else
-		document->top_h = window_height/2 - document->table_h/2;
-	document->center_w = window_width/2;
+		document->ulc_h = window_height/2 - document->table_h/2;
+	document->ulc_w = window_width/2 - document->table_w/2;
 	render(document);
 	expose();
 }
@@ -108,7 +108,7 @@ void key_prev_screan(){
 	if (document->rows > 0)
 		change_page(current_page-document->columns*document->rows);
 	else{
-		document->top_h += window_height;
+		document->ulc_h += window_height;
 		render(document);
 		expose();
 	}
@@ -117,7 +117,7 @@ void key_next_screan(){
 	if (document->rows > 0)
 		change_page(current_page+document->columns*document->rows);
 	else{
-		document->top_h -= window_height;
+		document->ulc_h -= window_height;
 		render(document);
 		expose();
 	}
@@ -130,11 +130,11 @@ void key_jump_down(int diff){ 	change_page(current_page + diff);}
 void key_this_page_has_number(int printed_number){ 	page_number_shift = -printed_number+current_page;}
 
 //pozor na 0 rows
-void key_move_right(){ 	document->center_w += move_shift; render(document); expose();}
-void key_move_left(){ 	document->center_w -= move_shift; render(document); expose();}
-void key_move_down(){ 	document->top_h -= move_shift; render(document); expose();}
-void key_move_up(){ 	document->top_h += move_shift; render(document); expose();}
-void move(int x, int y){ document->center_w +=x; document->top_h += y; render(document); expose();}
+void key_move_right(){ 	document->ulc_w += move_shift; render(document); expose();}
+void key_move_left(){ 	document->ulc_w -= move_shift; render(document); expose();}
+void key_move_down(){ 	document->ulc_h -= move_shift; render(document); expose();}
+void key_move_up(){ 	document->ulc_h += move_shift; render(document); expose();}
+void move(int x, int y){ document->ulc_w +=x; document->ulc_h += y; render(document); expose();}
 
 void key_quit(){
 	gdk_event_put( gdk_event_new(GDK_DELETE));
@@ -152,21 +152,26 @@ void key_fullscreen(){
 	}
 }
 
+void rotate(int rotation, int all){
+	if (all)
+		document->pages[current_page].rotation = rotation;
+	else
+		document->rotation = rotation; 
+	compute_space_center(document);
+	render(document);
+	expose();	
+}
 void key_rotate_document_right(){
-	document->rotation = (document->rotation+90)%360; 
-	render(document); expose();
+	rotate((document->rotation+90)%360,TRUE); 
 }
 void key_rotate_document_left(){
-	document->rotation = (document->rotation-90)%360; 
-	render(document); expose();
+	rotate((document->rotation-90)%360,TRUE); 
 }
 void key_rotate_page_right(){
-	document->pages[current_page].rotation = (document->pages[current_page].rotation + 90) % 360;
-	render(document); expose();
+	rotate((document->pages[current_page].rotation+90)%360,FALSE);
 }
 void key_rotate_page_left(){
-	document->pages[current_page].rotation = (document->pages[current_page].rotation - 90) % 360;
-	render(document); expose();
+	rotate((document->pages[current_page].rotation-90)%360,FALSE);
 }
 
 void key_reload(){
@@ -176,10 +181,11 @@ void key_reload(){
 	open_file(file_path);
 	new = document_create_databse();
 	compute_space_center(new);
-	render(new);
 	document_delete_database(document);
 	document=new;
-	expose();
+	key_center();
+//	render(document);
+//	expose();
 }
 
 void key_set_columns(int c){

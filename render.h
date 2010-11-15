@@ -22,9 +22,8 @@ typedef struct document_t{
 	int max_rows;
 //	double scale; //docasne
 	//zobrazeny kus
-	int top_h; //kde zacina aktualni stranka (pokud je 0 radku)
-//	int center_h;
-	int center_w;
+	int ulc_h; //kde zacina aktualni stranka (pokud je 0 radku)
+	int ulc_w;
 	int space_h;
 	int space_w;
 	int table_h; //space_h +margin 
