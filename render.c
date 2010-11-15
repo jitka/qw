@@ -73,44 +73,40 @@ void render_get_size(document_t * doc, int number_page, double *width, double *h
 void render_page(document_t * doc, int page_number, int space_shift_w, int space_shift_h){
 	//vymysli presnou pozitci a detaily doprosted krabicky
 	//todo: co takhle zachovavat pomery mezi velikostmi ruznych stran?
-	double page_width,page_height;
-	render_get_size(doc,page_number,&page_width,&page_height);
+	pixbuf_item *tmp = calloc(1,sizeof(pixbuf_item));
 	
-	pixbuf_item *tmp = calloc(1,sizeof(pixbuf_item));
+	if ((page_number < doc->number_pages) && (page_number >= 0)){
+		double page_width,page_height;
+		render_get_size(doc,page_number,&page_width,&page_height);
 
-	tmp->page_number = page_number;
-	tmp->rotation = (doc->pages[page_number].rotation+doc->rotation) % 360;
-	tmp->space_shift_w = space_shift_w;
-	tmp->space_shift_h = space_shift_h;
-	if (doc->space_w*page_height < page_width*doc->space_h){
-		//šířka /width je stejná
+		tmp->page_number = page_number;
+		tmp->rotation = (doc->pages[page_number].rotation+doc->rotation) % 360;
+		tmp->space_shift_w = space_shift_w;
+		tmp->space_shift_h = space_shift_h;
+		if (doc->space_w*page_height < page_width*doc->space_h){
+			//šířka /width je stejná
+			tmp->width = doc->space_w;
+			tmp->height = ceil(doc->space_w*page_height/page_width);
+			tmp->shift_w = 0;
+			tmp->shift_h = (doc->space_h - tmp->height) / 2;
+			tmp->scale = doc->space_w/page_width;
+		} else {
+			//výška/height je stejná
+			tmp->width = ceil(doc->space_h*(page_width/page_height));
+			tmp->height = doc->space_h;
+			tmp->shift_w = (doc->space_w - tmp->width) / 2;
+			tmp->shift_h = 0;
+			tmp->scale = doc->space_h/page_height;
+		}
+	} else{
+		tmp->page_number = -1;
+		tmp->space_shift_w = space_shift_w;
+		tmp->space_shift_h = space_shift_h;
 		tmp->width = doc->space_w;
-		tmp->height = ceil(doc->space_w*page_height/page_width);
-		tmp->shift_w = 0;
-		tmp->shift_h = (doc->space_h - tmp->height) / 2;
-		tmp->scale = doc->space_w/page_width;
-	} else {
-		//výška/height je stejná
-		tmp->width = ceil(doc->space_h*(page_width/page_height));
 		tmp->height = doc->space_h;
-		tmp->shift_w = (doc->space_w - tmp->width) / 2;
-		tmp->shift_h = 0;
-		tmp->scale = doc->space_h/page_height;
 	}
-
 	pixbuf_insert_into_database(&doc->displayed,tmp);
 }
-
-void render_page_black(document_t * doc, int space_shift_w, int space_shift_h){
-	pixbuf_item *tmp = calloc(1,sizeof(pixbuf_item));
-	tmp->page_number = -1;
-	tmp->space_shift_w = space_shift_w;
-	tmp->space_shift_h = space_shift_h;
-	tmp->width = doc->space_w;
-	tmp->height = doc->space_h;
-	pixbuf_insert_into_database(&doc->displayed,tmp);
-}
-
 double median_aspect(document_t *doc, int num_displayed){
 
 	//median pomeru stran
@@ -191,34 +187,22 @@ void render(document_t *doc){
 	pixbuf_delete_displayed(&doc->cache,&doc->displayed);
 	
 	if (doc->rows > 0){
-	//privaveni displayed
 		for (int j=0; j < doc->rows; j++){
 			for (int i=0; i < doc->columns; i++){
-				int this_page = current_page + j*doc->columns + i;
-				//printf("th %d ",this_page);
-				if ((this_page < doc->number_pages) && (this_page >= 0)){
-					render_page(
-							doc,//document_t * doc,
-							this_page,//int page_number,	
-							i * (doc->space_w + margin),
-							j * (doc->space_h + margin));//int space_shift_w, int space_shift_h)
-				} else {
-					render_page_black( //na tento space nezbyla zadna strana
-							doc,//document_t * doc,
-							i * (doc->space_w + margin),
-							j * (doc->space_h + margin));//int space_shift_w, int space_shift_h)
+				render_page(
+						doc,//document_t * doc,
+						current_page + j*doc->columns + i,//int page_number,	
+						i * (doc->space_w + margin),
+						j * (doc->space_h + margin));//int space_shift_w, int space_shift_h)
 				}
-			}
 		}
 	} else {
 		//vykleslit to co pujde videt
-	//	int row=0;
-	//	while (doc->current_h) //neni videt
-	//		row++;
+		int row=0;
+		while (doc->top_h + (doc->space_h+margin)*(row+1)-margin < 0) //neni videt
+			row++;
 		/*for (;je videt;row++){
 			for (int i=0; i<doc->columns; i++)
-				int this_page 
-				if
 		}*/
 	}
 	//need_render = TRUE;	
