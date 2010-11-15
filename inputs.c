@@ -183,17 +183,13 @@ void handle_click(int x, int y){
 }
 
 void handle_motion(int x, int y){
-	if (document->rows > 0 && state == BASIC){
-		move(x-click_x,y-click_y);
-		click_x=x;
-		click_y=y;
-	}
+	move(x-click_x,y-click_y);
+	click_x=x;
+	click_y=y;
 }
 
 void handle_motion2(int x, int y){
-	if (document->rows > 0 && state == BASIC){
-		move(0,y-click_y);
-		click_x=x;
-		click_y=y;
-	}
+	move(0,y-click_y);
+	click_x=x;
+	click_y=y;
 }

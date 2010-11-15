@@ -79,13 +79,17 @@ void open_file(char *path){
 
 void key_center(){
 	compute_space_center(document);
-	document->top_h = window_height/2 - document->table_h/2;
+	if (document->rows == 0)
+		document->top_h = 0;
+	else
+		document->top_h = window_height/2 - document->table_h/2;
 	document->center_w = window_width/2;
 	render(document);
 	expose();
 }
 
 void change_page(int new){
+	printf("neco\n");
 	if (new <0 || new >= document->number_pages)
 		return;
 	current_page=new;
@@ -101,8 +105,24 @@ void key_prev_page(){ 		change_page(current_page-1);}
 void key_next_page(){ 	change_page(current_page+1);}
 void key_prev_row(){ 	change_page(current_page-document->columns);}
 void key_next_row(){ 	change_page(current_page+document->columns);}
-void key_prev_screan(){ 	change_page(current_page-document->columns*document->rows);}
-void key_next_screan(){ change_page(current_page+document->columns*document->rows);}
+void key_prev_screan(){ 	
+	if (document->rows > 0)
+		change_page(current_page-document->columns*document->rows);
+	else{
+		document->top_h += window_height;
+		render(document);
+		expose();
+	}
+}
+void key_next_screan(){ 
+	if (document->rows > 0)
+		change_page(current_page+document->columns*document->rows);
+	else{
+		document->top_h -= window_height;
+		render(document);
+		expose();
+	}
+}
 void key_home(){ 	change_page(0);}
 void key_end(){ 	change_page(document->number_pages-1);}
 void key_jump(int num_page){ 	change_page(num_page+page_number_shift);}

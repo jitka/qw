@@ -187,23 +187,27 @@ void render(document_t *doc){
 	pixbuf_delete_displayed(&doc->cache,&doc->displayed);
 	
 	if (doc->rows > 0){
-		for (int j=0; j < doc->rows; j++){
-			for (int i=0; i < doc->columns; i++){
+		for (int j=0; j < doc->rows; j++)
+			for (int i=0; i < doc->columns; i++)
 				render_page(
 						doc,//document_t * doc,
 						current_page + j*doc->columns + i,//int page_number,	
 						i * (doc->space_w + margin),
 						j * (doc->space_h + margin));//int space_shift_w, int space_shift_h)
-				}
-		}
 	} else {
 		//vykleslit to co pujde videt
 		int row=0;
 		while (doc->top_h + (doc->space_h+margin)*(row+1)-margin < 0) //neni videt
 			row++;
-		/*for (;je videt;row++){
+		while (doc->top_h + (doc->space_h+margin)*row-margin < window_height){ //je videt
 			for (int i=0; i<doc->columns; i++)
-		}*/
+				render_page(
+						doc,//document_t * doc,
+						current_page + row*doc->columns + i,//int page_number,	
+						i * (doc->space_w + margin),
+						row * (doc->space_h + margin));//int space_shift_w, int space_shift_h)
+			row++;
+		}
 	}
 	//need_render = TRUE;	
 	render_displayed_pixbuf(doc);
