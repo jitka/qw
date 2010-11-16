@@ -19,8 +19,8 @@ document_t * document_create_databse(){
 	pixbuf_create_database(&doc->displayed);
 	doc->pages = calloc(doc->number_pages, sizeof(page_t));
 	doc->rotation = 0;
-	doc->columns = 1;
-	doc->rows = 1;
+	doc->columns = start_columns;
+	doc->rows = start_rows;
 	render_set_max_columns(doc);
 	doc->table_h = 0;
 	doc->table_w = 0;

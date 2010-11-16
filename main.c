@@ -40,6 +40,9 @@ int move_shift = 10; //o kolik posouvaji sipky
 int presentation_in_fullscreen = FALSE;
 int start_maximalized = FALSE;
 int start_fullscreen = FALSE;
+int start_columns = 1;
+int start_rows = 1;
+char *start_comand = "abc";
 
 extern document_t *document;
 
@@ -351,6 +354,8 @@ static void event_func(GdkEvent *ev, gpointer data) {
 					//todo: jeste by se tu dal vlozit nejaky hezky obrazek
 					mode = PAGE;
 					key_reload();
+//					for (int i = 0; strart_comand[i] != 0; i++)
+//						start_comand[i])
 					break;
 				default:
 //					printf("expose: %dx%d\n",ev->expose.area.width,ev->expose.area.height);

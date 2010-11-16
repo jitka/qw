@@ -9,7 +9,7 @@ LDFLAGS=$(LFL)
 
 sources=inputs main pixbuffer render backend
 
-qw: poppler.o $(addsuffix .o,$(sources))
+hui: poppler.o $(addsuffix .o,$(sources))
 	@echo LD $@
 	@gcc -o $@ $^ $(LDFLAGS)
 

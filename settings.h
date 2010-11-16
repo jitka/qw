@@ -25,3 +25,5 @@ extern int zoom_shift;
 extern int presentation_in_fullscreen;
 extern int start_maximalized;
 extern int start_fullscreen;
+extern int start_columns;
+extern int start_rows;
