@@ -7,4 +7,3 @@ extern int window_height;
 extern GdkCursor* cursor_basic;
 extern GdkCursor* cursor_move;
 extern GdkCursor* cursor_mesure;
-

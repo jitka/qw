@@ -304,6 +304,7 @@ static void event_func(GdkEvent *ev, gpointer data) {
 			if (ev->motion.state & GDK_BUTTON1_MASK){
 				handle_motion((int)ev->motion.x,(int)ev->motion.y);
 				gdk_event_request_motions(&ev->motion);
+		//		printf("expose %d %d\n",ev->motion.x,ev->motion.y);
 			}
 			if (ev->motion.state & GDK_BUTTON3_MASK){
 				handle_motion2((int)ev->motion.x,(int)ev->motion.y);
@@ -477,6 +478,8 @@ int main(int argc, char * argv[]) {
 	GList* icons = g_list_append(NULL,icon_pixbuf);	
 	gdk_window_set_icon_list(window,icons);
 */
+
+	
 	if (start_maximalized)
 		gdk_window_maximize(window);
 	if (start_fullscreen)

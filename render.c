@@ -7,6 +7,8 @@
 #include "render.h"
 #include "settings.h"
 #define min(A,B) ( (A) < (B) ? (A) : (B) )
+#define min3(A,B,C) ( min((A), min((B),(C)) ) )
+#define max(A,B) ( (A) > (B) ? (A) : (B) )
 
 extern int current_page;
 extern int need_render;
@@ -264,15 +266,15 @@ void expose(){
 	void render(gpointer data, gpointer user_data){
 		pixbuf_item *item = data;
 		user_data = NULL;
+		int shift_w = document->ulc_w + item->shift_w;
+		int shift_h = document->ulc_h + item->shift_h;
 		gdk_pixbuf_render_to_drawable(
 				item->pixbuf,
 				window,//GdkDrawable *drawable,
 				gdkGC, //GdkGC *gc,
-				0,0, //vykreslit cely pixbuf
-				document->ulc_w + item->shift_w,
-				document->ulc_h + item->shift_h,
-				item->width, //rozmery
-				item->height,
+				max(0,-shift_w),max(0,-shift_h),
+				max(shift_w,0),max(shift_h,0),
+				min3(item->width+shift_w,item->width,window_width),min3(item->height+shift_h,item->height,window_height),
 				GDK_RGB_DITHER_NONE, //fujvec nechci
 				0,0);
 	}
