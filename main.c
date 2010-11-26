@@ -301,13 +301,8 @@ static void event_func(GdkEvent *ev, gpointer data) {
 				handle_release();
 			break;
 		case GDK_MOTION_NOTIFY:
-			if (ev->motion.state & GDK_BUTTON1_MASK){
-				handle_motion((int)ev->motion.x,(int)ev->motion.y);
-				gdk_event_request_motions(&ev->motion);
-		//		printf("expose %d %d\n",ev->motion.x,ev->motion.y);
-			}
-			if (ev->motion.state & GDK_BUTTON3_MASK){
-				handle_motion2((int)ev->motion.x,(int)ev->motion.y);
+			if (ev->motion.state & (GDK_BUTTON1_MASK|GDK_BUTTON3_MASK)){
+				handle_motion((int)ev->motion.x,(int)ev->motion.y,ev->motion.state);
 				gdk_event_request_motions(&ev->motion);
 			}
 			break;

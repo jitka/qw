@@ -201,18 +201,13 @@ void handle_release(){
 	gdk_window_set_cursor(window,cursor_basic);
 }
 
-void handle_motion(int x, int y){
+void handle_motion(int x, int y, int button){
 	if (state == DISTANCE_1 || state == DISTANCE_2 || state == POSITION)
 		return;
-	move(x-click_x,y-click_y);
-	click_x=x;
-	click_y=y;
-}
-
-void handle_motion2(int x, int y){
-	if (state == DISTANCE_1 || state == DISTANCE_2 || state == POSITION)
-		return;
-	move(0,y-click_y);
+	if (button & GDK_BUTTON3_MASK)
+		move(x-click_x,y-click_y);
+	if (button & GDK_BUTTON1_MASK)
+		move(0,y-click_y);
 	click_x=x;
 	click_y=y;
 }
