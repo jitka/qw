@@ -297,6 +297,9 @@ static void event_func(GdkEvent *ev, gpointer data) {
 			if (ev->button.button == 1 || ev->button.button == 3)
 				handle_click((int)ev->button.x,(int)ev->button.y);
 			break;
+		case GDK_BUTTON_RELEASE:
+				handle_release();
+			break;
 		case GDK_MOTION_NOTIFY:
 			if (ev->motion.state & GDK_BUTTON1_MASK){
 				handle_motion((int)ev->motion.x,(int)ev->motion.y);
@@ -435,7 +438,7 @@ int main(int argc, char * argv[]) {
 
 
 	GdkDisplay *display = gdk_display_get_default();
-	cursor_basic = gdk_cursor_new_for_display(display,GDK_X_CURSOR);
+	cursor_basic = gdk_cursor_new_for_display(display,GDK_LEFT_PTR);
 	cursor_mesure = gdk_cursor_new_for_display(display,GDK_CROSSHAIR);
 	cursor_move = gdk_cursor_new_for_display(display,GDK_FLEUR);
 

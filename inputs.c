@@ -10,7 +10,8 @@ enum {
 	NUMBERS, //ceka na cisla 
 	DISTANCE_1, //ceka na kliknuti
 	DISTANCE_2,
-	POSITION, 
+	POSITION,
+        MOVE,	
 } state=BASIC;
 int number;
 int number_is_negativ;
@@ -21,9 +22,12 @@ extern document_t *document;
 
 void wait_distance(){ 	
 	state = DISTANCE_1;
-	gdk_window_set_cursor(window,cursor_move);
+	gdk_window_set_cursor(window,cursor_mesure);
 }
-void wait_position(){ 	state = POSITION;}
+void wait_position(){ 	
+	state = POSITION;
+	gdk_window_set_cursor(window,cursor_mesure);
+}
 
 
 static struct {
@@ -154,30 +158,47 @@ void handle_key(guint keyval, guint modifier){
 //					break;
 				}		
 			break;
+		case MOVE:
+			break;
 		default:
-			if (key_cancel_waiting)
+			if (key_cancel_waiting){
 				state = BASIC;
+				gdk_window_set_cursor(window,cursor_basic);
+			}
 			break;
 	}
 }
 
 void handle_click(int x, int y){
 	switch(state){
-		case DISTANCE_2:
-			click_distance(click_x,click_y,x,y);
-			state=BASIC;
-			break;
-		case POSITION:
-			click_position(x,y);
-			state=BASIC;
-			break;
-		case DISTANCE_1:
-			state=DISTANCE_2;
-		default:
-		        click_x=x;
-			click_y=y;
-			break;
+	case DISTANCE_1:
+		state=DISTANCE_2;
+		click_x=x;
+		click_y=y;
+		break;
+	case DISTANCE_2:
+		state=BASIC;
+		gdk_window_set_cursor(window,cursor_basic);
+		click_distance(click_x,click_y,x,y);
+		break;
+	case POSITION:
+		state=BASIC;
+		gdk_window_set_cursor(window,cursor_basic);
+		click_position(x,y);
+		break;
+	default:
+		state=MOVE;
+		gdk_window_set_cursor(window,cursor_move);
+		click_x=x;
+		click_y=y;
+		break;
 	}
+}
+
+void handle_release(){
+	if (state != MOVE) return;
+	state = BASIC;
+	gdk_window_set_cursor(window,cursor_basic);
 }
 
 void handle_motion(int x, int y){
