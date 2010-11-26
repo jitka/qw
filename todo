@@ -3,10 +3,8 @@ vypnout screen server
 vykreslovat z bufferu jen to co je videt
 posouvat o pul strany
 přidávat nastavení při relaudu, změnit nebo nezměnit číslo strany,+posun?
-vykreslovat jen ten kus co je potreba
 neposouvat obrazek uplne mimo okno
 zobrazit se podle velikosti pdf
-napsat zapinaci pismena, hned a ne az po vykresleni
 predelat help
 zobrazovat v titulku cislo stranky
 zapnaut na pozadi...

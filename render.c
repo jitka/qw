@@ -287,10 +287,14 @@ void expose(){
 }
 
 void change_scale(double scale){
+	document->ulc_h += document->table_h/2;
+	document->ulc_w += document->table_w/2;
 	document->space_h *= scale;
 	document->space_w *= scale;
 	document->table_h = document->rows * (document->space_h + margin) - margin;
 	document->table_w = document->columns * (document->space_w + margin) - margin;
+	document->ulc_h -= document->table_h/2;
+	document->ulc_w -= document->table_w/2;
 	render(document);
 	expose();
 
