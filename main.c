@@ -439,19 +439,19 @@ int main(int argc, char * argv[]) {
 	cursor_mesure = gdk_cursor_new_for_display(display,GDK_CROSSHAIR);
 	cursor_move = gdk_cursor_new_for_display(display,GDK_FLEUR);
 
-	GdkVisual *visual = gdk_visual_get_system();
-	GdkColormap *colormap = gdk_colormap_new(visual,TRUE);
+//	GdkVisual *visual = gdk_visual_get_system();
+//	GdkColormap *colormap = gdk_colormap_new(visual,TRUE);
 
 	GdkWindowAttr attr = {
-		NULL, //gchar *title; //nefunguje
+		"huiii", //gchar *title; //nefunguje
 		GDK_ALL_EVENTS_MASK, //gint event_mask;
 		100,0, //gint x, y;
 		start_window_width,start_window_height,
 	 	GDK_INPUT_OUTPUT, //GdkWindowClass wclass;
-		visual, //GdkVisual *visual;
-		colormap, //GdkColormap *colormap;
+		NULL, //GdkVisual *visual;
+		NULL, //GdkColormap *colormap;
 		GDK_WINDOW_TOPLEVEL, //GdkWindowType window_type;
-		cursor_mesure, //GdkCursor *cursor;
+		cursor_basic, //GdkCursor *cursor;
 		NULL, //gchar *wmclass_name;
 		NULL, //gchar *wmclass_class;
 		TRUE, //gboolean override_redirect; ???
@@ -461,8 +461,9 @@ int main(int argc, char * argv[]) {
 	window = gdk_window_new(
 			NULL, //GdkWindow *parent,
 			&attr, //GdkWindowAttr *attributes,
-			0 //gint attributes_mask ????
+			GDK_WA_TITLE|GDK_WA_X|GDK_WA_Y|GDK_WA_CURSOR //gint attributes_mask
 	);
+
 	gdkGC  = gdk_gc_new(window);
 
 	window_width = start_window_width;
@@ -473,9 +474,6 @@ int main(int argc, char * argv[]) {
 	GList* icons = g_list_append(NULL,icon_pixbuf);	
 	gdk_window_set_icon_list(window,icons);
 */
-	//titulek
-	gdk_window_set_title(window,"huiii");
-
 	if (start_maximalized)
 		gdk_window_maximize(window);
 	if (start_fullscreen)
