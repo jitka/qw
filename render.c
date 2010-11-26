@@ -81,8 +81,6 @@ void render_page(document_t * doc, int page_number, int space_shift_w, int space
 		return; //neni videt ;-)	
 	
 	pixbuf_item *tmp = calloc(1,sizeof(pixbuf_item));
-//	tmp->space_shift_w = space_shift_w;
-//	tmp->space_shift_h = space_shift_h;
 	tmp->shift_w = space_shift_w;
 	tmp->shift_h = space_shift_h;
 	tmp->width = doc->space_w;
@@ -97,14 +95,12 @@ void render_page(document_t * doc, int page_number, int space_shift_w, int space
 		if (doc->space_w*page_height < page_width*doc->space_h){
 			//šířka /width je stejná
 			tmp->height = ceil(doc->space_w*page_height/page_width);
-			tmp->shift_w += 0;
 			tmp->shift_h += (doc->space_h - tmp->height) / 2;
 			tmp->scale = doc->space_w/page_width;
 		} else {
 			//výška/height je stejná
 			tmp->width = ceil(doc->space_h*(page_width/page_height));
 			tmp->shift_w += (doc->space_w - tmp->width) / 2;
-			tmp->shift_h += 0;
 			tmp->scale = doc->space_h/page_height;
 		}
 	} else{
@@ -246,12 +242,10 @@ void render_get_relative_position(
 	
 	gint  compare(gconstpointer a, gconstpointer b){
 		const pixbuf_item *item = a;
-		int shift_w = item->space_shift_w + item->shift_w;
-		int shift_h = item->space_shift_h + item->shift_h;
-		return !(shift_w < pointer_x && 
-			shift_h < pointer_y &&
-			item->width + shift_w > pointer_x &&
-			item->height + shift_h > pointer_y);
+		return !(item->shift_w < pointer_x && 
+			item->shift_h < pointer_y &&
+			item->width + item->shift_w > pointer_x &&
+			item->height + item->shift_h > pointer_y);
 		b = NULL;
 	}
 	//prevedu na relativni vuci ulc tabulky
@@ -267,8 +261,8 @@ void render_get_relative_position(
 		*page = item->page_number;
 		*space_height = item->height;
 		*space_width = item->width;
-		*relative_x = pointer_x - (item->space_shift_w + item->shift_w);
-		*relative_y = pointer_y - (item->space_shift_h + item->shift_h);
+		*relative_x = pointer_x - item->shift_w;
+		*relative_y = pointer_y - item->shift_h;
 	}
 }
 
@@ -281,8 +275,8 @@ void expose(){
 				window,//GdkDrawable *drawable,
 				gdkGC, //GdkGC *gc,
 				0,0, //vykreslit cely pixbuf
-				document->ulc_w + item->space_shift_w + item->shift_w,
-				document->ulc_h + item->space_shift_h + item->shift_h,
+				document->ulc_w + item->shift_w,
+				document->ulc_h + item->shift_h,
 				item->width, //rozmery
 				item->height,
 				GDK_RGB_DITHER_NONE, //fujvec nechci

@@ -8,9 +8,7 @@ typedef struct pixbuf_item{
 	int page_number;
 	int width;
 	int height;
-	int space_shift_w; //posun tabulky
-	int space_shift_h;
-	int shift_w; //posun v tabulce
+	int shift_w; //posun
 	int shift_h;
 	double scale;
 	int rotation;
