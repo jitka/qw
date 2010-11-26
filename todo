@@ -3,7 +3,6 @@ vypnout screen server
 vykreslovat z bufferu jen to co je videt
 posouvat o pul strany
 přidávat nastavení při relaudu, změnit nebo nezměnit číslo strany,+posun?
-divne prazne pixbuffery za koncem, vubec je nedelat
 vykreslovat jen ten kus co je potreba
 neposouvat obrazek uplne mimo okno
 zobrazit se podle velikosti pdf
