@@ -246,6 +246,7 @@ void click_distance(int first_x, int first_y, int second_x, int second_y){
 	printf(_("strana %d (cislovano od jedne) %d (logicke cislovani)\n"
 			"%lf cm x %lf cm     %d x %d pikelu\n"
 			//"kliknuti 1: %d,%d kliknuti 2: %d,%d\n"
+			//"kliknuti 1: %d,%d kliknuti 2: %d,%d\n"
 			"vzdalenot %lf cm %lf pixelu\n\n"),
 			page_1+1,
 			page_1-page_number_shift,
@@ -254,6 +255,7 @@ void click_distance(int first_x, int first_y, int second_x, int second_y){
 			width,
 			height,
 			//x1,y1,x2,y2,
+			//first_x, first_y, second_x, second_y,
 			sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2)) / width*document->pages[page_1].width IN_CENTIMETRES,
 			sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2))
 			);

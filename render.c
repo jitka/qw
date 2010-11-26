@@ -81,6 +81,12 @@ void render_page(document_t * doc, int page_number, int space_shift_w, int space
 		return; //neni videt ;-)	
 	
 	pixbuf_item *tmp = calloc(1,sizeof(pixbuf_item));
+//	tmp->space_shift_w = space_shift_w;
+//	tmp->space_shift_h = space_shift_h;
+	tmp->shift_w = space_shift_w;
+	tmp->shift_h = space_shift_h;
+	tmp->width = doc->space_w;
+	tmp->height = doc->space_h;
 	
 	if ((page_number < doc->number_pages) && (page_number >= 0)){
 		double page_width,page_height;
@@ -88,29 +94,22 @@ void render_page(document_t * doc, int page_number, int space_shift_w, int space
 
 		tmp->page_number = page_number;
 		tmp->rotation = (doc->pages[page_number].rotation+doc->rotation) % 360;
-		tmp->space_shift_w = space_shift_w;
-		tmp->space_shift_h = space_shift_h;
 		if (doc->space_w*page_height < page_width*doc->space_h){
 			//šířka /width je stejná
-			tmp->width = doc->space_w;
 			tmp->height = ceil(doc->space_w*page_height/page_width);
-			tmp->shift_w = 0;
-			tmp->shift_h = (doc->space_h - tmp->height) / 2;
+			tmp->shift_w += 0;
+			tmp->shift_h += (doc->space_h - tmp->height) / 2;
 			tmp->scale = doc->space_w/page_width;
 		} else {
 			//výška/height je stejná
 			tmp->width = ceil(doc->space_h*(page_width/page_height));
-			tmp->height = doc->space_h;
-			tmp->shift_w = (doc->space_w - tmp->width) / 2;
-			tmp->shift_h = 0;
+			tmp->shift_w += (doc->space_w - tmp->width) / 2;
+			tmp->shift_h += 0;
 			tmp->scale = doc->space_h/page_height;
 		}
 	} else{
 		tmp->page_number = -1;
-		tmp->space_shift_w = space_shift_w;
-		tmp->space_shift_h = space_shift_h;
-		tmp->width = doc->space_w;
-		tmp->height = doc->space_h;
+		tmp->rotation = 0;
 	}
 	pixbuf_insert_into_database(&doc->displayed,tmp);
 }
@@ -203,14 +202,16 @@ void render(document_t *doc){
 						j * (doc->space_h + margin));//int space_shift_w, int space_shift_h)
 	} else {
 		//vykleslit to co pujde videt
-		while (doc->ulc_h > margin){ //nad current je zbytek jine
+		while (doc->ulc_h > margin && current_page > 0){ //nad current je zbytek jine
 			current_page -= document->columns;
 			doc->ulc_h -= doc->space_h + margin;
 		}
-		while (doc->ulc_h + doc->space_h < 0){ //neni videt je nahore
+		while (doc->ulc_h + doc->space_h < 0 && current_page <= doc->number_pages){ //neni videt je nahore
 			current_page += document->columns;
 			doc->ulc_h += doc->space_h + margin;
 		}
+		//auuuu to nejak moc moc preleza
+		printf("%d %d\n",current_page,doc->number_pages);
 		for (int j = 0; doc->ulc_h + (doc->space_h+margin)*j-margin < window_height; j++){ //je videt
 			for (int i=0; i<doc->columns; i++)
 				render_page(

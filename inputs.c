@@ -11,7 +11,6 @@ enum {
 	DISTANCE_1, //ceka na kliknuti
 	DISTANCE_2,
 	POSITION, 
-	PREPINAC, //je aktualne zmackle ctrl
 } state=BASIC;
 int number;
 int number_is_negativ;
@@ -164,9 +163,6 @@ void handle_key(guint keyval, guint modifier){
 
 void handle_click(int x, int y){
 	switch(state){
-		case DISTANCE_1:
-			state=DISTANCE_2;
-			break;
 		case DISTANCE_2:
 			click_distance(click_x,click_y,x,y);
 			state=BASIC;
@@ -175,20 +171,26 @@ void handle_click(int x, int y){
 			click_position(x,y);
 			state=BASIC;
 			break;
+		case DISTANCE_1:
+			state=DISTANCE_2;
 		default:
 		        click_x=x;
-			click_y=y;	
+			click_y=y;
 			break;
 	}
 }
 
 void handle_motion(int x, int y){
+	if (state == DISTANCE_1 || state == DISTANCE_2 || state == POSITION)
+		return;
 	move(x-click_x,y-click_y);
 	click_x=x;
 	click_y=y;
 }
 
 void handle_motion2(int x, int y){
+	if (state == DISTANCE_1 || state == DISTANCE_2 || state == POSITION)
+		return;
 	move(0,y-click_y);
 	click_x=x;
 	click_y=y;

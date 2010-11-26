@@ -81,6 +81,7 @@ void pixbuf_render(pixbuf_database *cache,pixbuf_item *it){
 
 	GList *tmp = g_list_find_custom(cache->glist,it,compare);
 	if (tmp != NULL){ // pokud byla v cachy vynda se
+		printf("vyndava se z cache\n");
 		pixbuf_item *old = pixbuf_remove_from_database(cache,tmp);
 		it->pixbuf=old->pixbuf;
 		free(old);
