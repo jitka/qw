@@ -30,8 +30,8 @@ static guint timer_id;
 int key_cancel_waiting = TRUE;
 int keep_scale = FALSE;
 int margin = 5; //sirka mezery v pixelech
-int start_window_width = 400;
-int start_window_height = 500;
+int start_window_w = 400;
+int start_window_h = 500;
 int minimum_width = 10;
 int minimum_height = 10;
 int cache_size = 2000000; //v poctu pixelu
@@ -55,8 +55,8 @@ GMainLoop *mainloop;
 GdkWindow *window;
 GdkGC *gdkGC;
 int is_fullscreen = FALSE;
-int window_width;
-int window_height;
+int window_w;
+int window_h;
 GdkCursor* cursor_basic;
 GdkCursor* cursor_move;
 GdkCursor* cursor_mesure;
@@ -85,8 +85,8 @@ void key_center(){
 	if (document->rows == 0)
 		document->ulc_h = 0;
 	else
-		document->ulc_h = window_height/2 - document->table_h/2;
-	document->ulc_w = window_width/2 - document->table_w/2;
+		document->ulc_h = window_h/2 - document->table_h/2;
+	document->ulc_w = window_w/2 - document->table_w/2;
 	render(document);
 	expose();
 }
@@ -111,7 +111,7 @@ void key_prev_screan(){
 	if (document->rows > 0)
 		change_page(current_page-document->columns*document->rows);
 	else{
-		document->ulc_h += window_height;
+		document->ulc_h += window_h;
 		render(document);
 		expose();
 	}
@@ -120,7 +120,7 @@ void key_next_screan(){
 	if (document->rows > 0)
 		change_page(current_page+document->columns*document->rows);
 	else{
-		document->ulc_h -= window_height;
+		document->ulc_h -= window_h;
 		render(document);
 		expose();
 	}
@@ -131,13 +131,6 @@ void key_jump(int num_page){ 	change_page(num_page+page_number_shift);}
 void key_jump_up(int diff){ 	change_page(current_page - diff);}
 void key_jump_down(int diff){ 	change_page(current_page + diff);}
 void key_this_page_has_number(int printed_number){ 	page_number_shift = -printed_number+current_page;}
-
-//pozor na 0 rows
-void key_move_right(){ 	document->ulc_w += move_shift; render(document); expose();}
-void key_move_left(){ 	document->ulc_w -= move_shift; render(document); expose();}
-void key_move_down(){ 	document->ulc_h -= move_shift; render(document); expose();}
-void key_move_up(){ 	document->ulc_h += move_shift; render(document); expose();}
-void move(int x, int y){ document->ulc_w +=x; document->ulc_h += y; render(document); expose();}
 
 void key_quit(){
 	gdk_event_put( gdk_event_new(GDK_DELETE));
@@ -155,6 +148,62 @@ void key_fullscreen(){
 	}
 }
 
+
+void check_position(){
+	if ( document->table_w < window_w ){ //male
+		document->ulc_w = (window_w - document->table_w)/2;
+	} else if ( document->ulc_w > 0 ) { //moc vlevo
+		document->ulc_w = 0;
+	} else if ( document->table_w + document->ulc_w < window_w ) //moc vpravo
+		document->ulc_w += window_w - (document->table_w + document->ulc_w); 
+	if ( document->rows > 0 ){
+		if ( document->table_h < window_h ){ //male
+			document->ulc_h = (window_h - document->table_h)/2;
+		} else if ( document->ulc_h > 0 ) { //moc nahore
+			document->ulc_h = 0;
+		} else if ( document->table_h + document->ulc_h < window_h ) //moc dole
+			document->ulc_h += window_h - (document->table_h + document->ulc_h); 
+	}
+}
+
+void move(int x, int y){
+	document->ulc_w += x; 
+	document->ulc_h += y; 
+	check_position();
+	render(document); expose();
+}
+void key_move_right(){ 	move(move_shift,0);}
+void key_move_left(){	move(-move_shift,0);}
+void key_move_down(){	move(0,-move_shift);}
+void key_move_up(){	move(0,move_shift);}
+
+void change_scale(double scale){
+	document->ulc_h += document->table_h/2;
+	document->ulc_w += document->table_w/2;
+	document->space_h *= scale;
+	document->space_w = floor(document->space_h*document->aspect);
+	document->table_h = document->rows * (document->space_h + margin) - margin;
+	document->table_w = document->columns * (document->space_w + margin) - margin;
+	document->ulc_h -= document->table_h/2;
+	document->ulc_w -= document->table_w/2;
+	check_position();
+	render(document);
+	expose();
+
+}
+
+
+void key_zoom_in(){ 	
+	change_scale(zoom_speed);
+}
+void key_zoom_out(){
+	if (document->space_h / zoom_speed > minimum_height &&
+			document->space_w / zoom_speed > minimum_width)
+		change_scale(1/zoom_speed);
+}
+
+
+
 void rotate(int rotation, int all){
 	if (all)
 		document->pages[current_page].rotation = rotation;
@@ -166,6 +215,7 @@ void rotate(int rotation, int all){
 	render(document);
 	document->ulc_w -= document->table_w/2;	
 	document->ulc_h -= document->table_h/2;	
+	check_position();
 	expose();	
 }
 void key_rotate_document_right(){
@@ -339,10 +389,10 @@ static void event_func(GdkEvent *ev, gpointer data) {
 			{
 				int w_width, w_height;
 				gdk_drawable_get_size(window,&w_width,&w_height);
-				if (window_width != w_width || window_height != w_height){
+				if (window_w != w_width || window_h != w_height){
 					//zmenila se velkost okna
-					window_width = w_width;
-					window_height = w_height;
+					window_w = w_width;
+					window_h = w_height;
 					render_set_max_columns(document);
 					key_center(); //tam je i render
 				}
@@ -445,7 +495,7 @@ int main(int argc, char * argv[]) {
 		"huiii", //gchar *title; //nefunguje
 		GDK_ALL_EVENTS_MASK, //gint event_mask;
 		100,0, //gint x, y;
-		start_window_width,start_window_height,
+		start_window_w,start_window_h,
 	 	GDK_INPUT_OUTPUT, //GdkWindowClass wclass;
 		NULL, //GdkVisual *visual;
 		NULL, //GdkColormap *colormap;
@@ -465,8 +515,8 @@ int main(int argc, char * argv[]) {
 
 	gdkGC  = gdk_gc_new(window);
 
-	window_width = start_window_width;
-	window_height = start_window_height;
+	window_w = start_window_w;
+	window_h = start_window_h;
 
 	//ikona
 /*	GdkPixbuf * icon_pixbuf = gdk_pixbuf_new_from_file("icon.png",NULL);

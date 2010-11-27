@@ -26,6 +26,7 @@ typedef struct document_t{
 	int ulc_w;
 	int space_h;
 	int space_w;
+	double aspect;
 	int table_h; //space_h +margin 
 	int table_w;
 } document_t;

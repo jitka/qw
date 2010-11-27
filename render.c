@@ -28,6 +28,7 @@ document_t * document_create_databse(){
 	doc->table_w = 0;
 	doc->space_h = 0;
 	doc->space_w = 0;
+	doc->aspect = 0;
 	doc->ulc_h = 0;
 	doc->ulc_w = 0;
 
@@ -37,8 +38,8 @@ document_t * document_create_databse(){
 }
 
 void render_set_max_columns(document_t *doc){
-	doc->max_columns = (window_width + margin) / (minimum_width + margin);
-	doc->max_rows = (window_height + margin) / (minimum_height + margin);
+	doc->max_columns = (window_w + margin) / (minimum_width + margin);
+	doc->max_rows = (window_h + margin) / (minimum_height + margin);
 }
 
 void document_delete_database(document_t *old){
@@ -75,8 +76,8 @@ void render_get_size(document_t * doc, int number_page, double *width, double *h
 void render_page(document_t * doc, int page_number, int space_shift_w, int space_shift_h){
 	//vymysli presnou pozitci a detaily doprosted krabicky
 	//todo: co takhle zachovavat pomery mezi velikostmi ruznych stran?
-	if ( 		doc->ulc_w + space_shift_w > window_width ||
-			doc->ulc_h + space_shift_h > window_height ||
+	if ( 		doc->ulc_w + space_shift_w > window_w ||
+			doc->ulc_h + space_shift_h > window_h ||
 			doc->ulc_w + space_shift_w + doc->space_w < 0 ||
 			doc->ulc_h + space_shift_h + doc->space_h < 0
 	   )
@@ -137,34 +138,33 @@ void compute_space_center(document_t *doc){
 	if (doc->rows > 0){
 		int num_displayed = min(doc->columns * doc->rows, doc->number_pages-current_page);
 
-		double aspect = median_aspect(doc,num_displayed);
+		doc->aspect = median_aspect(doc,num_displayed);
 
 		//velikost okynka na vykresleni jedne stranky
-		if ( (double) ((window_width-(doc->columns-1)*margin) //pouzitlna sirka
+		if ( (double) ((window_w-(doc->columns-1)*margin) //pouzitlna sirka
 					/doc->columns) //na jeden ramecek
-				/ (double) ((window_height-(doc->rows-1)*margin)
+				/ (double) ((window_h-(doc->rows-1)*margin)
 					/doc->rows)
-				> aspect){
+				> doc->aspect){
 			//vyska je stejna
-			doc->space_h = ( window_height - (doc->rows-1)*margin ) / doc->rows;
-			doc->space_w = floor(doc->space_h*aspect);
+			doc->space_h = ( window_h - (doc->rows-1)*margin ) / doc->rows;
+			doc->space_w = floor(doc->space_h*doc->aspect);
 		} else {
 			//sirka je stejna
-			doc->space_w = ( window_width-(doc->columns-1)*margin ) / doc->columns;
-			doc->space_h = floor(doc->space_w/aspect);
+			doc->space_w = ( window_w-(doc->columns-1)*margin ) / doc->columns;
+			doc->space_h = floor(doc->space_w/doc->aspect);
 		}
 	} else {
 		//n je pocetet sloupcu
 		//vezmu vysku z prvnich n pokud je to min nez vyska stranky
 		//pridam dalsich n a prepocitam vysku
-		double aspect;
 		int i=0;
-		doc->space_w = ( window_width-(doc->columns-1)*margin ) / doc->columns;
+		doc->space_w = ( window_w-(doc->columns-1)*margin ) / doc->columns;
 		do {
 			i++;
-			aspect = median_aspect(doc,min(doc->columns*i, doc->number_pages-current_page));
-			doc->space_h = floor(doc->space_w/aspect);
-		} while ((doc->space_h+margin)*i-margin < window_height); //celkova hlouba je mensi nez vyska stranky
+			doc->aspect = median_aspect(doc,min(doc->columns*i, doc->number_pages-current_page));
+			doc->space_h = floor(doc->space_w/doc->aspect);
+		} while ((doc->space_h+margin)*i-margin < window_h); //celkova hlouba je mensi nez vyska stranky
 		//printf("%d\n",doc->space_h);
 	}
 	doc->table_w = doc->space_w*doc->columns + margin*(doc->columns-1);
@@ -204,7 +204,7 @@ void render(document_t *doc){
 			current_page += document->columns;
 			doc->ulc_h += doc->space_h + margin;
 		}
-		for (int j = 0; doc->ulc_h + (doc->space_h+margin)*j-margin < window_height; j++){ //je videt
+		for (int j = 0; doc->ulc_h + (doc->space_h+margin)*j-margin < window_h; j++){ //je videt
 			for (int i=0; i<doc->columns; i++)
 				render_page(
 						doc,//document_t * doc,
@@ -274,41 +274,16 @@ void expose(){
 				gdkGC, //GdkGC *gc,
 				max(0,-shift_w),max(0,-shift_h),
 				max(shift_w,0),max(shift_h,0),
-				min3(item->width+shift_w,item->width,window_width),min3(item->height+shift_h,item->height,window_height),
+				min3(item->width+shift_w,item->width,window_w),min3(item->height+shift_h,item->height,window_h),
 				GDK_RGB_DITHER_NONE, //fujvec nechci
 				0,0);
 	}
-	GdkRectangle rec = {0,0,window_width,window_height};
+	GdkRectangle rec = {0,0,window_w,window_h};
 	GdkRegion *  reg = gdk_region_rectangle(&rec);
 	gdk_window_begin_paint_region(window,reg);
 	g_list_foreach(document->displayed.glist,render,NULL);
 	gdk_window_end_paint(window);
 	gdk_region_destroy(reg);
-}
-
-void change_scale(double scale){
-	document->ulc_h += document->table_h/2;
-	document->ulc_w += document->table_w/2;
-	document->space_h *= scale;
-	document->space_w *= scale;
-	document->table_h = document->rows * (document->space_h + margin) - margin;
-	document->table_w = document->columns * (document->space_w + margin) - margin;
-	document->ulc_h -= document->table_h/2;
-	document->ulc_w -= document->table_w/2;
-	render(document);
-	expose();
-
-}
-
-
-void key_zoom_in(){ 	
-	change_scale(zoom_speed);
-}
-void key_zoom_out(){
-	if (document->space_h / zoom_speed > minimum_height &&
-			document->space_w / zoom_speed > minimum_width)
-		change_scale(1/zoom_speed);
-
 }
 
 

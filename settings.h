@@ -15,8 +15,8 @@ extern file_type_t file_type;
 extern int key_cancel_waiting;
 extern int keep_scale;
 extern int margin; //sirka mezery v pixelech
-extern int start_window_width;
-extern int start_window_height;
+extern int start_window_w;
+extern int start_window_h;
 extern int minimum_width;
 extern int minimum_height;
 extern int cache_size;
