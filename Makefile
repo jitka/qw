@@ -7,7 +7,7 @@ CPPFLAGS=-g -Wall -W  $(CFL)
 LDFLAGS=$(LFL)
 
 
-sources=inputs main pixbuffer render backend
+sources=inputs main pixbuffer render backend settings 
 
 hui: poppler.o $(addsuffix .o,$(sources))
 	@echo LD $@

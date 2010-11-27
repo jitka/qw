@@ -41,3 +41,7 @@ void click_distance(int first_x, int first_y, int second_x, int second_y);
 void click_position(int x, int y);
 
 void move(int x, int y);
+
+
+void wait_distance();	
+void wait_position();	

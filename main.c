@@ -5,8 +5,8 @@
 #include <libintl.h> //preklady
 #include <math.h> //sqrt
 #include <fcntl.h> //presmerovani chyboveho vystupu
-#include <gdk-pixbuf/gdk-pixbuf.h> //kvuli ikonce
-#include <gdk/gdkkeysyms.h> //prepinace
+//#include <gdk-pixbuf/gdk-pixbuf.h> //kvuli ikonce
+//#include <gdk/gdkkeysyms.h> //prepinace
 //#include <gdk/gdk.h> //okynka,poppler.h pixbuffer.h
 //#include <glib-2.0/glib.h>
 #include "backend.h" //open_file
@@ -25,24 +25,6 @@ int current_page = 0;
 int need_render = FALSE;
 static int page_number_shift = -1; //lide pocitaji od 1
 static guint timer_id;
-
-//settings
-int key_cancel_waiting = TRUE;
-int keep_scale = FALSE;
-int margin = 5; //sirka mezery v pixelech
-int start_window_w = 400;
-int start_window_h = 500;
-int minimum_width = 10;
-int minimum_height = 10;
-int cache_size = 2000000; //v poctu pixelu
-double zoom_speed = 1.5;
-int move_shift = 10; //o kolik posouvaji sipky
-int presentation_in_fullscreen = FALSE;
-int start_maximalized = FALSE;
-int start_fullscreen = FALSE;
-int start_columns = 1;
-int start_rows = 1;
-char *start_comand = "abc";
 
 extern document_t *document;
 
@@ -148,7 +130,6 @@ void key_fullscreen(){
 	}
 }
 
-
 void check_position(){
 	if ( document->table_w < window_w ){ //male
 		document->ulc_w = (window_w - document->table_w)/2;
@@ -172,10 +153,10 @@ void move(int x, int y){
 	check_position();
 	render(document); expose();
 }
-void key_move_right(){ 	move(move_shift,0);}
-void key_move_left(){	move(-move_shift,0);}
-void key_move_down(){	move(0,-move_shift);}
-void key_move_up(){	move(0,move_shift);}
+void key_move_right(){ 	move(window_w/move_delta,0);}
+void key_move_left(){	move(-window_w/move_delta,0);}
+void key_move_down(){	move(0,-window_w/move_delta);}
+void key_move_up(){	move(0,window_w/move_delta);}
 
 void change_scale(double scale){
 	document->ulc_h += document->table_h/2;
@@ -209,14 +190,7 @@ void rotate(int rotation, int all){
 		document->pages[current_page].rotation = rotation;
 	else
 		document->rotation = rotation;
-	document->ulc_w += document->table_w/2;	
-	document->ulc_h += document->table_h/2;	
-	compute_space_center(document);
-	render(document);
-	document->ulc_w -= document->table_w/2;	
-	document->ulc_h -= document->table_h/2;	
-	check_position();
-	expose();	
+	key_center();
 }
 void key_rotate_document_right(){
 	rotate((document->rotation+90)%360,FALSE); 
@@ -405,8 +379,8 @@ static void event_func(GdkEvent *ev, gpointer data) {
 					//todo: jeste by se tu dal vlozit nejaky hezky obrazek
 					mode = PAGE;
 					key_reload();
-//					for (int i = 0; strart_comand[i] != 0; i++)
-//						start_comand[i])
+					for (int i = 0; start_comand[i] != 0; i++)
+						handle_key(start_comand[i],0);
 					break;
 				default:
 //					printf("expose: %dx%d\n",ev->expose.area.width,ev->expose.area.height);
