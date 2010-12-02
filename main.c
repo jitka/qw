@@ -47,7 +47,7 @@ GdkCursor* cursor_mesure;
 	
 void open_file(char *path){
 	if (path == NULL){
-		printf(_("Nebylo zadáno jmeno souboru.\n"));
+		printf(_("No file given.\n"));
 		exit(1);
 	}
 	if (!doc_init(path)){
@@ -264,14 +264,14 @@ void click_distance(int first_x, int first_y, int second_x, int second_y){
 	render_get_relative_position(first_x,first_y,&page_1,&x1,&y1,&height,&width);
 	render_get_relative_position(second_x,second_y,&page_2,&x2,&y2,&height,&width);
 	if (page_1 != page_2 || page_1 == -1 || page_2 == -1){
-		printf(_("Priste klikejte do stejneho obrazku.\n"));
+		printf(_("You must click to same picture\n"));
 		return;
 	}
-	printf(_("strana %d (cislovano od jedne) %d (logicke cislovani)\n"
-			"%lf cm x %lf cm     %d x %d pikelu\n"
+	printf(_("page %d (numbered from 1) %d (user numbered)\n"
+			"	%lf cm x %lf cm     %d x %d pixels\n"
 			//"kliknuti 1: %d,%d kliknuti 2: %d,%d\n"
 			//"kliknuti 1: %d,%d kliknuti 2: %d,%d\n"
-			"vzdalenot %lf cm %lf pixelu\n\n"),
+			"distance %lf cm %lf pixels\n\n"),
 			page_1+1,
 			page_1-page_number_shift,
 			document->pages[page_1].width IN_CENTIMETRES,
@@ -290,12 +290,12 @@ void click_position(int click_x, int click_y){
 	int height,width;
 	render_get_relative_position(click_x,click_y,&page,&x,&y,&height,&width);
 	if (page == -1){
-		printf(_("Priste klikejte do obrazku.\n"));
+		printf(_("You must click to picture.\n"));
 		return;
 	}
-	printf(_("strana %d (cislovano od jedne) %d (logicke cislovani)\n"
-			"%lf cm x %lf cm     %d x %d pikelu\n"
-			"kliknuti: %lf,%lf cm %d,%d pixelu \n\n"),
+	printf(_("page %d (numbered from 1) %d (user numbered)\n"
+			"	%lf cm x %lf cm     %d x %d pixel\n"
+			"clicked: %lf,%lf cm %d,%d pixel \n\n"),
 			page+1,
 			page-page_number_shift,
 			document->pages[page].width IN_CENTIMETRES,
@@ -425,16 +425,21 @@ int main(int argc, char * argv[]) {
 		next_option = getopt_long(argc, argv, short_options, long_options, NULL);
 		switch(next_option){
 			case 'h': 
-				printf(_("Nápověda qw: \n"
-					" -h 	-help 	nápověda\n"
-					" -p 	-page 	počáteční stránka\n"
-					" \n"
-					"Ovladání:\n"
-					" hoho by bavilo porad to upravovat... \n"
-					" zkus intuici.. \n"
-					" nebo se podivej do inputs.c \n"
-					" doporucuji vyzkouset 0r \n"
-					));
+				printf(_(
+					"Usage: hui [OPINION]... [FILE] \n"
+					"View pdf document.\n"
+					"\n"
+					"  -p 	--page[=NUMBER] start at page NUMBER\n"
+					"  -h   --help 		display this help and exit\n"
+					"\n"
+//					"TODO\n"
+//					"zmena cislovani\n"
+//					"zapnuti na pozadi\n"
+//					"velikost cache\n"
+//					"nepouzivat informace z minula\n"
+//					"info o soubru\n"
+					"\n"
+				));
 				return 0;
 			case 'p':
 				current_page = atoi(optarg) - 1; //lide cisluji od 1

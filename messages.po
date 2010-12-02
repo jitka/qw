@@ -1,52 +1,72 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# HUI.
+# Copyright (C) 2010
+# This file is distributed under the same license as the HUI package.
+# Jitka Novotná <jitka@ucw.cz>, 2010.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-08-30 10:38+0200\n"
+"POT-Creation-Date: 2010-11-28 00:18+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: cs_CZ\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: main.c:48
+#: main.c:50
 #, c-format
-msgid "Nebylo zadáno jmeno souboru.\n"
-msgstr ""
+msgid "No file given.\n"
+msgstr "Nebylo zadáno jméno souboru.\n"
 
 #: main.c:54
 #, c-format
-msgid "au getcwd \n"
-msgstr ""
+msgid "Load error\n"
+msgstr "Nepodařilo se načíst soubor\n"
 
-#: main.c:68
+#: main.c:267
 #, c-format
-msgid "Chyba načtení: %s\n"
-msgstr ""
+msgid "You must click to same page\n"
+msgstr "Příště klikejte na stejnou stránku.\n"
 
-#: main.c:121
-#, c-format
-msgid "hui %f %f %d %d - %d %d\n"
-msgstr ""
-
-#: main.c:124
-#, c-format
-msgid "hui %f %f %d %d\n"
-msgstr ""
-
-#: main.c:190
+#: main.c:270
 #, c-format
 msgid ""
-"Nápověda qw: \n"
-" šipečky posunuji, okynko se da zvětšit\n"
-" -h \t-help \tnápověda\n"
-" -p \t-page \tpočáteční stránka\n"
-" -i \t-info \tinfo dokumentu\n"
+"page %d (numbered from 1) %d (user numbered)\n"
+"\t%lf cm x %lf cm     %d x %d pixels\n"
+"distance %lf cm %lf pixels\n"
+"\n"
+msgstr ""
+"strana %d (čílováno od 1) %d (vlastní číslování)\n"
+"\t%lf cm x %lf cm     %d x %d pixlů\n"
+"vzdálenost %lf cm %lf pixels\n"
+"\n"
+
+#: main.c:293
+#, c-format
+msgid "You must click to page.\n"
+msgstr "Klikejte na stránku."
+
+#: main.c:296
+#, c-format
+msgid ""
+"page %d (numbered from 1) %d (user numbered)\n"
+"\t%lf cm x %lf cm     %d x %d pixel\n"
+"clicked: %lf,%lf cm %d,%d pixel \n"
+"\n"
+msgstr ""
+
+#: main.c:429
+#, c-format
+msgid ""
+"Usage: hui [OPINION]... [FILE] \n"
+"View pdf document.\n"
+"\n"
+"  -p \t--page[=NUMBER] start at page NUMBER\n"
+"  -h   --help \t\tdisplay this help and exit\n"
+"\n"
+"\n"
 msgstr ""
