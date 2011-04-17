@@ -5,6 +5,8 @@
 #include <libintl.h> //preklady
 #include <math.h> //sqrt
 #include <fcntl.h> //presmerovani chyboveho vystupu
+#include <unistd.h> //dup2 na zahozeni chyb popplera
+#include <errno.h>
 //#include <gdk-pixbuf/gdk-pixbuf.h> //kvuli ikonce
 //#include <gdk/gdkkeysyms.h> //prepinace
 //#include <gdk/gdk.h> //okynka,poppler.h pixbuffer.h
@@ -50,10 +52,23 @@ void open_file(char *path){
 		printf(_("No file given.\n"));
 		exit(1);
 	}
+
+	//zahodim chybovy vystup at nema poppler kam zvanit
+	int dn = open("/dev/null",O_WRONLY);
+	int err2 = dup(2);
+	dup2(dn,2);
+	close(dn);
+
 	if (!doc_init(path)){
-		printf(_("Load error\n"));
+		printf(_("Couldn't open file %s\n"),path);
 		exit(1);
 	}
+
+	//nahodim chybovy vystup
+	dup2(err2,2);
+	close(err2);
+
+
 	//cas posledni zmeny	
 	struct stat s;
 	if (stat(path, &s) != -1){

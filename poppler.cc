@@ -13,13 +13,11 @@ extern "C" {
 static PopplerDocument * doc;
 
 int pdf_init( char* filePath) {
-	GError * err;
 	if (mode != START) g_object_unref(doc);
 
-	err = (GError *) 0;
-	doc = poppler_document_new_from_file(filePath,0,&err); //0->nema heslo
-		//vrati-li NULL -> ma chybu
-	if (err != 0){
+	doc = poppler_document_new_from_file(filePath,NULL,NULL); //0->nema heslo
+	//vrati-li NULL -> ma chybu
+	if (doc == 0){
 		return 0;
 	}
 	return 1;
