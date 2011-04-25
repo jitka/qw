@@ -474,7 +474,11 @@ static inline void make_window(){
 	gdk_event_handler_set(event_func, NULL, NULL);
 	mainloop = g_main_loop_new(g_main_context_default(), FALSE);	
 	g_main_loop_run(mainloop);
+	printf("baf%d\n", gdk_window_is_destroyed(window));
+	gdk_window_hide(window);
 	gdk_window_destroy(window);
+	g_object_unref(window);
+	printf("baf%d\n", gdk_window_is_destroyed(window));
 
 }
 
@@ -525,24 +529,64 @@ int main(int argc, char * argv[]) {
 		}
 	} while (next_option != -1);
 
-	for (; optind <argc; optind++){
-		pid_t cpid = fork();
-		if (cpid == -1) {
-			perror("fork\n");
-			exit(EXIT_FAILURE);
-		}
+	//jednou se forknu aby ten prvni proces udrzel prompt
+	pid_t cpid2 = fork();
+	if (cpid2 == -1) {
+		perror("fork\n");
+		exit(EXIT_FAILURE);
+	}
 
-		if (cpid == 0) {    //dite
+	if (cpid2 == 0) {    //dite
+	} else {            //rodic
+		waitpid(cpid2,NULL,0);
+		exit(0);
+	}
+
+	if (parallel_window){
+		//vytvori okna naraz
+		pid_t child;
+		for (; optind <argc; optind++){
+			pid_t cpid = fork();
+			if (cpid == -1) {
+				perror("fork\n");
+				exit(EXIT_FAILURE);
+			}
+
+			if (cpid == 0) {    //dite
+			} else {            //rodic
+				child = cpid;
+				break;
+			}
+		}
+		if (optind < argc) {
 			file_path = argv[optind]; //vim ze tohle obecne nefunguje, ale tady to staci
 			open_file(file_path); //ověří, jestli soubor je skutečně pdf
 			gdk_init(NULL,NULL);
 			make_window();
-			return 0;	
-		} else {            //rodic
-			//TODO toto je jen jedna varianta
-			waitpid(cpid,NULL,0);
-		}
-	}
 
-	return 0;
+			waitpid(child,NULL,0);
+		}
+		return 0;
+	} else {
+		//vytvori okna postupne
+		for (; optind <argc; optind++){
+			pid_t cpid = fork();
+			if (cpid == -1) {
+				perror("fork\n");
+				exit(EXIT_FAILURE);
+			}
+
+			if (cpid == 0) {    //dite
+				file_path = argv[optind]; //vim ze tohle obecne nefunguje, ale tady to staci
+				open_file(file_path); //ověří, jestli soubor je skutečně pdf
+				gdk_init(NULL,NULL);
+				make_window();
+				return 0;	
+			} else {            //rodic
+				waitpid(cpid,NULL,0);
+			}
+		}
+
+		return 0;
+	}
 }
