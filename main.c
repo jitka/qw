@@ -7,6 +7,8 @@
 #include <fcntl.h> //presmerovani chyboveho vystupu
 #include <unistd.h> //dup2 na zahozeni chyb popplera
 #include <errno.h>
+#include <sys/types.h> //fork
+#include <sys/wait.h>  //fork
 //#include <gdk-pixbuf/gdk-pixbuf.h> //kvuli ikonce
 //#include <gdk/gdkkeysyms.h> //prepinace
 //#include <gdk/gdk.h> //okynka,poppler.h pixbuffer.h
@@ -420,6 +422,62 @@ static void event_func(GdkEvent *ev, gpointer data) {
 	}
 }
 
+static inline void make_window(){
+	GdkDisplay *display = gdk_display_get_default();
+	cursor_basic = gdk_cursor_new_for_display(display,GDK_LEFT_PTR);
+	cursor_mesure = gdk_cursor_new_for_display(display,GDK_CROSSHAIR);
+	cursor_move = gdk_cursor_new_for_display(display,GDK_FLEUR);
+
+	//	GdkVisual *visual = gdk_visual_get_system();
+	//	GdkColormap *colormap = gdk_colormap_new(visual,TRUE);
+
+	GdkWindowAttr attr = {
+		"huiii", //gchar *title; //nefunguje
+		GDK_ALL_EVENTS_MASK, //gint event_mask;
+		100,0, //gint x, y;
+		start_window_w,start_window_h,
+		GDK_INPUT_OUTPUT, //GdkWindowClass wclass;
+		NULL, //GdkVisual *visual;
+		NULL, //GdkColormap *colormap;
+		GDK_WINDOW_TOPLEVEL, //GdkWindowType window_type;
+		cursor_basic, //GdkCursor *cursor;
+		NULL, //gchar *wmclass_name;
+		NULL, //gchar *wmclass_class;
+		TRUE, //gboolean override_redirect; ???
+		GDK_WINDOW_TYPE_HINT_NORMAL, //GdkWindowTypeHint type_hint;
+	};
+
+	window = gdk_window_new(
+			NULL, //GdkWindow *parent,
+			&attr, //GdkWindowAttr *attributes,
+			GDK_WA_TITLE|GDK_WA_X|GDK_WA_Y|GDK_WA_CURSOR //gint attributes_mask
+			);
+
+	gdkGC  = gdk_gc_new(window);
+
+	window_w = start_window_w;
+	window_h = start_window_h;
+
+	//ikona
+	/*	GdkPixbuf * icon_pixbuf = gdk_pixbuf_new_from_file("icon.png",NULL);
+		GList* icons = g_list_append(NULL,icon_pixbuf);	
+		gdk_window_set_icon_list(window,icons);
+		*/
+
+
+	if (start_maximalized)
+		gdk_window_maximize(window);
+	if (start_fullscreen)
+		gdk_window_fullscreen(window);
+	//spusteni programu
+	gdk_window_show(window);
+	gdk_event_handler_set(event_func, NULL, NULL);
+	mainloop = g_main_loop_new(g_main_context_default(), FALSE);	
+	g_main_loop_run(mainloop);
+	gdk_window_destroy(window);
+
+}
+
 int main(int argc, char * argv[]) {
 
 
@@ -476,69 +534,10 @@ int main(int argc, char * argv[]) {
 
 		if (cpid == 0) {    //dite
 			file_path = argv[optind]; //vim ze tohle obecne nefunguje, ale tady to staci
-
 			open_file(file_path); //ověří, jestli soubor je skutečně pdf
-			//	printf("%d\n",file_type);
-			//	double w,h;
-			//	doc_page_get_size(0,&w,&h);
-			//	printf("stran %d, %lfx%lfcm\n",doc_get_number_pages(),w IN_CENTIMETRES,h IN_CENTIMETRES);
-			//vytvoreni okna
 			gdk_init(NULL,NULL);
-
-
-			GdkDisplay *display = gdk_display_get_default();
-			cursor_basic = gdk_cursor_new_for_display(display,GDK_LEFT_PTR);
-			cursor_mesure = gdk_cursor_new_for_display(display,GDK_CROSSHAIR);
-			cursor_move = gdk_cursor_new_for_display(display,GDK_FLEUR);
-
-			//	GdkVisual *visual = gdk_visual_get_system();
-			//	GdkColormap *colormap = gdk_colormap_new(visual,TRUE);
-
-			GdkWindowAttr attr = {
-				"huiii", //gchar *title; //nefunguje
-				GDK_ALL_EVENTS_MASK, //gint event_mask;
-				100,0, //gint x, y;
-				start_window_w,start_window_h,
-				GDK_INPUT_OUTPUT, //GdkWindowClass wclass;
-				NULL, //GdkVisual *visual;
-				NULL, //GdkColormap *colormap;
-				GDK_WINDOW_TOPLEVEL, //GdkWindowType window_type;
-				cursor_basic, //GdkCursor *cursor;
-				NULL, //gchar *wmclass_name;
-				NULL, //gchar *wmclass_class;
-				TRUE, //gboolean override_redirect; ???
-				GDK_WINDOW_TYPE_HINT_NORMAL, //GdkWindowTypeHint type_hint;
-			};
-
-			window = gdk_window_new(
-					NULL, //GdkWindow *parent,
-					&attr, //GdkWindowAttr *attributes,
-					GDK_WA_TITLE|GDK_WA_X|GDK_WA_Y|GDK_WA_CURSOR //gint attributes_mask
-					);
-
-			gdkGC  = gdk_gc_new(window);
-
-			window_w = start_window_w;
-			window_h = start_window_h;
-
-			//ikona
-			/*	GdkPixbuf * icon_pixbuf = gdk_pixbuf_new_from_file("icon.png",NULL);
-				GList* icons = g_list_append(NULL,icon_pixbuf);	
-				gdk_window_set_icon_list(window,icons);
-				*/
-
-
-			if (start_maximalized)
-				gdk_window_maximize(window);
-			if (start_fullscreen)
-				gdk_window_fullscreen(window);
-			//spusteni programu
-			gdk_window_show(window);
-			gdk_event_handler_set(event_func, NULL, NULL);
-			mainloop = g_main_loop_new(g_main_context_default(), FALSE);	
-			g_main_loop_run(mainloop);
-			gdk_window_destroy(window);
-		       return 0;	
+			make_window();
+			return 0;	
 		} else {            //rodic
 			//TODO toto je jen jedna varianta
 			waitpid(cpid,NULL,0);

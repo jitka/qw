@@ -30,6 +30,7 @@ extern int start_fullscreen;
 extern int start_columns;
 extern int start_rows;
 extern char *start_comand;
+extern int parallel_window;
 
 typedef struct {
 	unsigned int mode_mask;

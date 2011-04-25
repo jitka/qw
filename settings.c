@@ -24,6 +24,7 @@ int start_fullscreen = FALSE;
 int start_columns = 1;
 int start_rows = 1;
 char *start_comand = "C"; //jsou zavolany po prvnim expose
+int parallel_window = FALSE; //jestli jsou vytvorene vsechny okna naraz
 
 number_chars_t number_chars[] = {
 	{ 0, GDK_g, key_jump },
