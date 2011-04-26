@@ -69,7 +69,8 @@ void pixbuf_render(pixbuf_database *cache,pixbuf_item *it){
 		it->pixbuf=old->pixbuf;
 		free(old);
 	} else { // jinak se vykresli
-		pdf_render_page_to_pixbuf(
+//void doc_render_page_to_pixbuf(GdkPixbuf **pixbuf, int num_page, int width, int height, double scale, int rotation);
+		doc_render_page_to_pixbuf(
 			&it->pixbuf,
 			it->page_number,
 			it->width, it->height,
