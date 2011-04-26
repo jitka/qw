@@ -1,10 +1,8 @@
 #include <stdlib.h> //free
 #include <string.h> //memcpy
 #include "pixbuffer.h"
-//#include "backend.h"
+#include "backend.h"
 #include "settings.h"
-
-#include "poppler.h" //fuj
 
 void pixbuf_free(gpointer data, gpointer user_data){
 	pixbuf_item *item = data;
