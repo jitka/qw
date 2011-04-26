@@ -415,6 +415,7 @@ static void event_func(GdkEvent *ev, gpointer data) {
 			} //tady by se dalo vykrestlovat dopredu
 			break;
 		case GDK_DELETE:
+			gdk_window_destroy(window);
 			g_main_loop_quit(mainloop);
 			break;
 		default:
@@ -474,12 +475,6 @@ static inline void make_window(){
 	gdk_event_handler_set(event_func, NULL, NULL);
 	mainloop = g_main_loop_new(g_main_context_default(), FALSE);	
 	g_main_loop_run(mainloop);
-	printf("baf%d\n", gdk_window_is_destroyed(window));
-	gdk_window_hide(window);
-	gdk_window_destroy(window);
-	g_object_unref(window);
-	printf("baf%d\n", gdk_window_is_destroyed(window));
-
 }
 
 int main(int argc, char * argv[]) {
@@ -487,7 +482,6 @@ int main(int argc, char * argv[]) {
 
 //	close(2); 
 //	open("/dev/null", O_RDWR);
-	g_type_init();
 
 	//zpracovani parametru
 	const char *short_options = "hi:p:";
@@ -544,8 +538,7 @@ int main(int argc, char * argv[]) {
 
 	if (parallel_window){
 		//vytvori okna naraz
-		pid_t child;
-		for (; optind <argc; optind++){
+		for (int i=optind;i <argc; i++){
 			pid_t cpid = fork();
 			if (cpid == -1) {
 				perror("fork\n");
@@ -553,18 +546,17 @@ int main(int argc, char * argv[]) {
 			}
 
 			if (cpid == 0) {    //dite
+				g_type_init();
+				file_path = argv[i]; 
+				open_file(file_path); //ověří, jestli soubor je skutečně pdf
+				gdk_init(NULL,NULL);
+				make_window();
+				return 0;	
 			} else {            //rodic
-				child = cpid;
-				break;
 			}
 		}
-		if (optind < argc) {
-			file_path = argv[optind]; //vim ze tohle obecne nefunguje, ale tady to staci
-			open_file(file_path); //ověří, jestli soubor je skutečně pdf
-			gdk_init(NULL,NULL);
-			make_window();
-
-			waitpid(child,NULL,0);
+		for (int i=optind;i <argc; i++){
+			wait(NULL);		
 		}
 		return 0;
 	} else {
@@ -577,7 +569,8 @@ int main(int argc, char * argv[]) {
 			}
 
 			if (cpid == 0) {    //dite
-				file_path = argv[optind]; //vim ze tohle obecne nefunguje, ale tady to staci
+				g_type_init();
+				file_path = argv[optind]; 
 				open_file(file_path); //ověří, jestli soubor je skutečně pdf
 				gdk_init(NULL,NULL);
 				make_window();
