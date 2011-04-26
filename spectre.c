@@ -39,6 +39,17 @@ void ps_render_page_to_pixbuf(GdkPixbuf **pixbuf, int num_page, int width, int h
 	spectre_render_context_free (rc);
 	spectre_page_free(page);
 
+	* pixbuf =  gdk_pixbuf_new_from_data(
+			data,//const guchar *data,
+			GDK_COLORSPACE_RGB,//GdkColorspace colorspace,
+			0,//gboolean has_alpha,
+			8,//int bits_per_sample,
+			width,//int width,
+			height,//int height,
+			row_length,//int rowstride,
+			NULL,//GdkPixbufDestroyNotify destroy_fn,
+			NULL//gpointer destroy_fn_data);
+		);
 
 /*	cairo_surface_t *surface = cairo_image_surface_create_for_data(
 			data,
