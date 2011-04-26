@@ -17,16 +17,20 @@ int doc_init(char *path){
 		sprintf(abs_path,"file://%s",path);
 	else
 		sprintf(abs_path,"file://%s/%s",pwd,path);
-	if (!pdf_init(abs_path)){
+	if (pdf_init(abs_path)){
 		file_type = PDF;
-		return 0;
-	}
-	//ps
-/*	if (ps_init(path) == NULL){
-		file_type = PS;
+		//printf("pdf\n");
 		return 1;
 	}
-*/	return 1;
+	//ps
+//	printf("nepdf\n");
+	if (!ps_init(path)){
+		file_type = PS;
+//		printf("ps\n");
+		return 0; //protoze to zatim neumim
+	}
+	printf("nic\n");
+//	return 0;
 
 }
 void doc_page_get_size(int n, double *width, double *height){

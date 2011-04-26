@@ -547,7 +547,7 @@ int main(int argc, char * argv[]) {
 
 			if (cpid == 0) {    //dite
 				g_type_init();
-				file_path = argv[i]; 
+				file_path = argv[i];
 				open_file(file_path); //ověří, jestli soubor je skutečně pdf
 				gdk_init(NULL,NULL);
 				make_window();
@@ -561,6 +561,7 @@ int main(int argc, char * argv[]) {
 		return 0;
 	} else {
 		//vytvori okna postupne
+		printf("%d %d\n",optind,argc);	
 		for (; optind <argc; optind++){
 			pid_t cpid = fork();
 			if (cpid == -1) {

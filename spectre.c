@@ -4,7 +4,7 @@
 
 static SpectreDocument *doc = NULL;
 
-char * ps_init(char *file_name){
+int ps_init(char *file_name){
 	if (doc != NULL)
 		spectre_document_free(doc);
 	doc = spectre_document_new();
@@ -12,8 +12,8 @@ char * ps_init(char *file_name){
 //	printf("%d\n",spectre_document_status(doc));
 //	printf("%s\n",spectre_document_get_creator(doc));
 	if (spectre_document_status(doc) == SPECTRE_STATUS_SUCCESS)
-		return NULL;
-	return ("spectre load error");
+		return 0;
+	return 1;
 }
 
 int ps_get_number_pages(){
@@ -30,7 +30,7 @@ void ps_page_get_size(int num_page, double *width, double *height){
 	spectre_page_free(page);
 }
 
-void ps_render_page_to_pixbuf(GdkPixbuf **pixbuf, int num_page, int width, int height, double scale, int rotation){
+/*void ps_render_page_to_pixbuf(GdkPixbuf **pixbuf, int num_page, int width, int height, double scale, int rotation){
 	SpectrePage *page = spectre_document_get_page(doc, num_page);
 	SpectreRenderContext *rc = spectre_render_context_new ();
 	unsigned char * data;
@@ -49,4 +49,6 @@ void ps_render_page_to_pixbuf(GdkPixbuf **pixbuf, int num_page, int width, int h
 			200,200,
 			4);
 	cairo_t * cairo = gdk_cairo_create(pixmap);
-}
+
+	
+}*/
