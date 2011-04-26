@@ -27,24 +27,24 @@ int doc_init(char *path){
 	if (!ps_init(path)){
 		file_type = PS;
 //		printf("ps\n");
-		return 0; //protoze to zatim neumim
+		return 1; //neumim ale zkousim
+//		return 0; //protoze to zatim neumim
 	}
-	printf("nic\n");
-//	return 0;
+//	printf("nic\n");
+	return 0;
 
 }
 void doc_page_get_size(int n, double *width, double *height){
 	if (file_type == PDF)
 		pdf_page_get_size(n,width,height);
-//	if (file_type == PS)
-//		ps_page_get_size(n,width,height);
+	if (file_type == PS)
+		ps_page_get_size(n,width,height);
 }
 int doc_get_number_pages(){
 	if (file_type == PDF)
 		return pdf_get_number_pages();
-//	if (file_type == PS)
-//		return ps_get_number_pages();
-	return 42;
+	if (file_type == PS)
+		return ps_get_number_pages();
 }
 void doc_render_page_to_pixbuf(GdkPixbuf **pixbuf, int num_page, int width, int height, double scale, int rotation){
 	if (file_type == PDF)
