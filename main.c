@@ -549,12 +549,12 @@ int main(int argc, char * argv[]) {
 				g_type_init();
 				file_path = argv[i];
 				open_file(file_path); //ověří, jestli soubor je skutečně pdf
-				printf("%s: %d\n",file_path,doc_get_number_pages());
+/*				printf("%s: %d\n",file_path,doc_get_number_pages());
 				double width,height;
 				doc_page_get_size(13, &width, &height);
 				printf("%s,13: %lf %lf \n",file_path,width,height);
-			//	gdk_init(NULL,NULL);
-			//	make_window();
+*/				gdk_init(NULL,NULL);
+				make_window();
 				return 0;	
 			} else {            //rodic
 			}

@@ -30,7 +30,7 @@ void ps_page_get_size(int num_page, double *width, double *height){
 	spectre_page_free(page);
 }
 
-/*void ps_render_page_to_pixbuf(GdkPixbuf **pixbuf, int num_page, int width, int height, double scale, int rotation){
+void ps_render_page_to_pixbuf(GdkPixbuf **pixbuf, int num_page, int width, int height, double scale, int rotation){
 	SpectrePage *page = spectre_document_get_page(doc, num_page);
 	SpectreRenderContext *rc = spectre_render_context_new ();
 	unsigned char * data;
@@ -40,7 +40,7 @@ void ps_page_get_size(int num_page, double *width, double *height){
 	spectre_page_free(page);
 
 
-	cairo_surface_t *surface = cairo_image_surface_create_for_data(
+/*	cairo_surface_t *surface = cairo_image_surface_create_for_data(
 			data,
 			CAIRO_FORMAT_RGB24,
 			200, 200, 
@@ -49,6 +49,6 @@ void ps_page_get_size(int num_page, double *width, double *height){
 			200,200,
 			4);
 	cairo_t * cairo = gdk_cairo_create(pixmap);
-
+*/
 	
-}*/
+}

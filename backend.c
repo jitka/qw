@@ -49,6 +49,6 @@ int doc_get_number_pages(){
 void doc_render_page_to_pixbuf(GdkPixbuf **pixbuf, int num_page, int width, int height, double scale, int rotation){
 	if (file_type == PDF)
 		pdf_render_page_to_pixbuf(pixbuf,num_page,width,height,scale,rotation);
-//	if (file_type == PS)
-//		ps_render_page_to_pixbuf(pixbuf,num_page,width,height,scale,rotation);
+	if (file_type == PS)
+	ps_render_page_to_pixbuf(pixbuf,num_page,width,height,scale,rotation);
 }
